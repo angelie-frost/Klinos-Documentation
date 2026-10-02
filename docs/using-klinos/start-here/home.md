@@ -1,5 +1,8 @@
 ---
 title: Klinos
+head:
+  - tag: title
+    content: Klinos Docs
 description: A Figma plugin built around a library of device mockups that tilt into a 3D perspective angle, and angled cards from your Figma layers.
 order: 1
 lastUpdated: "[VERIFY: date]"
@@ -46,6 +49,4 @@ Any Figma element as a flat card at an angle: an image, shape, vector, text, fra
 
 <!-- Media to capture:
   1. Hero clip, 8 s, 16:10: a Figma frame selected, Klinos opened, a device chosen, the angle changed, then Insert mockup placing the result beside the frame.
-  2. Screenshot: the mode tabs (Studio, Photoreal, Playground) at the top of the panel.
-  3. Screenshot, close crop: the build label at the right of the preview's status bar.
 -->

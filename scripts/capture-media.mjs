@@ -31,8 +31,6 @@ const STUDIO_CARD = (inner) => `section.card:has(${inner})`;
 const R = {
 	/* ---------- Start here ---------- */
 	'using-klinos/start-here/home#1': { figma: 'a Figma frame selected and Insert mockup placing the result on the canvas' },
-	'using-klinos/start-here/home#2': { kind: 'shot', target: '#modebar', pad: 8 },
-	'using-klinos/start-here/home#3': { kind: 'shot', target: '#ver', pad: [14, 14, 14, 40] },
 	'using-klinos/start-here/getting-started#1': { figma: 'selecting a frame in Figma, opening the plugin, and Insert mockup on the canvas' },
 	'using-klinos/start-here/getting-started#2': { figma: "Figma's organization plugins list" },
 	'using-klinos/start-here/getting-started#3': {

@@ -37,10 +37,15 @@
 	--k-stage-line: transparent;
 	--k-line: #ededf0;
 	--k-line2: #dedee3;
+	/* Text hierarchy: headings, bold and links use --k-ink; running text --k-ink-body; the lede sits between;
+	   captions and secondary text --k-ink-muted. Ratios are checked by npm run check:contrast. */
 	--k-ink: #0a0a0b;
+	--k-ink-lede: #222226;
+	--k-ink-body: #333338;
+	--k-ink-muted: #66666c;
 	--k-onink: #ffffff;
-	--k-ink2: #6e6e73;
-	--k-caption: #636366;
+	--k-ink2: var(--k-ink-muted);
+	--k-caption: var(--k-ink-muted);
 	--k-ink3: #8e8e93;
 	--k-ok: #14ae5c;
 	--k-ok-text: #0e7a41;
@@ -67,9 +72,12 @@
 	--k-line: #1f1f1f;
 	--k-line2: #2e2e2e;
 	--k-ink: #ededed;
+	--k-ink-lede: #e0e0e3;
+	--k-ink-body: #cbcbcf;
+	--k-ink-muted: #9d9da3;
 	--k-onink: #0a0a0a;
-	--k-ink2: #a1a1a1;
-	--k-caption: #a1a1a1;
+	--k-ink2: var(--k-ink-muted);
+	--k-caption: var(--k-ink-muted);
 	--k-ink3: #6b6b6b;
 	--k-ok: #5dd39e;
 	--k-ok-text: #5dd39e;
@@ -92,7 +100,7 @@
 
 	--sl-color-white: var(--k-ink);
 	--sl-color-gray-1: var(--k-ink);
-	--sl-color-gray-2: var(--k-ink);
+	--sl-color-gray-2: var(--k-ink-body);
 	--sl-color-gray-3: var(--k-ink2);
 	--sl-color-gray-4: var(--k-ink3);
 	--sl-color-gray-5: var(--k-line2);
@@ -104,7 +112,7 @@
 	--sl-color-accent: var(--k-ink);
 	--sl-color-accent-high: var(--k-ink);
 
-	--sl-color-text: var(--k-ink);
+	--sl-color-text: var(--k-ink-body);
 	--sl-color-text-accent: var(--k-ink);
 	--sl-color-text-invert: var(--k-onink);
 	--sl-color-bg: var(--k-surface);
@@ -129,6 +137,6 @@
 	--sl-text-h3: var(--k-fs-h3);
 	--sl-text-h4: var(--k-fs-body);
 	--sl-text-body: var(--k-fs-body);
-	--sl-line-height: 1.65;
+	--sl-line-height: 1.7;
 	--sl-line-height-headings: 1.25;
 }

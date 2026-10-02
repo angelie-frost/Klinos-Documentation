@@ -2,8 +2,8 @@
 
 body {
 	background: var(--k-surface);
-	color: var(--k-ink);
-	font: 400 var(--k-fs-body) / 1.65 var(--k-font-body);
+	color: var(--k-ink-body);
+	font: 400 var(--k-fs-body) / 1.7 var(--k-font-body);
 	-webkit-font-smoothing: antialiased;
 }
 :focus-visible {
@@ -421,9 +421,21 @@ h1#_top.is-home {
 }
 
 /* ---------- Prose ---------- */
+/* Text hierarchy: running text in --k-ink-body; headings, bold and links stay at full --k-ink. */
 .sl-markdown-content {
 	font-size: var(--k-fs-body);
-	line-height: 1.65;
+	line-height: 1.7;
+	color: var(--k-ink-body);
+}
+/* Comfortable line length for running text (tables and media keep the full column). */
+.sl-markdown-content > p,
+.sl-markdown-content > :is(ul, ol),
+.sl-markdown-content .guide-fig-text,
+.sl-markdown-content .try-card-body > p {
+	max-width: 68ch;
+}
+.sl-markdown-content td {
+	color: var(--k-ink-body);
 }
 .sl-markdown-content :is(h2, h3, h4) {
 	color: var(--k-ink);
@@ -461,9 +473,10 @@ h1#_top.is-home {
 	color: var(--k-ink3);
 }
 .sl-markdown-content p.lede {
-	font-size: 18px;
-	line-height: 1.55;
-	color: var(--k-ink);
+	font-size: 1.2rem;
+	line-height: 1.6;
+	color: var(--k-ink-lede);
+	max-width: 68ch;
 }
 .sl-markdown-content :not(pre) > code {
 	font-family: var(--k-font-mono);
@@ -662,23 +675,64 @@ h1#_top.is-home {
 	margin: 0;
 }
 
-/* ---------- Callouts ---------- */
+/* ---------- Callouts ----------
+   Grid: a fixed icon column and a content column. The icon box is exactly one title line tall, so the icon
+   is centred on the first line; the body sits in the content column, left-aligned with the title.
+   Without a title, the icon box takes the height of the body's first line instead. */
 .sl-markdown-content aside.callout {
+	--callout-title-lh: 22px; /* 14px title */
+	--callout-body-lh: 1.6; /* 15px body */
 	display: grid;
-	grid-template-columns: 16px 1fr;
-	gap: var(--k-s3);
+	grid-template-columns: 20px minmax(0, 1fr);
+	column-gap: 10px;
+	row-gap: 2px;
+	align-items: start;
 	border: 1px solid var(--k-line);
 	background: var(--k-sunk);
 	border-radius: var(--k-r-media);
-	padding: 12px 16px;
-	font-size: 15px;
-	line-height: 1.6;
+	padding: 12px 16px 13px;
+	color: var(--k-ink-body);
 }
-.callout > svg {
+.sl-markdown-content aside.callout > * {
+	margin: 0;
+}
+.sl-markdown-content .callout-icon {
+	grid-column: 1;
+	grid-row: 1;
+	height: var(--callout-title-lh);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--k-ink-muted);
+}
+.sl-markdown-content .callout-icon svg {
 	width: 16px;
 	height: 16px;
-	margin-top: 4px;
-	color: var(--k-ink2);
+	display: block;
+	margin: 0;
+	flex: none;
+}
+.sl-markdown-content .callout-title {
+	grid-column: 2;
+	grid-row: 1;
+	font-size: var(--k-fs-sm);
+	line-height: var(--callout-title-lh);
+	font-weight: 600;
+	color: var(--k-ink);
+	overflow-wrap: anywhere;
+}
+.sl-markdown-content .callout-body {
+	grid-column: 2;
+	grid-row: 2;
+	min-width: 0;
+	font-size: 15px;
+	line-height: var(--callout-body-lh);
+}
+.sl-markdown-content aside.callout:not(:has(.callout-title)) .callout-body {
+	grid-row: 1;
+}
+.sl-markdown-content aside.callout:not(:has(.callout-title)) .callout-icon {
+	height: calc(15px * var(--callout-body-lh));
 }
 .sl-markdown-content .callout-body > * {
 	margin: 0;
@@ -686,32 +740,24 @@ h1#_top.is-home {
 .sl-markdown-content .callout-body > * + * {
 	margin-top: var(--k-s2);
 }
-.sl-markdown-content .callout-body > .callout-title {
-	font-size: var(--k-fs-sm);
-	font-weight: 600;
-	margin-bottom: 2px;
-}
-.sl-markdown-content .callout-body > .callout-title + * {
-	margin-top: 0;
-}
 .sl-markdown-content aside.callout.tip {
 	background: var(--k-ok-bg);
 	border-color: var(--k-ok-line);
 }
-.callout.tip > svg {
+.sl-markdown-content .callout.tip .callout-icon {
 	color: var(--k-ok);
 }
-.callout.tip .callout-title {
+.sl-markdown-content .callout.tip .callout-title {
 	color: var(--k-ok-text);
 }
 .sl-markdown-content aside.callout.warn {
 	background: var(--k-warn-bg);
 	border-color: var(--k-warn-line);
 }
-.callout.warn > svg {
+.sl-markdown-content .callout.warn .callout-icon {
 	color: var(--k-warn);
 }
-.callout.warn .callout-title {
+.sl-markdown-content .callout.warn .callout-title {
 	color: var(--k-warn-text);
 }
 
@@ -1020,42 +1066,76 @@ footer .meta:empty {
 	max-width: 60ch;
 }
 
-/* Lightbox */
+/* Lightbox.
+   Starlight's reset sets margin:0 on every element, which removes the margin:auto a modal <dialog> relies on
+   to centre itself; it then sat at the top-left. Centre it explicitly: fixed, inset 0, margin auto, sized to
+   its content. The page behind is locked without a layout shift (scrollbar-gutter keeps the gutter). */
+html {
+	scrollbar-gutter: stable;
+}
+html:has(dialog.lightbox[open]) {
+	overflow: hidden;
+}
 dialog.lightbox {
-	max-width: min(96vw, 1600px);
-	max-height: 94vh;
+	position: fixed;
+	inset: 0;
+	margin: auto;
+	width: fit-content;
+	height: fit-content;
+	max-width: 100vw;
+	max-height: 100dvh;
 	padding: 0;
 	border: 0;
 	border-radius: var(--k-r-media);
 	background: var(--k-surface);
 	box-shadow: var(--k-pop-shadow);
-	overflow: hidden;
+	overflow: visible;
+	transform: none;
+	/* Room kept free above and below the framed image, so the caption fits under it while the image itself
+	   stays exactly centred in the viewport. */
+	--lb-gap: 88px;
+}
+dialog.lightbox[open] {
+	display: grid;
+	place-items: center;
 }
 dialog.lightbox::backdrop {
 	background: rgba(10, 10, 11, 0.72);
 }
 dialog.lightbox figure {
 	margin: 0;
-	padding: var(--k-s4);
+	padding: 12px;
+	display: block;
 }
 dialog.lightbox img {
 	display: block;
-	max-width: calc(96vw - 32px);
-	max-height: calc(94vh - 90px);
+	max-width: calc(min(96vw, 1600px) - 24px);
+	max-height: calc(100dvh - 2 * var(--lb-gap) - 24px);
 	width: auto;
 	height: auto;
-	margin: 0 auto;
+	object-fit: contain;
+	margin: 0;
 }
+/* The caption hangs below the frame, on the dim backdrop, so it never shifts the image off centre. */
 dialog.lightbox figcaption {
-	margin-top: var(--k-s3);
+	position: absolute;
+	left: 50%;
+	top: calc(100% + 10px);
+	translate: -50% 0;
+	width: max-content;
+	max-width: min(70ch, 92vw);
+	max-height: calc(var(--lb-gap) - 14px);
+	overflow: hidden;
 	font-size: var(--k-fs-cap);
-	color: var(--k-caption);
-	max-width: 70ch;
+	line-height: 1.45;
+	color: #ededed;
+	text-align: center;
 }
 .lightbox-close {
 	position: absolute;
 	top: 8px;
 	right: 8px;
+	z-index: 1;
 	width: 32px;
 	height: 32px;
 	border: 1px solid var(--k-line2);
@@ -1278,4 +1358,193 @@ dialog.lightbox figcaption {
 }
 .sl-markdown-content .clip.has-media figcaption span {
 	flex: 1;
+}
+
+/* ---------- What's new in V3 (non-blocking card; bottom sheet on phones) ---------- */
+.k-whatsnew {
+	height: 32px;
+	padding: 0 6px;
+	border: 0;
+	background: none;
+	color: var(--k-ink-muted);
+	font: 500 var(--k-fs-sm) / 1 var(--k-font-body);
+	cursor: pointer;
+	border-radius: var(--k-r-btn);
+	white-space: nowrap;
+}
+.k-whatsnew:hover {
+	color: var(--k-ink);
+}
+.k-whatsnew[hidden],
+.whatsnew[hidden],
+.wn-slide[hidden] {
+	display: none !important;
+}
+.k-menu-extra {
+	padding: 0.5rem 0 0;
+	border-top: 1px solid var(--k-line);
+}
+.k-menu-extra .k-whatsnew {
+	padding: 0;
+	font-size: var(--k-fs-body);
+	color: var(--k-ink);
+}
+.whatsnew {
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	z-index: 60;
+	width: 340px;
+	max-height: calc(100dvh - var(--sl-nav-height) - 40px);
+	overflow: auto;
+	padding: 14px 16px 14px;
+	background: var(--k-surface);
+	color: var(--k-ink-body);
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-block);
+	box-shadow: var(--k-pop-shadow);
+	font-size: var(--k-fs-sm);
+	line-height: 1.5;
+}
+.wn-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 10px;
+}
+.wn-head h2 {
+	margin: 0;
+	font: 600 15px / 1.3 var(--k-font-display);
+	color: var(--k-ink);
+}
+.wn-head h2:focus {
+	outline: none;
+}
+/* Focus is moved to the heading for screen readers; it is not interactive, so no ring. */
+.wn-head h2:focus-visible {
+	outline: none;
+}
+.wn-close {
+	width: 28px;
+	height: 28px;
+	flex: none;
+	border: 0;
+	border-radius: 50%;
+	background: none;
+	color: var(--k-ink-muted);
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+}
+.wn-close:hover {
+	background: var(--k-sunk);
+	color: var(--k-ink);
+}
+.wn-slides {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.wn-slide {
+	animation: wn-fade 0.18s ease;
+}
+@keyframes wn-fade {
+	from {
+		opacity: 0;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.wn-slide {
+		animation: none;
+	}
+}
+.wn-art {
+	display: block;
+	aspect-ratio: 16 / 10;
+	border-radius: 10px;
+	overflow: hidden;
+	background: var(--k-stage);
+	margin-bottom: 10px;
+}
+.wn-art img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center top;
+	display: block;
+}
+.wn-slide-title {
+	margin: 0 0 2px;
+	font-weight: 600;
+	color: var(--k-ink);
+}
+.wn-text {
+	margin: 0 0 6px;
+}
+.wn-more {
+	color: var(--k-ink);
+	text-decoration: underline;
+	text-decoration-color: var(--k-line2);
+	text-underline-offset: 3px;
+	font-weight: 500;
+}
+.wn-foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 12px;
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid var(--k-line);
+}
+.wn-never {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--k-fs-cap);
+	color: var(--k-ink-muted);
+	cursor: pointer;
+}
+.wn-nav {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.wn-count {
+	font-size: var(--k-fs-cap);
+	color: var(--k-ink-muted);
+	font-variant-numeric: tabular-nums;
+}
+.wn-btn {
+	height: 28px;
+	padding: 0 12px;
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-btn);
+	background: var(--k-surface);
+	color: var(--k-ink);
+	font: 500 var(--k-fs-label) / 1 var(--k-font-body);
+	cursor: pointer;
+}
+.wn-btn:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+.wn-btn.wn-primary {
+	background: var(--k-ink);
+	border-color: var(--k-ink);
+	color: var(--k-onink);
+}
+@media (max-width: 640px) {
+	.whatsnew {
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: auto;
+		max-height: 70dvh;
+		border-radius: var(--k-r-block) var(--k-r-block) 0 0;
+		border-bottom: 0;
+		padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+	}
 }

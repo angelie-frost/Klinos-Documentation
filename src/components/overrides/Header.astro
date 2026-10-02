@@ -2,7 +2,12 @@
 // Header: logo + "Klinos Docs", search, Try it live, version badge, theme toggle.
 import Search from 'virtual:starlight/components/Search';
 import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
+import WhatsNew from '../WhatsNew.astro';
 import { KLINOS_VERSION } from '../../config';
+// Lucide icon (ISC), copied from lucide-static 1.49.0; see LICENSES/lucide.txt.
+import rotate3d from '../../icons/lucide/rotate-3d.svg?raw';
+
+const brandMark = rotate3d.replace(/<!--[\s\S]*?-->\s*/, '').replace('<svg', '<svg aria-hidden="true" focusable="false"').replace('class="lucide lucide-rotate-3d"', 'class="brand-mark lucide lucide-rotate-3d"');
 
 const LIVE = '/using-klinos/reference/try-it-live/';
 const onLive = Astro.url.pathname === LIVE;
@@ -13,10 +18,7 @@ const tryIcon =
 <div class="header k-header">
 	<div class="title-wrapper sl-flex">
 		<a class="brand" href="/" aria-label="Klinos Docs, home">
-			<svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true"
-				><rect x="5.5" y="1.5" width="11" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"
-				></rect><rect x="7.5" y="4" width="7" height="14" rx="1.5" fill="currentColor" opacity=".18"></rect></svg
-			>
+			<Fragment set:html={brandMark} />
 			<span translate="no">Klinos <small>Docs</small></span>
 		</a>
 	</div>
@@ -26,10 +28,12 @@ const tryIcon =
 	</div>
 	<div class="sl-hidden md:sl-flex print:hidden right-group">
 		<a class="k-try" href={LIVE} aria-current={onLive ? 'page' : undefined}><Fragment set:html={tryIcon} />Try it live</a>
+		<button class="k-whatsnew" type="button" data-wn-open>What's new</button>
 		<span class="k-badge" title="Packaged build">v{KLINOS_VERSION}</span>
 		<ThemeSelect />
 	</div>
 </div>
+<WhatsNew />
 
 <style>
 	@layer starlight.core {

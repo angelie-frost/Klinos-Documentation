@@ -39,15 +39,20 @@ const ICON = {
 		'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.8" y="4.2" width="12.4" height="9" rx="2"/><circle cx="8" cy="8.7" r="2.4"/><path d="M5.5 4.2 6.6 2.4h2.8l1.1 1.8"/></svg>',
 	Playground:
 		'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 4.5 11 2.6l2 8.9-8 1.9z"/></svg>',
-	note: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.3v4M8 4.8v.1" stroke-linecap="round"/></svg>',
-	tip: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.3"/><path d="m5.4 8.2 1.8 1.8 3.5-3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-	warn: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 2.2 14.3 13H1.7z" stroke-linejoin="round"/><path d="M8 6.6v3.2M8 11.6v.1" stroke-linecap="round"/></svg>',
 	clip: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="6" width="22" height="16" rx="3"/><path d="M12 11v6l5-3z" fill="currentColor" stroke="none"/></svg>',
 	shot: '<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="22" height="18" rx="3"/><circle cx="10" cy="11" r="2"/><path d="m4 20 6-5 4 3 4-4 6 5" stroke-linejoin="round"/></svg>',
 	play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6L12.8 8z" fill="currentColor"/></svg>',
 	pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 3h2.4v10H4.5zM9.1 3h2.4v10H9.1z" fill="currentColor"/></svg>',
 	try: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.8" y="2.8" width="12.4" height="10.4" rx="2"/><path d="M6.6 6v4l3.4-2z" fill="currentColor" stroke="none"/></svg>',
 };
+// Callout icons: Lucide lightbulb, info and triangle-alert (ISC), copied unchanged from lucide-static 1.49.0
+// into src/icons/lucide/ (see LICENSES/lucide.txt). They use currentColor, so they take the callout's accent colour.
+const lucide = (name) =>
+	readFileSync(path.join(ROOT, 'src', 'icons', 'lucide', `${name}.svg`), 'utf8')
+		.replace(/<!--[\s\S]*?-->\s*/, '')
+		.replace('<svg', '<svg aria-hidden="true" focusable="false"')
+		.trim();
+const CALLOUT_ICON = { tip: lucide('lightbulb'), note: lucide('info'), warn: lucide('triangle-alert') };
 const MODES = ['Studio', 'Photoreal', 'Playground'];
 const CALLOUTS = { Tip: 'tip', Note: 'note', Warning: 'warn' };
 
@@ -183,7 +188,8 @@ function toCallout(node) {
 		];
 	}
 	return [
-		html(`<aside class="callout ${kind}" aria-label="${label}">${ICON[kind]}<div class="callout-body"><p class="callout-title">${label}</p>`),
+		// Grid: icon cell | title on row 1, body under the title (see .callout in klinos.css).
+		html(`<aside class="callout ${kind}" aria-label="${label}"><span class="callout-icon">${CALLOUT_ICON[kind]}</span><p class="callout-title">${label}</p><div class="callout-body">`),
 		...node.children,
 		html('</div></aside>'),
 	];

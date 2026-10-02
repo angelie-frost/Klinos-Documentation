@@ -1,5 +1,5 @@
 // Screenshots pages with the locally installed Edge (or Chrome).
-// Usage: node scripts/screenshots.mjs [outDir] [baseUrl] [slug ...] [--theme light|dark|both] [--phone] [--viewport]
+// Usage: node scripts/screenshots.mjs [outDir] [baseUrl] [slug ...] [--theme light|dark|both] [--phone] [--viewport] [--whatsnew]
 //   --theme     which site theme to capture; default light (the site's default theme)
 //   --phone     390×844 phone viewport instead of 1440×900
 //   --viewport  capture only the first screen instead of the full page
@@ -38,6 +38,8 @@ for (const theme of themes) {
 			? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }
 			: { viewport: { width: 1440, height: 900 } }
 	);
+	// The What's new card would cover page shots; mark it as seen unless --whatsnew asks for it.
+	if (!flag('--whatsnew')) await ctx.addInitScript(() => localStorage.setItem('klinos-whatsnew-v3', 'seen'));
 	// Light is the site default, so only dark needs to be stored.
 	if (theme === 'dark') await ctx.addInitScript(() => localStorage.setItem('starlight-theme', 'dark'));
 	const page = await ctx.newPage();

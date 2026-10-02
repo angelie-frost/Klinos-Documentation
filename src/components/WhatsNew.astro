@@ -1,0 +1,176 @@
+---
+// "What's new in V3": a small, non-blocking card for first-time visitors (Home only), reopened from the header.
+// The slide text is read at build time from the "What V3 added" list in docs/using-klinos/start-here/about-klinos.md,
+// so it never says more than the docs. Visuals are media already captured from the panel (public/media/).
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const ROOT = process.cwd();
+const ABOUT = join(ROOT, 'docs', 'using-klinos', 'start-here', 'about-klinos.md');
+
+// Which bullets become slides, where each links, and which captured screenshot illustrates it.
+const SLIDES = [
+	{ label: 'Editable lighting', href: '/using-klinos/studio/lighting/', media: 'using-klinos/studio/lighting/2' },
+	{ label: 'Photoreal mode', href: '/using-klinos/photoreal/photoreal/', media: 'using-klinos/photoreal/photoreal/2' },
+	{ label: 'Playground mode', href: '/using-klinos/playground/layouts/', media: 'using-klinos/playground/layouts/2' },
+	// The panel's own dark theme: always the dark capture of the panel.
+	{ label: 'Dark theme', href: '/using-klinos/start-here/about-klinos/#what-v3-added', media: 'using-klinos/reference/try-it-live/1', only: 'dark' },
+];
+
+const list = (readFileSync(ABOUT, 'utf8').split('### What V3 added')[1] ?? '').split(/\n#{2,3} |\nSmaller changes/)[0];
+const bullets = new Map(
+	[...list.matchAll(/^- \*\*(.+?)\.?\*\*\s*(.+)$/gm)].map((m) => [m[1].replace(/\.$/, ''), m[2].trim()])
+);
+
+function media(id, only) {
+	const [slug, n] = [id.slice(0, id.lastIndexOf('/')), id.slice(id.lastIndexOf('/') + 1)];
+	const meta = join(ROOT, 'public', 'media', slug, `${n}.json`);
+	if (!existsSync(meta)) return null;
+	const m = JSON.parse(readFileSync(meta, 'utf8'));
+	const url = (v) => `/media/${slug}/${v.src}`;
+	const dark = url(m.dark ?? m.light);
+	return { w: m.w, h: m.h, light: only === 'dark' ? dark : url(m.light), dark };
+}
+
+const slides = SLIDES.map((s) => {
+	const text = bullets.get(s.label);
+	if (!text) throw new Error(`What's new: no "**${s.label}.**" bullet under "What V3 added" in about-klinos.md`);
+	return { ...s, text, img: media(s.media, s.only) };
+});
+---
+
+<section class="whatsnew" id="whatsnew" role="dialog" aria-modal="false" aria-labelledby="whatsnew-title" hidden data-pagefind-ignore>
+	<div class="wn-head">
+		<h2 id="whatsnew-title" tabindex="-1">What's new in V3</h2>
+		<button class="wn-close" type="button" aria-label="Close What's new" data-wn-close>&times;</button>
+	</div>
+	<ol class="wn-slides" aria-live="polite">
+		{
+			slides.map((s, i) => (
+				<li class="wn-slide" data-wn-slide hidden={i > 0} aria-label={`${i + 1} of ${slides.length}: ${s.label}`}>
+					{s.img && (
+						<a class="wn-art" href={s.href} tabindex="-1" aria-hidden="true">
+							{s.img.light === s.img.dark ? (
+								<img src={s.img.light} width={s.img.w} height={s.img.h} alt="" loading="lazy" decoding="async" />
+							) : (
+								<>
+									<img class="media-light" src={s.img.light} width={s.img.w} height={s.img.h} alt="" loading="lazy" decoding="async" />
+									<img class="media-dark" src={s.img.dark} width={s.img.w} height={s.img.h} alt="" loading="lazy" decoding="async" />
+								</>
+							)}
+						</a>
+					)}
+					<p class="wn-slide-title">{s.label}</p>
+					<p class="wn-text">{s.text}</p>
+					<a class="wn-more" href={s.href}>Read more<span class="sr-only"> about {s.label}</span></a>
+				</li>
+			))
+		}
+	</ol>
+	<div class="wn-foot">
+		<label class="wn-never"><input type="checkbox" data-wn-never /> Don't show again</label>
+		<div class="wn-nav">
+			<button type="button" class="wn-btn" data-wn-prev disabled>Back</button>
+			<span class="wn-count" data-wn-count>1 of {slides.length}</span>
+			<button type="button" class="wn-btn wn-primary" data-wn-next>Next</button>
+		</div>
+	</div>
+</section>
+
+<script>
+	const KEY = 'klinos-whatsnew-v3'; // change the key to show the card again for a future release
+	const HOME = '/using-klinos/start-here/home/';
+	const card = document.getElementById('whatsnew') as HTMLElement | null;
+
+	const read = (): string | null => {
+		try {
+			return localStorage.getItem(KEY);
+		} catch {
+			return null;
+		}
+	};
+	const write = (v: string) => {
+		try {
+			localStorage.setItem(KEY, v);
+		} catch {
+			/* storage blocked: the card still works for this page view */
+		}
+	};
+
+	if (card) {
+		const slides = [...card.querySelectorAll<HTMLElement>('[data-wn-slide]')];
+		const prev = card.querySelector<HTMLButtonElement>('[data-wn-prev]')!;
+		const next = card.querySelector<HTMLButtonElement>('[data-wn-next]')!;
+		const count = card.querySelector<HTMLElement>('[data-wn-count]')!;
+		const never = card.querySelector<HTMLInputElement>('[data-wn-never]')!;
+		const title = card.querySelector<HTMLElement>('#whatsnew-title')!;
+		const openers = () => document.querySelectorAll<HTMLElement>('[data-wn-open]');
+		let index = 0;
+		let returnTo: HTMLElement | null = null;
+
+		const show = (i: number) => {
+			index = Math.max(0, Math.min(slides.length - 1, i));
+			slides.forEach((s, k) => (s.hidden = k !== index));
+			prev.disabled = index === 0;
+			const last = index === slides.length - 1;
+			next.textContent = last ? 'Done' : 'Next';
+			count.textContent = `${index + 1} of ${slides.length}`;
+		};
+		const open = (from: HTMLElement | null) => {
+			returnTo = from ?? (document.activeElement as HTMLElement | null);
+			show(0);
+			never.checked = read() === 'dismissed';
+			card.hidden = false;
+			title.focus();
+		};
+		const close = () => {
+			if (card.hidden) return;
+			card.hidden = true;
+			if (never.checked) {
+				write('dismissed');
+				openers().forEach((b) => (b.hidden = true));
+			} else if (read() !== 'dismissed') {
+				write('seen');
+			}
+			// Focus goes back to where it was (the header button, or the page if it opened by itself).
+			if (returnTo && document.contains(returnTo) && returnTo !== document.body) returnTo.focus();
+			returnTo = null;
+		};
+
+		prev.addEventListener('click', () => show(index - 1));
+		next.addEventListener('click', () => (index === slides.length - 1 ? close() : show(index + 1)));
+		card.querySelector('[data-wn-close]')!.addEventListener('click', close);
+		// Esc closes it wherever focus is (the card does not trap focus, since it never blocks the page).
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !card.hidden && !document.querySelector('dialog[open]')) close();
+		});
+		openers().forEach((b) => {
+			b.hidden = read() === 'dismissed';
+			b.addEventListener('click', () => {
+				// From the phone menu: close the menu first, or the card would sit behind it.
+				const menu = document.getElementById('starlight__sidebar');
+				if (b.closest('#starlight__sidebar') && menu?.matches(':popover-open')) {
+					menu.hidePopover();
+					open(document.querySelector<HTMLElement>('button.sl-menu-button'));
+					return;
+				}
+				card.hidden ? open(b) : close();
+			});
+		});
+
+		// First visit only, Home only, and only when the visitor landed on Home directly:
+		// no hash or query (deep link or search landing) and not arriving from another page of this site.
+		const onHome = location.pathname === HOME;
+		const direct = !location.hash && !location.search;
+		let fromSite = false;
+		try {
+			const ref = document.referrer ? new URL(document.referrer) : null;
+			// The bare site root redirects to Home, so arriving from "/" still counts as landing on Home directly.
+			fromSite = !!ref && ref.origin === location.origin && ref.pathname !== '/';
+		} catch {}
+		if (onHome && direct && !fromSite && read() === null) {
+			write('seen');
+			open(null);
+		}
+	}
+</script>

@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "check:verify": "node scripts/check-verify.mjs",
     "check:links": "node scripts/check-links.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs",
     "build": "npm run sync && npm run check:verify && astro build && npm run check:links",
     "build:draft": "npm run sync && astro build && npm run check:links",
     "preview": "astro preview",
