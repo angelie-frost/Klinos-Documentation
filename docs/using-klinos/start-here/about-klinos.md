@@ -31,7 +31,7 @@ V2's device finishes were fitted to Apple's own product renders. That colour mat
 
 ### V3
 
-V3 rebuilds the plugin on Three.js. The devices are now 3D meshes, but they still use V2's calibrated material. The finishes look the same as in V2.
+V3 rebuilds the plugin on Three.js. The devices are now 3D meshes, but they still use V2's calibrated material. The finishes look the same as in V2. V2's finishes were fitted to the makers' own product renders, so keeping them keeps the devices true to the real products.
 
 The team compared the two before switching. The mesh version came within 0.33 to 0.64 points out of 255, on average, of V2's renders across finishes and poses. That close a match is why the calibration could be kept as it was.
 

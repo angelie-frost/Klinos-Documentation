@@ -23,6 +23,8 @@ There are two cases: porting a device that V2 had, and adding one with no V2 ver
 
 Change the shape constants in the shader **and** `DEVICES` together.
 
+Finishes are fitted to the maker's own references, never set by eye. See [Why each device keeps its look](../understand/architecture.md#why-each-device-keeps-its-look).
+
 ## Porting a V2 device
 
 1. **Port the shader.** V2's shaders live verbatim in `reference/v2/`. `tools/port_v2_shaders.py` writes `src/shaders/` from them, applying asserted, single-match edits. Make edits in the script, then re-run it. Never edit the generated shader by hand.

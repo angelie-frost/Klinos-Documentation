@@ -44,6 +44,38 @@ Playground sync and export requests carry a sequence number. Stale replies are d
 
 The V2 source shaders in `reference/v2/` are the calibration source of truth. `tools/port_v2_shaders.py` turns them into `src/shaders/` with a short list of asserted edits.
 
+## Why each device keeps its look
+
+The meshes are new in V3, but each device keeps V2's calibrated material: the same finishes, shading and tone as in V2, under the Calibrated rig.
+
+**What is kept**
+
+- The finish values: `finishes` in `DEVICES` in `src/ui.html` are F0 values, passed to the shader as `uFinish` in `makeDeviceMaterial`.
+- The per-device tone values, such as the band and seam tones in `DEVICES`.
+- `BODY_EXPOSURE` and `BODY_WHITE`, `envBRDF` and `encodeBody` in each `src/shaders/<device>.glsl`.
+
+Much of the material is shared. The iPhone 17 Pro, iPad and MacBook use the same aluminium material, and the Galaxy S26 uses the 17 Pro's.
+
+**Why**
+
+- The finishes were fitted to the makers' own product renders and photos. Changing them by eye would move the devices away from the real products. See [Decisions log](decisions-log.md).
+- Re-fitting the calibration to a new model, such as Three.js's own PBR material, would have thrown that work away. So V2's material was ported unchanged.
+- Art direction goes in a Look, Polished frame or Surface texture. When those two are off, the standard finish is untouched.
+
+**The numbers**
+
+- The bake-off, measured once when the port was decided: 0.33 to 0.64/255 mean error against V2, across finishes and poses.
+- `tools/verify.js`, measured on each run: display overall mean 0.65/255 over 38 cases, with the placeholder design on the screen. See [Testing and QA](../work-on-it/testing-and-qa.md).
+
+These are different measurements, so the two numbers are not a before and after.
+
+**Before you change it**
+
+- Have a measured reason, and note the measurement.
+- Edit `tools/port_v2_shaders.py`, not the generated shader. `reference/v2/` stays the source of truth.
+- Run `node tools/verify.js` until it passes, and put the numbers in the change description.
+- Compare before and after with `node tools/render.js diff`, which checks all four channels.
+
 ## Render pipeline: from frame to canvas
 
 ```mermaid
