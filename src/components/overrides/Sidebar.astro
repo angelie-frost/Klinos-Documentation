@@ -1,5 +1,6 @@
 ---
 // Copy of Starlight 0.42.5 Sidebar.astro: the menu footer (theme toggle, What is new) shows up to 980px instead of 800px.
+// Added after the tree: the sidebar's scroll is saved as the page is left, and the current page is kept in view.
 import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
 import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
 import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
@@ -10,6 +11,49 @@ const { sidebar } = Astro.locals.starlightRoute;
 <SidebarPersister>
 	<SidebarSublist sublist={sidebar} />
 </SidebarPersister>
+
+{
+	/* Runs before the first paint, right after Starlight's own restore (end of SidebarPersister).
+	   1. Starlight saves the sidebar state on visibilitychange; this also saves it on pageswap/pagehide, which run
+	      before the next page is built, with the same key and format, so Starlight's restore reads it.
+	   2. Desktop only (the sidebar is a menu at 980px and below): restores the saved scroll (Starlight's own restore
+	      does not take, see below) and, if the current page's link is still out of view, centres it. */
+}
+<script is:inline aria-hidden="true">
+	(() => {
+		const scroller = document.getElementById('starlight__sidebar');
+		const persist = scroller?.querySelector('sl-sidebar-state-persist');
+		if (!scroller || !persist) return;
+		const save = () => {
+			try {
+				const key = 'sl-sidebar-state';
+				const stored = JSON.parse(sessionStorage.getItem(key) || '{}');
+				const hash = persist.dataset.hash || '';
+				const open = Array.isArray(stored.open) && stored.hash === hash ? stored.open : [];
+				sessionStorage.setItem(key, JSON.stringify({ hash, open, scroll: scroller.scrollTop }));
+			} catch {}
+		};
+		addEventListener('pageswap', save);
+		addEventListener('pagehide', save);
+		try {
+			if (!matchMedia('(min-width: 981px)').matches) return;
+			// Starlight's restore (just above) runs while the pane still has the menu's popover attribute, which
+			// hides it until a later script removes it, so its scroll is lost. On desktop the pane is no popover:
+			// drop the attribute now (the same thing that script does) and restore the scroll here.
+			scroller.removeAttribute('popover');
+			const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+			if (state && state.hash === persist.dataset.hash && state.scroll) scroller.scrollTop = state.scroll;
+			// The prototype's revealActive: if the current page's link is outside the visible part (a direct visit
+			// to a page low in the list), centre it. A link already in view is left alone, so the sidebar never jumps
+			// after a click. Set directly, not with scrollIntoView, which would also move where the next Tab starts.
+			const current = scroller.querySelector('[aria-current="page"]');
+			if (!current) return;
+			const box = scroller.getBoundingClientRect();
+			const link = current.getBoundingClientRect();
+			if (link.top < box.top || link.bottom > box.bottom) scroller.scrollTop += link.top - box.top - box.height / 2 + link.height / 2;
+		} catch {}
+	})();
+</script>
 
 <div class="k-touch-only">
 	<MobileMenuFooter />

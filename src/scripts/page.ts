@@ -77,17 +77,8 @@ if (live) {
 	});
 }
 
-/* ---------- Sidebar: bring the current page into view (prototype revealActive) ---------- */
-const pane = document.querySelector<HTMLElement>('.sidebar-pane');
-const currentLink = pane?.querySelector<HTMLElement>('a[aria-current="page"]');
-if (pane && currentLink) {
-	const a = currentLink.getBoundingClientRect();
-	const p = pane.getBoundingClientRect();
-	const pad = 48;
-	if (a.top < p.top + pad || a.bottom > p.bottom - pad) {
-		pane.scrollTop += a.top - p.top - p.height / 2 + a.height / 2;
-	}
-}
+/* Sidebar: bringing the current page into view (the prototype's revealActive) is done before the first paint
+   in overrides/Sidebar.astro, together with keeping the sidebar's scroll between pages. */
 
 /* ---------- Media: lightbox for images ---------- */
 const zoomButtons = document.querySelectorAll<HTMLButtonElement>('[data-zoom]');

@@ -54,9 +54,23 @@ for (const file of htmlFiles) {
 	}
 }
 
+// Render-blocking hints (<link rel="expect" ... blocking="render">): the browser holds the first paint until that
+// element is parsed, so a page with the hint but no target would wait for the whole document. Every page with the
+// hint must contain its target id.
+let expectPages = 0;
+for (const file of htmlFiles) {
+	const html = readFileSync(file, 'utf8');
+	const pageUrl = '/' + relative(DIST, file).split(sep).join('/').replace(/index\.html$/, '');
+	for (const m of html.matchAll(/<link\b[^>]*\brel="expect"[^>]*>/g)) {
+		expectPages++;
+		const id = decode(m[0].match(/\shref="#([^"]+)"/)?.[1] ?? '');
+		if (!id || !idsOf(file).has(id)) problems.push(`${pageUrl}  render-blocking <link rel="expect"> has no target ${id ? `"#${id}"` : '(no #id href)'}`);
+	}
+}
+
 if (problems.length) {
 	console.error(`check:links: ${problems.length} broken link(s) out of ${checked} checked in ${htmlFiles.length} pages:\n`);
 	for (const p of [...new Set(problems)]) console.error('  ' + p);
 	process.exit(1);
 }
-console.log(`check:links: ${checked} internal links and anchors in ${htmlFiles.length} pages, all resolve.`);
+console.log(`check:links: ${checked} internal links and anchors in ${htmlFiles.length} pages, all resolve; ${expectPages} render-blocking hint(s) have their target.`);

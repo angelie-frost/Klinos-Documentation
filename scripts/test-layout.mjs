@@ -168,7 +168,103 @@ for (const theme of THEMES) {
 	}
 }
 
+// ---------- Tablet/phone: the open "On this page" list sits above the page ----------
+// For the centre of every visible list item, the topmost element must be that item (not page content), the
+// list's background must be opaque, and it must fit on the screen. Scrolled to the top and scrolled down.
+const mtocRows = [];
+for (const theme of THEMES) {
+	const ctx = await browser.newContext({ viewport: { width: 980, height: 900 }, hasTouch: true });
+	await ctx.addInitScript((t) => {
+		localStorage.setItem('klinos-whatsnew-v3', 'seen');
+		localStorage.setItem('starlight-theme', t);
+	}, theme);
+	const p = await ctx.newPage();
+	for (const w of [980, 900, 820, 768, 390]) {
+		await p.setViewportSize({ width: w, height: w < 700 ? 844 : 900 });
+		for (const [name, path] of [['Reordering (short list)', 'using-klinos/panel/panel-cards/'], ['Lighting (long list)', 'using-klinos/studio/lighting/']]) {
+			for (const scrolled of [false, true]) {
+				await p.goto(`${BASE}/${path}`, { waitUntil: 'networkidle' });
+				if (scrolled) await p.evaluate(() => scrollTo(0, 1400));
+				await p.waitForTimeout(150);
+				const rowHitClosed = await p.evaluate(() => { const r = document.querySelector('.k-mtoc-row').getBoundingClientRect(); return !!document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest('.k-mtoc-row'); });
+				await p.$eval('.k-mtoc-row', (b) => b.click()); // a DOM click: a real tap fails when the bug covers the row
+				await p.waitForTimeout(200);
+				const m = await p.evaluate(() => {
+					const list = document.getElementById('k-mtoc-list');
+					const lr = list.getBoundingClientRect();
+					const items = [...list.querySelectorAll('li')].filter((li) => { const r = li.getBoundingClientRect(); const y = r.top + r.height / 2; return y > lr.top && y < lr.bottom; });
+					const covered = items.filter((li) => { const r = li.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !li.contains(hit); }).map((li) => { const r = li.getBoundingClientRect(); const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return `${li.textContent.trim().slice(0, 18)} ← ${hit?.tagName.toLowerCase()}.${(hit?.className + '').split(' ')[0]}`; });
+					const bg = getComputedStyle(list).backgroundColor;
+					const alpha = bg.startsWith('rgba') ? parseFloat(bg.split(',')[3]) : 1;
+					const row = document.querySelector('.k-mtoc-row').getBoundingClientRect();
+					const rowHit = document.elementFromPoint(row.left + row.width / 2, row.top + row.height / 2);
+					return { items: items.length, covered, bg, alpha, fits: lr.bottom <= innerHeight + 0.5, scrolls: list.scrollHeight > list.clientHeight + 1, rowOnTop: !!rowHit?.closest('.k-mtoc-row') };
+				});
+				const tag = `${theme} ${w} ${name}${scrolled ? ' scrolled' : ''}: open list`;
+				mtocRows.push({ theme, width: w, page: name, scrolled, items: m.items, covered: m.covered.length, bg: m.bg, fits: m.fits, 'scrolls inside': m.scrolls });
+				check(`${tag}: every item is on top of the page`, m.items > 0 && m.covered.length === 0, m.covered.slice(0, 3).join('; '));
+				check(`${tag}: opaque background`, m.alpha === 1, m.bg);
+				check(`${tag}: fits on the screen`, m.fits);
+				check(`${tag}: the row stays on top (closed and open)`, m.rowOnTop && rowHitClosed);
+				await p.keyboard.press('Escape');
+				check(`${tag}: Esc closes it`, await p.$eval('#k-mtoc-list', (l) => l.hidden));
+			}
+		}
+	}
+	// A list taller than the screen (Lighting on a short phone screen): capped to the screen, scrolls inside.
+	await p.setViewportSize({ width: 390, height: 560 });
+	await p.goto(`${BASE}/using-klinos/studio/lighting/`, { waitUntil: 'networkidle' });
+	await p.tap('.k-mtoc-row');
+	await p.waitForTimeout(200);
+	const tall = await p.evaluate(() => {
+		const l = document.getElementById('k-mtoc-list');
+		const before = l.scrollTop;
+		l.scrollTop = 10000;
+		const last = l.querySelector('li:last-child').getBoundingClientRect();
+		const hit = document.elementFromPoint(last.left + last.width / 2, last.top + last.height / 2);
+		return { fits: l.getBoundingClientRect().bottom <= innerHeight + 0.5, scrolls: l.scrollHeight > l.clientHeight + 1, moved: l.scrollTop > before, lastOnTop: !!hit && l.contains(hit) };
+	});
+	check(`${theme} 390x560 long list: fits the screen and scrolls inside, last item reachable`, tall.fits && tall.scrolls && tall.moved && tall.lastOnTop, JSON.stringify(tall));
+	await ctx.close();
+}
+
+// ---------- Desktop: the content's first line and the rail's label share a top ----------
+const alignRows = [];
+for (const theme of THEMES) {
+	const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+	await ctx.addInitScript((t) => {
+		localStorage.setItem('klinos-whatsnew-v3', 'seen');
+		localStorage.setItem('starlight-theme', t);
+	}, theme);
+	const p = await ctx.newPage();
+	for (const w of [1152, 1280, 1440]) {
+		await p.setViewportSize({ width: w, height: 900 });
+		for (const [name, path] of [['Lighting', 'using-klinos/studio/lighting/'], ['Device library', 'using-klinos/reference/device-library/'], ['About', 'using-klinos/start-here/about-klinos/']]) {
+			await p.goto(`${BASE}/${path}`, { waitUntil: 'networkidle' });
+			const tops = () =>
+				p.evaluate(() => {
+					const textTop = (e) => { const r = document.createRange(); r.selectNodeContents(e); return r.getClientRects()[0].top; };
+					const crumbs = document.querySelector('main .crumbs');
+					const label = document.querySelector('.right-sidebar-panel h2');
+					return { crumbs: crumbs.getBoundingClientRect().top, crumbsText: textTop(crumbs), label: label.getBoundingClientRect().top, labelText: textTop(label), header: document.querySelector('header.header').getBoundingClientRect().bottom };
+				});
+			const t = await tops();
+			await p.evaluate(() => scrollTo(0, 1500));
+			await p.waitForTimeout(100);
+			const labelScrolled = (await tops()).label;
+			const tag = `${theme} ${w} ${name}`;
+			alignRows.push({ theme, width: w, page: name, header: t.header, 'breadcrumb top': t.crumbs, 'rail label top': t.label, 'breadcrumb text': +t.crumbsText.toFixed(1), 'label text': +t.labelText.toFixed(1), 'label after scroll': labelScrolled });
+			check(`${tag}: breadcrumb and rail label share a top`, Math.abs(t.crumbs - t.label) <= 1, `${t.crumbs} vs ${t.label}`);
+			check(`${tag}: their text starts at the same height`, Math.abs(t.crumbsText - t.labelText) <= 1, `${t.crumbsText.toFixed(1)} vs ${t.labelText.toFixed(1)}`);
+			check(`${tag}: rail label stays put while scrolling`, Math.abs(labelScrolled - t.label) <= 0.5, `${t.label} → ${labelScrolled}`);
+		}
+	}
+	await ctx.close();
+}
+
 await browser.close();
+console.table(mtocRows.filter((r) => r.theme === 'light'));
+console.table(alignRows.filter((r) => r.theme === 'light'));
 console.table(rows.filter((r) => r.theme === 'light'));
 console.table(headerRows.filter((r) => r.theme === 'light'));
 const failed = results.filter((r) => r.result !== 'PASS');

@@ -9,6 +9,13 @@
 	--sl-menu-button-size: 40px;
 	--sl-mobile-toc-height: 44px;
 }
+/* From 72rem the right-hand rail replaces the row: Starlight sets the row height to 0 there, in a layer, which the
+   unlayered value above would override, leaving an empty 44px above the content. */
+@media (min-width: 72rem) {
+	:root {
+		--sl-mobile-toc-height: 0rem;
+	}
+}
 @media (pointer: coarse) {
 	:root {
 		--k-hit: 40px;
@@ -338,11 +345,16 @@ site-search {
 	list-style: none;
 	margin: 0;
 	padding: 8px var(--sl-nav-pad-x) 14px;
-	max-height: calc(80dvh - var(--sl-nav-height) - var(--sl-mobile-toc-height));
+	/* The screen below the header and the row, less a 16px margin: longer lists scroll inside. */
+	max-height: calc(100dvh - var(--sl-nav-height) - var(--sl-mobile-toc-height) - 16px);
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	border-top: 1px solid var(--k-line);
 	background: var(--k-surface);
+}
+/* Open: the row and list read as a panel above the page (the row's own hairline closes it at the bottom). */
+.k-mtoc:has(> .k-mtoc-row[aria-expanded='true']) {
+	box-shadow: var(--k-pop-shadow);
 }
 .k-mtoc-list[hidden] {
 	display: none;
@@ -737,5 +749,113 @@ site-search {
 	.k-search-close:active {
 		background: var(--k-hover-strong);
 		transition: none;
+	}
+}
+
+/* ---------- Page transitions (cross-document View Transitions) ----------
+   Between two pages of the site the browser cross-fades instead of snapping. The header, the sidebar and the
+   tablet "On this page" row are captured on their own and swap without animating, so they look still; only the
+   content (and the right-hand "On this page" rail) fades in and rises 8px. Browsers without support ignore all of
+   this and navigate as before. The opt-in (@view-transition) is inline in Head.astro, off under reduced motion;
+   Try it live is skipped there too. */
+header.header {
+	view-transition-name: k-header;
+}
+.sidebar-pane {
+	view-transition-name: k-sidebar;
+}
+.k-mtoc {
+	view-transition-name: k-mtoc;
+}
+main {
+	view-transition-name: k-main;
+}
+/* The right-hand rail only from 72rem, where it shows. Below that, .right-sidebar is the wrapper of the tablet
+   "On this page" row, and a view-transition name would make it a stacking context: the row's z-index would then
+   only count inside it, and the content (painted later) would cover the row and its open list. */
+@media (min-width: 72rem) {
+	.right-sidebar {
+		view-transition-name: k-toc;
+	}
+}
+/* The menu button sits in the sidebar nav, not in the header: on its own it is not covered by the header's
+   snapshot. The What's new card sits inside the header: on its own it fades out instead of staying for the
+   length of the transition. */
+.k-menu-btn {
+	view-transition-name: k-menu-btn;
+}
+.whatsnew {
+	view-transition-name: k-whatsnew;
+}
+/* No size or position morphing: every part takes its new place at once. */
+::view-transition-group(*) {
+	animation: none;
+}
+/* Snapshots are drawn in page order unless told otherwise; keep the live page's stacking: content, then the
+   "On this page" row, the sidebar, the header, the menu button and the card. (No transition runs while the
+   tablet/phone menu is open; see Head.astro.) */
+::view-transition-group(k-main),
+::view-transition-group(k-toc) {
+	z-index: 0;
+}
+::view-transition-group(k-mtoc) {
+	z-index: 1;
+}
+::view-transition-group(k-sidebar) {
+	z-index: 2;
+}
+::view-transition-group(k-header) {
+	z-index: 3;
+}
+::view-transition-group(k-menu-btn) {
+	z-index: 4;
+}
+::view-transition-group(k-whatsnew) {
+	z-index: 5;
+}
+/* The page background, the header, the sidebar and the row: swap in place. */
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(k-header),
+::view-transition-new(k-header),
+::view-transition-old(k-sidebar),
+::view-transition-new(k-sidebar),
+::view-transition-old(k-mtoc),
+::view-transition-new(k-mtoc),
+::view-transition-old(k-menu-btn),
+::view-transition-new(k-menu-btn) {
+	animation: none;
+}
+/* The content: the old page fades out quickly while the new one fades in and rises 8px. */
+::view-transition-old(k-main),
+::view-transition-old(k-toc) {
+	animation: k-vt-out 120ms ease-out both;
+}
+::view-transition-new(k-main),
+::view-transition-new(k-toc) {
+	animation: k-vt-in 200ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+/* A part only on the old page (the What's new card, the "On this page" row when leaving a page that has one)
+   fades out instead of lingering for the length of the transition; one only on the new page fades in. */
+::view-transition-old(*):only-child {
+	animation: k-vt-out 120ms ease-out both;
+}
+::view-transition-new(*):only-child {
+	animation: k-vt-fade-in 120ms ease-out both;
+}
+@keyframes k-vt-out {
+	to {
+		opacity: 0;
+	}
+}
+@keyframes k-vt-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+}
+@keyframes k-vt-fade-in {
+	from {
+		opacity: 0;
 	}
 }

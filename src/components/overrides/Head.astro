@@ -1,8 +1,61 @@
 ---
 import Default from '@astrojs/starlight/components/Head.astro';
+
+// Page transitions (see "Page transitions" in chrome.css). Every Starlight page has the title as h1#_top: PageTitle
+// renders it, and on hero pages (the 404) Hero renders it with the same id. The browser holds the first paint until
+// that heading is parsed, so the incoming page is never captured half-empty. check:links fails if a built page has
+// this hint without its target (the root redirect page has neither; it does not use this Head).
 ---
 
 <Default />
+<link rel="expect" href="#_top" blocking="render" />
+{
+	/* The opt-in lives here, inline, not in chrome.css: with it in the bundled stylesheet, Edge reported
+	   "ViewTransition opt-in disabled" for the incoming page at 980px and below and skipped every transition there.
+	   Inline it is read with the head, at every width. Reduced motion: no opt-in, so navigation stays instant. */
+}
+<style is:inline>
+	@media (prefers-reduced-motion: no-preference) {
+		@view-transition {
+			navigation: auto;
+		}
+	}
+</style>
+
+{
+	/* No transition to or from Try it live: the demo iframe paints after the page's first frame, so the
+	   snapshot would show an empty box that then pops in. Browsers without these events ignore this. */
+}
+<script is:inline>
+	(() => {
+		const LIVE = '/using-klinos/reference/try-it-live/';
+		const isLive = (url) => {
+			try {
+				return new URL(url, location.href).pathname === LIVE;
+			} catch {
+				return false;
+			}
+		};
+		// A skipped transition rejects its `ready` promise; handled here so it is not reported as an error.
+		const skip = (vt) => {
+			vt.ready.catch(() => {});
+			vt.skipTransition();
+		};
+		addEventListener('pageswap', (e) => {
+			if (!e.viewTransition) return;
+			// Also none from the open tablet/phone menu: a top-layer popover is captured with the page background,
+			// under the content, so it would be drawn in the wrong order. Skipped, the menu stays until the new
+			// page (menu closed) appears, exactly as without transitions.
+			// Likewise when the tablet "On this page" list is open: its taller snapshot would linger over the
+			// incoming page. (A tap outside normally closes it before the page is left.)
+			const menuOpen = !!document.querySelector('#starlight__sidebar:popover-open, #k-mtoc-list:not([hidden])');
+			if (menuOpen || isLive(location.href) || isLive(e.activation?.entry?.url ?? '')) skip(e.viewTransition);
+		});
+		addEventListener('pagereveal', (e) => {
+			if (e.viewTransition && (isLive(location.href) || isLive(window.navigation?.activation?.from?.url ?? ''))) skip(e.viewTransition);
+		});
+	})();
+</script>
 
 <script>
 	import '../../scripts/page';

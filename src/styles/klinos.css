@@ -301,6 +301,8 @@ header.header {
 }
 .crumbs {
 	font-size: var(--k-fs-cap);
+	/* 1.4, as the rail's "On this page" label: with the same top, both lines' text then starts at the same height. */
+	line-height: 1.4;
 	color: var(--k-ink2);
 	margin: 0 0 var(--k-s3);
 }

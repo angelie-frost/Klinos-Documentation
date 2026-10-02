@@ -7,6 +7,9 @@ import { starlightSidebar } from './scripts/sidebar.mjs';
 
 export default defineConfig({
 	devToolbar: { enabled: false },
+	// Fetch a page when its link is hovered or focused, so the page transition does not wait on the network.
+	// Not "viewport": the sidebar shows ~40 links, which would download most of the site on every page view.
+	prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 	// The home page lives at its folder address; the bare root forwards to it.
 	redirects: { '/': '/using-klinos/start-here/home/' },
 	markdown: {
