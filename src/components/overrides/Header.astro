@@ -1,0 +1,57 @@
+---
+// Header: logo + "Klinos Docs", search, version badge, theme toggle.
+import Search from 'virtual:starlight/components/Search';
+import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
+import { KLINOS_VERSION } from '../../config';
+---
+
+<div class="header k-header">
+	<div class="title-wrapper sl-flex">
+		<a class="brand" href="/" aria-label="Klinos Docs, home">
+			<svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true"
+				><rect x="5.5" y="1.5" width="11" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"
+				></rect><rect x="7.5" y="4" width="7" height="14" rx="1.5" fill="currentColor" opacity=".18"></rect></svg
+			>
+			<span translate="no">Klinos <small>Docs</small></span>
+		</a>
+	</div>
+	<div class="sl-flex print:hidden k-search">
+		<Search />
+	</div>
+	<div class="sl-hidden md:sl-flex print:hidden right-group">
+		<span class="k-badge" title="Packaged build">v{KLINOS_VERSION}</span>
+		<ThemeSelect />
+	</div>
+</div>
+
+<style>
+	@layer starlight.core {
+		.header {
+			display: flex;
+			gap: var(--sl-nav-gap);
+			justify-content: space-between;
+			align-items: center;
+			height: 100%;
+		}
+		.title-wrapper {
+			overflow: clip;
+			padding: 0.25rem;
+			margin: -0.25rem;
+			min-width: 0;
+		}
+		.right-group {
+			gap: 12px;
+			align-items: center;
+		}
+		@media (min-width: 50rem) {
+			.header {
+				display: grid;
+				grid-template-columns: calc(var(--sl-sidebar-width) - var(--sl-nav-pad-x)) 1fr auto;
+				align-content: center;
+			}
+			.k-search {
+				justify-content: center;
+			}
+		}
+	}
+</style>

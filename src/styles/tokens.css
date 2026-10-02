@@ -1,0 +1,133 @@
+/* Klinos Docs tokens ("Panel, Unfolded"), taken from design/klinos-docs-prototype.html,
+   and mapped onto Starlight's custom properties. Starlight's ThemeProvider always sets
+   data-theme on <html> before paint (stored choice, else the system setting). */
+
+:root {
+	--k-font-display: 'Inter Tight', 'Inter', -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+	--k-font-body: 'Inter', -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+	--k-font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+	--k-fs-h1: 36px;
+	--k-fs-h2: 24px;
+	--k-fs-h3: 18px;
+	--k-fs-body: 16px;
+	--k-fs-sm: 14px;
+	--k-fs-cap: 13px;
+	--k-fs-label: 12px;
+	--k-s1: 4px;
+	--k-s2: 8px;
+	--k-s3: 12px;
+	--k-s4: 16px;
+	--k-s5: 24px;
+	--k-s6: 32px;
+	--k-s7: 48px;
+	--k-r-block: 18px;
+	--k-r-media: 12px;
+	--k-r-nav: 10px;
+	--k-r-btn: 7px;
+	--k-r-pill: 999px;
+	--k-scroll-w: 8px;
+
+	/* Dark: Vercel-style near-black */
+	color-scheme: dark;
+	--k-surface: #0a0a0a;
+	--k-sunk: #1a1a1a;
+	--k-hover: #121212;
+	--k-nav-active: #1a1a1a;
+	--k-stage: #141414;
+	--k-stage-line: #262626;
+	--k-line: #1f1f1f;
+	--k-line2: #2e2e2e;
+	--k-ink: #ededed;
+	--k-onink: #0a0a0a;
+	--k-ink2: #a1a1a1;
+	--k-caption: #a1a1a1;
+	--k-ink3: #6b6b6b;
+	--k-ok: #5dd39e;
+	--k-ok-text: #5dd39e;
+	--k-ok-bg: #0e2018;
+	--k-ok-line: #1e4630;
+	--k-warn: #f3a54a;
+	--k-warn-text: #f3a54a;
+	--k-warn-bg: #24190b;
+	--k-warn-line: #4d3415;
+	--k-focus: #ededed;
+	--k-clip-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 28px rgba(0, 0, 0, 0.6);
+	--k-pop-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='light'] {
+	color-scheme: light;
+	--k-surface: #ffffff;
+	--k-sunk: #f5f5f7;
+	--k-hover: #fafafa;
+	--k-nav-active: #ebebee;
+	--k-stage: #f2f2f4;
+	--k-stage-line: transparent;
+	--k-line: #ededf0;
+	--k-line2: #dedee3;
+	--k-ink: #0a0a0b;
+	--k-onink: #ffffff;
+	--k-ink2: #6e6e73;
+	--k-caption: #636366;
+	--k-ink3: #8e8e93;
+	--k-ok: #14ae5c;
+	--k-ok-text: #0e7a41;
+	--k-ok-bg: #eef8f2;
+	--k-ok-line: #bfe6cf;
+	--k-warn: #b86200;
+	--k-warn-text: #9a5200;
+	--k-warn-bg: #fdf4ea;
+	--k-warn-line: #f1d3ae;
+	--k-focus: #0a0a0b;
+	--k-clip-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 6px 24px rgba(0, 0, 0, 0.08);
+	--k-pop-shadow: 0 8px 24px rgba(10, 10, 11, 0.1);
+}
+
+/* Starlight mapping (both themes resolve through the --k-* tokens above). */
+:root,
+:root[data-theme='light'] {
+	--sl-font: var(--k-font-body);
+	--sl-font-mono: var(--k-font-mono);
+
+	--sl-color-white: var(--k-ink);
+	--sl-color-gray-1: var(--k-ink);
+	--sl-color-gray-2: var(--k-ink);
+	--sl-color-gray-3: var(--k-ink2);
+	--sl-color-gray-4: var(--k-ink3);
+	--sl-color-gray-5: var(--k-line2);
+	--sl-color-gray-6: var(--k-sunk);
+	--sl-color-gray-7: var(--k-hover);
+	--sl-color-black: var(--k-surface);
+
+	--sl-color-accent-low: var(--k-nav-active);
+	--sl-color-accent: var(--k-ink);
+	--sl-color-accent-high: var(--k-ink);
+
+	--sl-color-text: var(--k-ink);
+	--sl-color-text-accent: var(--k-ink);
+	--sl-color-text-invert: var(--k-onink);
+	--sl-color-bg: var(--k-surface);
+	--sl-color-bg-nav: var(--k-surface);
+	--sl-color-bg-sidebar: var(--k-surface);
+	--sl-color-bg-inline-code: var(--k-sunk);
+	--sl-color-bg-accent: var(--k-ink);
+	--sl-color-hairline-light: var(--k-line);
+	--sl-color-hairline: var(--k-line);
+	--sl-color-hairline-shade: var(--k-line);
+	--sl-color-backdrop-overlay: rgba(10, 10, 11, 0.4);
+
+	--sl-nav-height: 56px;
+	--sl-nav-pad-x: 16px;
+	--sl-sidebar-width: 264px;
+	--sl-sidebar-pad-x: 16px;
+	--sl-content-width: 43.75rem; /* 700px */
+	--sl-content-pad-x: 40px;
+
+	--sl-text-h1: var(--k-fs-h1);
+	--sl-text-h2: var(--k-fs-h2);
+	--sl-text-h3: var(--k-fs-h3);
+	--sl-text-h4: var(--k-fs-body);
+	--sl-text-body: var(--k-fs-body);
+	--sl-line-height: 1.65;
+	--sl-line-height-headings: 1.25;
+}

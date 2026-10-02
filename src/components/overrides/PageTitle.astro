@@ -1,0 +1,30 @@
+---
+// Page title with the prototype's breadcrumb ("Using Klinos / Studio") and the Unreleased pill.
+// Section, group and badge come from the sidebar Starlight built for this page (from sidebar.md).
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
+
+// Same id Starlight uses for its own title (skip link / TOC "Overview" target).
+const PAGE_TITLE_ID = '_top';
+const { entry, sidebar } = Astro.locals.starlightRoute;
+type Entry = StarlightRouteData['sidebar'][number];
+
+function findTrail(entries: Entry[], trail: Entry[] = []): { trail: Entry[]; link: Entry } | null {
+	for (const e of entries) {
+		if (e.type === 'link' && e.isCurrent) return { trail, link: e };
+		if (e.type === 'group') {
+			const hit = findTrail(e.entries, [...trail, e]);
+			if (hit) return hit;
+		}
+	}
+	return null;
+}
+
+const hit = findTrail(sidebar);
+const isHome = entry.id === 'using-klinos/start-here/home';
+const unreleased = !!hit && [...hit.trail, hit.link].some((e) => e.badge?.text === 'Unreleased');
+---
+
+{hit && !isHome && <p class="crumbs">{hit.trail.map((g) => g.label).join(' / ')}</p>}
+<h1 id={PAGE_TITLE_ID} class:list={{ 'is-home': isHome }}>
+	{entry.data.title}{unreleased && <> <span class="unrel">Unreleased</span></>}
+</h1>

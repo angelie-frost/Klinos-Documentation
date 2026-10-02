@@ -1,0 +1,66 @@
+---
+// One round toggle. The first visit follows the system; a click switches light/dark and is remembered.
+// Uses Starlight's storage key so its inline ThemeProvider sets the theme before paint (no flash).
+---
+
+<klinos-theme-toggle>
+	<button class="themebtn" type="button" aria-label="Switch theme">
+		<svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"
+			><circle cx="8" cy="8" r="3"></circle><path
+				d="M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9"></path></svg
+		>
+		<svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"
+			><path d="M13.3 9.6A5.6 5.6 0 0 1 6.4 2.7a5.6 5.6 0 1 0 6.9 6.9z"></path></svg
+		>
+		<span class="tt" aria-hidden="true">Switch theme</span>
+	</button>
+</klinos-theme-toggle>
+
+<script>
+	const KEY = 'starlight-theme';
+	const root = document.documentElement;
+	const mq = matchMedia('(prefers-color-scheme: light)');
+
+	const stored = (): 'light' | 'dark' | null => {
+		try {
+			const v = localStorage.getItem(KEY);
+			return v === 'light' || v === 'dark' ? v : null;
+		} catch {
+			return null;
+		}
+	};
+	const current = () => (root.dataset.theme === 'light' ? 'light' : 'dark');
+
+	function sync() {
+		const next = current() === 'dark' ? 'light' : 'dark';
+		document.querySelectorAll('klinos-theme-toggle button').forEach((b) => {
+			b.setAttribute('aria-label', `Switch to ${next} theme`);
+			const tt = b.querySelector('.tt');
+			if (tt) tt.textContent = `Switch to ${next}`;
+		});
+	}
+
+	function apply(theme: 'light' | 'dark') {
+		root.dataset.theme = theme;
+		sync();
+		window.dispatchEvent(new CustomEvent('klinos:theme', { detail: theme }));
+	}
+
+	mq.addEventListener('change', () => {
+		if (!stored()) apply(mq.matches ? 'light' : 'dark');
+	});
+
+	class KlinosThemeToggle extends HTMLElement {
+		connectedCallback() {
+			sync();
+			this.querySelector('button')?.addEventListener('click', () => {
+				const next = current() === 'dark' ? 'light' : 'dark';
+				try {
+					localStorage.setItem(KEY, next);
+				} catch {}
+				apply(next);
+			});
+		}
+	}
+	customElements.define('klinos-theme-toggle', KlinosThemeToggle);
+</script>
