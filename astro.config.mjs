@@ -41,6 +41,7 @@ export default defineConfig({
 				'@fontsource/geist-mono/500.css',
 				'./src/styles/tokens.css',
 				'./src/styles/klinos.css',
+				'./src/styles/chrome.css',
 			],
 			components: {
 				Header: './src/components/overrides/Header.astro',
@@ -49,6 +50,12 @@ export default defineConfig({
 				Head: './src/components/overrides/Head.astro',
 				ThemeProvider: './src/components/overrides/ThemeProvider.astro',
 				MobileMenuFooter: './src/components/overrides/MobileMenuFooter.astro',
+				MobileMenuToggle: './src/components/overrides/MobileMenuToggle.astro',
+				MobileTableOfContents: './src/components/overrides/MobileTableOfContents.astro',
+				Pagination: './src/components/overrides/Pagination.astro',
+				Search: './src/components/overrides/Search.astro',
+				PageFrame: './src/components/overrides/PageFrame.astro',
+				Sidebar: './src/components/overrides/Sidebar.astro',
 			},
 			expressiveCode: {
 				// Light first: it is the site's default theme.

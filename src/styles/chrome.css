@@ -1,0 +1,741 @@
+/* Klinos Docs — site chrome (Stage 6): header, tablet/phone header, "On this page" row, search panel, stepper.
+   Loaded after klinos.css. Icons are Lucide (ISC), inlined from src/icons/lucide/ (see LICENSES/lucide.txt). */
+
+/* One icon set across the header: Lucide at stroke 2, one size. */
+:root {
+	--k-icon: 18px;
+	--k-header-gap: 16px;
+	--k-hit: 36px;
+	--sl-menu-button-size: 40px;
+	--sl-mobile-toc-height: 44px;
+}
+@media (pointer: coarse) {
+	:root {
+		--k-hit: 40px;
+	}
+}
+@media (max-width: 980px) {
+	:root {
+		--k-icon: 20px;
+	}
+}
+.k-icon {
+	width: var(--k-icon);
+	height: var(--k-icon);
+	flex: none;
+	display: block;
+}
+
+/* ---------- Desktop header ---------- */
+.k-header .right-group {
+	gap: var(--k-header-gap);
+	align-items: center;
+}
+/* "Try it live": the only button-shaped item. */
+.k-header .k-try {
+	height: var(--k-hit);
+	padding: 0 14px;
+	gap: 8px;
+}
+.k-header .k-try .k-icon {
+	width: var(--k-icon);
+	height: var(--k-icon);
+}
+/* "What's new": plain text. */
+.k-header .k-whatsnew {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: var(--k-hit);
+	padding: 0 4px;
+	color: var(--k-ink-muted);
+}
+.k-header .k-whatsnew:focus-visible {
+	color: var(--k-ink);
+}
+@media (hover: hover) and (pointer: fine) {
+.k-header .k-whatsnew:hover {
+	color: var(--k-ink);
+}
+}
+.k-whatsnew:focus-visible,
+.k-try:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+}
+/* The version, next to the title: small muted mono text, a link to the changelog. No chip, no underline until hovered.
+   Its box is the header hit height (44px on touch), the text centred in it; 4px side padding gives the pressed
+   background room, and the negative margin keeps the visible gap after "Docs" at 8px. */
+.k-header .k-version {
+	display: inline-flex;
+	align-items: center;
+	height: var(--k-hit);
+	/* 2.5px on top moves the text 1.25px down in its box: the title, aligned to this baseline, then sits on
+	   the same centreline as the header icons. */
+	padding: 2.5px 4px 0;
+	margin-inline-start: -4px;
+	border-radius: var(--k-r-nav);
+	color: var(--k-ink-muted);
+	font: 400 var(--k-fs-label) / 1 var(--k-font-mono);
+	font-variant-numeric: tabular-nums;
+	text-decoration: none;
+	white-space: nowrap;
+}
+@media (hover: hover) and (pointer: fine) {
+.k-header .k-version:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+}
+@media (max-width: 359px) {
+	.k-header .k-version {
+		display: none;
+	}
+}
+/* Theme toggle: a plain icon button; a soft background on hover and focus only. */
+klinos-theme-toggle {
+	display: inline-flex;
+}
+.themebtn {
+	position: relative;
+	width: var(--k-hit);
+	height: var(--k-hit);
+	flex: none;
+	display: inline-grid;
+	place-items: center;
+	padding: 0;
+	border: 0;
+	border-radius: var(--k-r-nav);
+	background: transparent;
+	color: var(--k-ink);
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+.themebtn:focus-visible {
+	background: var(--k-hover-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+.themebtn:hover {
+	background: var(--k-hover-strong);
+}
+}
+.themebtn:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+}
+.themebtn .k-icon {
+	grid-area: 1/1;
+	transition:
+		opacity 0.15s ease,
+		transform 0.2s ease;
+}
+.themebtn .i-moon {
+	opacity: 0;
+	transform: rotate(-30deg);
+}
+:root[data-theme='dark'] .themebtn .i-sun {
+	opacity: 0;
+	transform: rotate(30deg);
+}
+:root[data-theme='dark'] .themebtn .i-moon {
+	opacity: 1;
+	transform: none;
+}
+.themebtn .tt {
+	position: absolute;
+	top: calc(100% + 8px);
+	right: 0;
+	white-space: nowrap;
+	padding: 5px 9px;
+	border-radius: var(--k-r-btn);
+	background: var(--k-ink);
+	color: var(--k-onink);
+	font-size: var(--k-fs-label);
+	font-weight: 500;
+	line-height: 1.3;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.12s ease;
+	z-index: 30;
+}
+.themebtn:focus-visible .tt {
+	opacity: 1;
+	transition-delay: 0.35s;
+}
+@media (hover: hover) and (pointer: fine) {
+.themebtn:hover .tt {
+	opacity: 1;
+	transition-delay: 0.35s;
+}
+}
+@media (prefers-reduced-motion: reduce) {
+	.themebtn,
+	.themebtn .k-icon,
+	.themebtn .tt {
+		transition: none;
+	}
+}
+
+/* ---------- Header search trigger ---------- */
+/* Starlight's own layout for this button was scoped to its component, so it is restated here. */
+site-search {
+	display: contents;
+}
+.k-search button[data-open-modal] {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+}
+@media (min-width: 981px) {
+	.k-search button[data-open-modal] > kbd {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25em;
+		margin-inline-start: auto;
+	}
+}
+.k-search button[data-open-modal] > kbd kbd {
+	font: inherit;
+	background: none;
+	border: 0;
+	padding: 0;
+}
+@media (min-width: 981px) {
+	.k-search button[data-open-modal] .k-icon {
+		width: 16px;
+		height: 16px;
+		color: var(--k-ink-muted);
+	}
+}
+
+/* ---------- Tablet and phone header: one row, one centreline, plain icon buttons ---------- */
+@media (max-width: 980px) {
+	.k-header .k-search {
+		gap: 0;
+		align-items: center;
+	}
+	.k-header .k-try-icon,
+	.k-search button[data-open-modal] {
+		display: inline-grid;
+		place-items: center;
+		width: var(--sl-menu-button-size);
+		height: var(--sl-menu-button-size);
+		padding: 0;
+		border: 0;
+		border-radius: var(--k-r-nav);
+		background: transparent;
+		color: var(--k-ink);
+	}
+	@media (hover: hover) and (pointer: fine) {
+	.k-header .k-try-icon:hover,
+	.k-search button[data-open-modal]:hover {
+		background: var(--k-hover-strong);
+	}
+	}
+}
+.k-menu-btn {
+	display: none;
+	place-items: center;
+	width: var(--sl-menu-button-size);
+	height: var(--sl-menu-button-size);
+	padding: 0;
+	border: 0;
+	border-radius: var(--k-r-nav);
+	background: transparent;
+	color: var(--k-ink);
+	box-shadow: none;
+	cursor: pointer;
+}
+@media (max-width: 980px) {
+	.k-menu-btn {
+		display: inline-grid;
+	}
+}
+/* Menu or close icon, by whether the sidebar pane (the next sibling) is open. Restated unlayered,
+   because .k-icon would otherwise show both. */
+.k-menu-btn:has(~ :popover-open) .open-menu,
+.k-menu-btn:not(:has(~ :popover-open)) .close-menu {
+	display: none;
+}
+.k-menu-btn:focus-visible {
+	background: var(--k-hover-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+.k-menu-btn:hover {
+	background: var(--k-hover-strong);
+}
+}
+.k-header a:focus-visible,
+.k-search button[data-open-modal]:focus-visible,
+.k-menu-btn:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+}
+
+/* ---------- "On this page" row (tablet and phone) ---------- */
+.k-mtoc {
+	position: fixed;
+	z-index: var(--sl-z-index-toc);
+	top: var(--sl-nav-height);
+	inset-inline: 0;
+	background: var(--k-surface);
+	border-bottom: 1px solid var(--k-line);
+}
+@media (min-width: 981px) {
+	.k-mtoc {
+		inset-inline-start: var(--sl-content-inline-start, 0);
+	}
+}
+.k-mtoc-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	height: var(--sl-mobile-toc-height);
+	padding: 0 var(--sl-nav-pad-x);
+	border: 0;
+	background: transparent;
+	color: var(--k-ink);
+	font: inherit;
+	font-size: var(--k-fs-sm);
+	text-align: left;
+	cursor: pointer;
+}
+.k-mtoc-row:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: -2px;
+}
+.k-mtoc-label {
+	flex: none;
+	font-size: var(--k-fs-label);
+	color: var(--k-ink-muted);
+}
+.k-mtoc-current {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-weight: 500;
+}
+.k-mtoc-chev {
+	width: 16px;
+	height: 16px;
+	color: var(--k-ink-muted);
+	transition: transform 0.18s ease;
+}
+.k-mtoc-row[aria-expanded='true'] .k-mtoc-chev {
+	transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+	.k-mtoc-chev {
+		transition: none;
+	}
+}
+.k-mtoc-list {
+	list-style: none;
+	margin: 0;
+	padding: 8px var(--sl-nav-pad-x) 14px;
+	max-height: calc(80dvh - var(--sl-nav-height) - var(--sl-mobile-toc-height));
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	border-top: 1px solid var(--k-line);
+	background: var(--k-surface);
+}
+.k-mtoc-list[hidden] {
+	display: none;
+}
+.k-mtoc-list li {
+	margin: 0;
+	border-left: 1px solid var(--k-line);
+}
+.k-mtoc-list a {
+	display: block;
+	padding: 8px 0 8px calc(14px + 12px * var(--k-toc-depth, 0));
+	margin-left: -1px;
+	border-left: 2px solid transparent;
+	color: var(--k-ink-muted);
+	text-decoration: none;
+	font-size: var(--k-fs-sm);
+	line-height: 1.4;
+}
+@media (hover: hover) and (pointer: fine) {
+.k-mtoc-list a:hover {
+	color: var(--k-ink);
+}
+}
+.k-mtoc-list a[aria-current='true'] {
+	color: var(--k-ink);
+	border-left-color: var(--k-ink);
+}
+.k-mtoc-list a:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: -2px;
+}
+
+/* ---------- Search panel ---------- */
+.k-search-dialog {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	max-width: 100vw;
+	max-height: 100dvh;
+	width: 100%;
+	height: 100%;
+}
+.k-search-dialog[open] {
+	display: block;
+}
+.k-search-dialog::backdrop {
+	background: rgba(10, 10, 11, 0.4);
+}
+/* A floating panel at every width: near the top, a gap on all sides, the results scroll inside it.
+   dvh follows the on-screen keyboard, so the results stay above it. */
+.k-search-panel {
+	display: flex;
+	flex-direction: column;
+	--k-search-top: max(16px, 4dvh);
+	width: min(640px, calc(100vw - 32px));
+	max-height: calc(100dvh - var(--k-search-top) - 16px);
+	margin: var(--k-search-top) auto 0;
+	background: var(--k-surface);
+	color: var(--k-ink-body);
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-media);
+	box-shadow: var(--k-pop-shadow);
+	overflow: hidden;
+}
+@media (min-width: 981px) {
+	.k-search-panel {
+		width: min(640px, calc(100vw - 48px));
+		max-height: min(560px, 80dvh);
+		margin-top: 12dvh;
+	}
+}
+/* The field: flat, one hairline under it; focus shows as a 2px ink underline (one indicator, not two). */
+.k-search-field {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 12px 0 16px;
+	height: 56px;
+	flex: none;
+	border-bottom: 1px solid var(--k-line);
+	box-shadow: inset 0 -2px 0 transparent;
+	transition: box-shadow 0.12s ease;
+}
+.k-search-field:focus-within {
+	box-shadow: inset 0 -2px 0 var(--k-focus);
+}
+.k-search-field > .k-icon {
+	width: 18px;
+	height: 18px;
+	color: var(--k-ink-muted);
+}
+.k-search-field input {
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	border: 0;
+	background: transparent;
+	color: var(--k-ink);
+	font: 400 16px / 1.4 var(--k-font-body); /* 16px: iOS does not zoom */
+	outline: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.k-search-field input::placeholder {
+	color: var(--k-ink-muted);
+}
+.k-search-field input::-webkit-search-cancel-button {
+	display: none;
+}
+.k-search-esc {
+	flex: none;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+.k-search-esc kbd {
+	display: inline-block;
+	padding: 2px 6px;
+	border: 1px solid var(--k-line2);
+	border-radius: 6px;
+	font: 500 11px / 1.3 var(--k-font-mono);
+	color: var(--k-ink-muted);
+	background: var(--k-surface);
+}
+.k-search-close {
+	display: none;
+	flex: none;
+	min-height: 44px;
+	padding: 0 8px;
+	border: 0;
+	border-radius: var(--k-r-btn);
+	background: none;
+	color: var(--k-ink);
+	font: 500 var(--k-fs-sm) / 1 var(--k-font-body);
+	cursor: pointer;
+}
+.k-search-close:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 0;
+}
+@media (pointer: coarse) {
+	.k-search-esc {
+		display: none;
+	}
+	.k-search-close {
+		display: inline-flex;
+		align-items: center;
+	}
+}
+.k-search-esc:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+.k-search-body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 12px 8px 16px;
+}
+.k-search-body [hidden] {
+	display: none !important;
+}
+.k-search-body p {
+	margin: 0;
+}
+.k-search-hint,
+.k-search-none,
+.k-search-note {
+	padding: 6px 10px;
+	font-size: var(--k-fs-sm);
+	color: var(--k-ink-muted);
+}
+.k-search-none {
+	color: var(--k-ink-body);
+}
+.k-search-note code {
+	font-family: var(--k-font-mono);
+	font-size: 0.92em;
+	background: var(--k-sunk);
+	border-radius: 4px;
+	padding: 1px 4px;
+}
+.k-search-suggest {
+	list-style: none;
+	margin: 2px 0 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 4px;
+}
+.k-search-suggest button {
+	min-height: 32px;
+	padding: 4px 10px;
+	border: 0;
+	border-radius: var(--k-r-btn);
+	background: none;
+	color: var(--k-ink);
+	font: 500 var(--k-fs-sm) / 1.3 var(--k-font-body);
+	cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+.k-search-suggest button:hover {
+	background: var(--k-hover-strong);
+}
+}
+.k-search-suggest button:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 0;
+}
+.k-search-results {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.k-search-results a {
+	display: grid;
+	gap: 2px;
+	padding: 10px 12px;
+	border-radius: var(--k-r-nav);
+	color: var(--k-ink-body);
+	text-decoration: none;
+}
+.k-search-results [aria-selected='true'] a {
+	background: var(--k-hover-strong);
+	box-shadow: inset 2px 0 0 var(--k-ink);
+}
+.k-sr-title {
+	font-weight: 600;
+	color: var(--k-ink);
+	font-size: var(--k-fs-sm);
+}
+.k-sr-section {
+	font-size: var(--k-fs-label);
+	color: var(--k-ink-muted);
+}
+.k-sr-excerpt {
+	font-size: var(--k-fs-cap);
+	line-height: 1.5;
+	color: var(--k-ink-body);
+}
+.k-sr-excerpt mark {
+	background: none;
+	color: var(--k-ink);
+	font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+	.k-search-field {
+		transition: none;
+	}
+}
+
+/* ---------- Stepper: muted mono numerals on a thin rail ---------- */
+.sl-markdown-content ol {
+	list-style: none;
+	padding-left: 0;
+	counter-reset: step;
+}
+.sl-markdown-content ol > li {
+	position: relative;
+	margin: 0;
+	padding: 0 0 var(--k-s3) 36px;
+	counter-increment: step;
+}
+.sl-markdown-content ol > li + li {
+	margin-top: 0;
+}
+/* The numeral sits on the first line of its step: its line box is one text line tall. */
+.sl-markdown-content ol > li::before {
+	content: counter(step);
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 22px;
+	text-align: center;
+	font-family: var(--k-font-mono);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: calc(var(--k-fs-body) * 1.7);
+	font-variant-numeric: tabular-nums;
+	color: var(--k-ink-muted);
+}
+/* The rail: a thin light line from under the numeral to just before the next one. */
+.sl-markdown-content ol > li::after {
+	content: '';
+	position: absolute;
+	left: 10.5px;
+	top: calc(var(--k-fs-body) * 1.7 + 2px);
+	bottom: 4px;
+	width: 1px;
+	background: var(--k-line);
+}
+.sl-markdown-content ol > li:last-child::after {
+	display: none;
+}
+
+/* Narrow desktop (981–1100px, sidebar showing): the desktop header, tightened so "Search documentation" fits. */
+@media (min-width: 981px) and (max-width: 1100px) {
+	:root {
+		--k-header-gap: 10px;
+	}
+	.k-search button[data-open-modal] > kbd {
+		display: none !important;
+	}
+	.k-search button[data-open-modal] > span {
+		white-space: nowrap;
+	}
+	.k-header .k-try {
+		padding: 0 10px;
+	}
+}
+
+/* Layout switch at 980px (Starlight's own switch is 50rem / 800px; see overrides/PageFrame.astro).
+   Our components use these instead of Starlight's md: utility classes. */
+@media (max-width: 980px) {
+	.k-desktop-only {
+		display: none !important;
+	}
+}
+@media (min-width: 981px) {
+	.k-touch-only {
+		display: none !important;
+	}
+	.k-header .right-group {
+		display: flex;
+	}
+}
+/* Page.astro sets the content's start to the sidebar width from 50em (`:where(.astro-…)[data-has-sidebar]`, unlayered,
+   and bundled after this file); below 981px there is no sidebar column. `:root` gives this rule the higher specificity,
+   so it wins whatever the bundle order. */
+@media (max-width: 980px) {
+	:root[data-has-sidebar] {
+		--sl-content-inline-start: 0rem;
+	}
+}
+/* Tablet and phone: one centred column (Starlight centres it only from 72rem). Below the content max width it
+   fills the space between the gutters, as before. */
+@media (max-width: 980px) {
+	.content-panel .sl-container {
+		margin-inline: auto;
+	}
+}
+
+/* ---------- Touch: tap targets of at least 44px, and a pressed state instead of hover ---------- */
+@media (pointer: coarse) {
+	:root {
+		--k-hit: 44px;
+		--sl-menu-button-size: 44px;
+		--sl-mobile-toc-height: 44px;
+	}
+	.sidebar-content a {
+		min-height: 44px;
+	}
+	.k-mtoc-list a {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		padding-block: 0;
+	}
+	.k-search-suggest button {
+		min-height: 44px;
+	}
+	.k-search-results a {
+		min-height: 44px;
+	}
+	.k-menu-extra .k-whatsnew {
+		min-height: 44px;
+	}
+}
+/* Pressed: a soft background, instant, no movement. Only on touch, so a mouse never sees it. */
+@media (hover: none), (pointer: coarse) {
+	html {
+		-webkit-tap-highlight-color: transparent;
+	}
+	.k-header .k-try-icon:active,
+	.k-header .k-try:active,
+	.k-header .k-version:active,
+	.k-header .k-whatsnew:active,
+	.k-search button[data-open-modal]:active,
+	.k-menu-btn:active,
+	.themebtn:active,
+	.k-menu-extra .k-whatsnew:active,
+	.k-pager-link:active,
+	.sidebar-content a:active,
+	.k-mtoc-row:active,
+	.k-mtoc-list a:active,
+	.k-search-results a:active,
+	.k-search-suggest button:active,
+	.k-search-close:active {
+		background: var(--k-hover-strong);
+		transition: none;
+	}
+}

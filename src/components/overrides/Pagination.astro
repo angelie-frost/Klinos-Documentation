@@ -1,0 +1,48 @@
+---
+// Previous / Next: two plain links under a hairline. A muted label ("Previous" / "Next") sits above
+// "Group / Title"; the group comes from the sidebar Starlight built for this page (sidebar.md).
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
+import { lucide } from '../../icons/lucide';
+
+const { dir, pagination, sidebar } = Astro.locals.starlightRoute;
+const { prev, next } = pagination;
+const isRtl = dir === 'rtl';
+type Entry = StarlightRouteData['sidebar'][number];
+
+/** The label of the sidebar group that holds the link with this href. */
+function groupOf(href: string, entries: Entry[], group?: string): string | undefined {
+	for (const e of entries) {
+		if (e.type === 'link' && e.href === href) return group;
+		if (e.type === 'group') {
+			const hit = groupOf(href, e.entries, e.label);
+			if (hit) return hit;
+		}
+	}
+	return undefined;
+}
+const links = [
+	prev && { rel: 'prev', label: Astro.locals.t('page.previousLink'), link: prev, group: groupOf(prev.href, sidebar) },
+	next && { rel: 'next', label: Astro.locals.t('page.nextLink'), link: next, group: groupOf(next.href, sidebar) },
+].filter(Boolean) as { rel: 'prev' | 'next'; label: string; link: NonNullable<typeof prev>; group?: string }[];
+const chevron = (rel: 'prev' | 'next') => lucide(rel === 'prev' !== isRtl ? 'chevron-left' : 'chevron-right', 'k-pager-chev');
+---
+
+{
+	links.length > 0 && (
+		<nav class="k-pager print:hidden" aria-label="Previous and next page" dir={dir}>
+			{links.map(({ rel, label, link, group }) => (
+				<a class:list={['k-pager-link', `is-${rel}`]} href={link.href} rel={rel}>
+					<span class="k-pager-label">{label}</span>
+					<span class="k-pager-line">
+						{rel === 'prev' && <Fragment set:html={chevron(rel)} />}
+						<span class="k-pager-text">
+							{group && <span class="k-pager-group">{group} / </span>}
+							<span class="k-pager-title">{link.label}</span>
+						</span>
+						{rel === 'next' && <Fragment set:html={chevron(rel)} />}
+					</span>
+				</a>
+			))}
+		</nav>
+	)
+}

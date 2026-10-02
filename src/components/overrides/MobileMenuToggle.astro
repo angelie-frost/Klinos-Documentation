@@ -1,0 +1,40 @@
+---
+// The phone/tablet menu button: a plain icon button (no circle), same size, stroke and centreline as the
+// other header icons. Same behaviour as Starlight's: popovertarget opens the sidebar pane.
+// Icons: Lucide menu / x (ISC), see LICENSES/lucide.txt.
+import { lucide } from '../../icons/lucide';
+---
+
+<button popovertarget="starlight__sidebar" class="sl-menu-button k-menu-btn k-touch-only print:hidden">
+	<Fragment set:html={lucide('menu', 'k-icon open-menu')} />
+	<Fragment set:html={lucide('x', 'k-icon close-menu')} />
+	<span class="sr-only">{Astro.locals.t('menuButton.accessibleLabel')}</span>
+</button>
+
+<style>
+	@layer starlight.core {
+		button {
+			position: fixed;
+			top: calc((var(--sl-nav-height) - var(--sl-menu-button-size)) / 2);
+			inset-inline-end: var(--sl-nav-pad-x);
+			z-index: var(--sl-z-index-navbar);
+		}
+		button:has(~ :popover-open) .open-menu,
+		button:not(:has(~ :popover-open)) .close-menu {
+			display: none;
+		}
+	}
+</style>
+
+<style is:global>
+	@layer starlight.core {
+		body:has(#starlight__sidebar:popover-open) {
+			overflow: hidden;
+		}
+		@media (min-width: 981px) {
+			body:has(#starlight__sidebar:popover-open) {
+				overflow: auto;
+			}
+		}
+	}
+</style>

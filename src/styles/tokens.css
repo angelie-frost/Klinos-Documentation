@@ -32,6 +32,7 @@
 	--k-surface: #ffffff;
 	--k-sunk: #f5f5f7;
 	--k-hover: #fafafa;
+	--k-hover-strong: #f0f0f3; /* hover/focus fill on icon buttons, rows */
 	--k-nav-active: #ebebee;
 	--k-stage: #f2f2f4;
 	--k-stage-line: transparent;
@@ -66,6 +67,7 @@
 	--k-surface: #0a0a0a;
 	--k-sunk: #1a1a1a;
 	--k-hover: #121212;
+	--k-hover-strong: #1f1f1f;
 	--k-nav-active: #1a1a1a;
 	--k-stage: #141414;
 	--k-stage-line: #262626;

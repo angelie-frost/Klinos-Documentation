@@ -1,0 +1,16 @@
+---
+// Copy of Starlight 0.42.5 Sidebar.astro: the menu footer (theme toggle, What is new) shows up to 980px instead of 800px.
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+
+const { sidebar } = Astro.locals.starlightRoute;
+---
+
+<SidebarPersister>
+	<SidebarSublist sublist={sidebar} />
+</SidebarPersister>
+
+<div class="k-touch-only">
+	<MobileMenuFooter />
+</div>

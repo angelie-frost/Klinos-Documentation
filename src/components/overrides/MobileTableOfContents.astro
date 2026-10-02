@@ -1,0 +1,82 @@
+---
+// "On this page" on tablets and phones: one plain full-width row between hairlines (muted label, the current
+// section, a chevron that turns when open). It opens a plain list styled like the desktop rail, with a thin
+// line on the active item. A real button with aria-expanded / aria-controls; Esc and a tap outside close it.
+// Icon: Lucide chevron-down (ISC), see LICENSES/lucide.txt.
+import { lucide } from '../../icons/lucide';
+
+const { toc } = Astro.locals.starlightRoute;
+type Item = { slug: string; text: string; depth: number; children: Item[] };
+const flat = (items: Item[]): Item[] => items.flatMap((i) => [i, ...flat(i.children)]);
+const items = toc ? flat(toc.items as Item[]) : [];
+const minDepth = items.length ? Math.min(...items.map((i) => i.depth)) : 2;
+---
+
+{
+	toc && (
+		<k-mobile-toc data-min-h={toc.minHeadingLevel} data-max-h={toc.maxHeadingLevel}>
+			<nav class="k-mtoc" aria-label={Astro.locals.t('tableOfContents.onThisPage')}>
+				<button class="k-mtoc-row" type="button" aria-expanded="false" aria-controls="k-mtoc-list" data-mtoc-toggle>
+					<span class="k-mtoc-label">{Astro.locals.t('tableOfContents.onThisPage')}</span>
+					<span class="k-mtoc-current" data-mtoc-current>{items[0]?.text}</span>
+					<Fragment set:html={lucide('chevron-down', 'k-icon k-mtoc-chev')} />
+				</button>
+				<ul class="k-mtoc-list" id="k-mtoc-list" hidden>
+					{items.map((i, n) => (
+						<li style={`--k-toc-depth:${i.depth - minDepth}`}>
+							<a href={`#${i.slug}`} aria-current={n === 0 ? 'true' : undefined}>
+								{i.text}
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
+		</k-mobile-toc>
+	)
+}
+
+<script>
+	class KMobileToc extends HTMLElement {
+		connectedCallback() {
+			const btn = this.querySelector<HTMLButtonElement>('[data-mtoc-toggle]')!;
+			const list = this.querySelector<HTMLElement>('#k-mtoc-list')!;
+			const current = this.querySelector<HTMLElement>('[data-mtoc-current]')!;
+			const links = [...list.querySelectorAll<HTMLAnchorElement>('a')];
+			const headings = links
+				.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))))
+				.filter((h): h is HTMLElement => !!h);
+
+			const setOpen = (open: boolean, focusButton = false) => {
+				btn.setAttribute('aria-expanded', String(open));
+				list.hidden = !open;
+				if (!open && focusButton) btn.focus();
+			};
+			btn.addEventListener('click', () => setOpen(list.hidden));
+			links.forEach((a) => a.addEventListener('click', () => setOpen(false)));
+			document.addEventListener('click', (e) => {
+				if (!list.hidden && !this.contains(e.target as Node)) setOpen(false);
+			});
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape' && !list.hidden) setOpen(false, this.contains(document.activeElement));
+			});
+
+			// The current section: the last heading above the header and this row (the rule Starlight uses).
+			let frame = 0;
+			const update = () => {
+				frame = 0;
+				const top = (document.querySelector('header')?.getBoundingClientRect().height || 0) + btn.getBoundingClientRect().height + 32;
+				let index = 0;
+				headings.forEach((h, i) => {
+					if (h.getBoundingClientRect().top <= top) index = i;
+				});
+				const link = links.find((a) => a.hash === '#' + encodeURIComponent(headings[index]?.id ?? ''));
+				if (!link) return;
+				links.forEach((a) => (a === link ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+				current.textContent = link.textContent;
+			};
+			window.addEventListener('scroll', () => (frame ||= requestAnimationFrame(update)), { passive: true });
+			update();
+		}
+	}
+	customElements.define('k-mobile-toc', KMobileToc);
+</script>

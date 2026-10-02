@@ -45,12 +45,16 @@ const PAIRS = [
 	['--k-ink-body', '--k-stage', 7, 'body text on media/card stage'],
 	['--k-ink-body', '--k-ok-bg', 7, 'body text in Tip callouts'],
 	['--k-ink-body', '--k-warn-bg', 7, 'body text in Warning callouts'],
-	['--k-ink-muted', '--k-surface', 4.5, 'captions, sidebar, On this page'],
+	['--k-ink-muted', '--k-surface', 4.5, 'captions, sidebar, On this page, header version (header surface)'],
 	['--k-ink-muted', '--k-sunk', 4.5, 'muted text on sunk'],
 	['--k-ink-muted', '--k-stage', 4.5, 'media captions'],
 	['--k-ink', '--k-sunk', 4.5, 'Note callout title'],
 	['--k-ok-text', '--k-ok-bg', 4.5, 'Tip callout title'],
 	['--k-warn-text', '--k-warn-bg', 4.5, 'Warning callout title'],
+	['--k-ink', '--k-hover-strong', 7, 'selected search row title, icon buttons on hover'],
+	['--k-ink-body', '--k-hover-strong', 7, 'selected search row excerpt'],
+	['--k-ink-muted', '--k-hover-strong', 4.5, 'selected search row section'],
+	['--k-focus', '--k-surface', 3, 'focus rings and the search field underline (non-text)'],
 ];
 
 const rows = [];

@@ -1,17 +1,14 @@
 ---
-// One round toggle. The first visit opens in light (ThemeProvider.astro); a click switches light/dark and is remembered.
-// Uses Starlight's storage key so its inline ThemeProvider sets the theme before paint (no flash).
+// One plain icon button (no border or circle). The first visit opens in light (ThemeProvider.astro);
+// a click switches light/dark and is remembered. Uses Starlight's storage key so its inline
+// ThemeProvider sets the theme before paint (no flash). Icons: Lucide sun/moon (ISC), see LICENSES/lucide.txt.
+import { lucide } from '../../icons/lucide';
 ---
 
 <klinos-theme-toggle>
 	<button class="themebtn" type="button" aria-label="Switch theme">
-		<svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"
-			><circle cx="8" cy="8" r="3"></circle><path
-				d="M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9"></path></svg
-		>
-		<svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"
-			><path d="M13.3 9.6A5.6 5.6 0 0 1 6.4 2.7a5.6 5.6 0 1 0 6.9 6.9z"></path></svg
-		>
+		<Fragment set:html={lucide('sun', 'k-icon i-sun')} />
+		<Fragment set:html={lucide('moon', 'k-icon i-moon')} />
 		<span class="tt" aria-hidden="true">Switch theme</span>
 	</button>
 </klinos-theme-toggle>

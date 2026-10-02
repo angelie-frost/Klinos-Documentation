@@ -33,8 +33,10 @@ body {
 	border: 2px solid transparent;
 	background-clip: padding-box;
 }
+@media (hover: hover) and (pointer: fine) {
 ::-webkit-scrollbar-thumb:hover {
 	background-color: var(--k-ink3);
+}
 }
 ::-webkit-scrollbar-button {
 	display: none;
@@ -47,8 +49,10 @@ body {
 .sidebar-pane::-webkit-scrollbar-thumb {
 	background-color: transparent;
 }
+@media (hover: hover) and (pointer: fine) {
 .sidebar-pane:hover::-webkit-scrollbar-thumb {
 	background-color: var(--k-line2);
+}
 }
 /* Firefox only: in Chrome 121+ the standard properties would override the rules above and bring arrows back. */
 @supports not selector(::-webkit-scrollbar) {
@@ -62,8 +66,10 @@ body {
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
 	}
+	@media (hover: hover) and (pointer: fine) {
 	.sidebar-pane:hover {
 		scrollbar-color: var(--k-line2) transparent;
+	}
 	}
 }
 
@@ -88,6 +94,10 @@ header.header {
 	height: 22px;
 	flex: none;
 }
+/* The brand's text sets its baseline (the logo has none), so the version can sit on the same baseline. */
+.k-header .brand > span {
+	align-self: baseline;
+}
 .k-header .brand small {
 	font-weight: 400;
 	color: var(--k-ink2);
@@ -97,8 +107,10 @@ header.header {
 /* Search: the prototype's sunk field. The button opens Starlight's Pagefind dialog. */
 .k-header .title-wrapper {
 	flex: none;
+	align-items: baseline; /* "Klinos Docs" and the version share a baseline */
+	gap: 8px;
 }
-@media (min-width: 50rem) {
+@media (min-width: 981px) {
 	.k-search {
 		width: 100%;
 	}
@@ -118,9 +130,11 @@ header.header {
 		font-size: var(--k-fs-sm);
 		padding-inline: 11px 8px;
 	}
+	@media (hover: hover) and (pointer: fine) {
 	.k-search button[data-open-modal]:hover {
 		color: var(--k-ink);
 		background: var(--k-sunk);
+	}
 	}
 	.k-search button[data-open-modal] svg {
 		width: 16px;
@@ -142,122 +156,6 @@ header.header {
 	}
 }
 
-/* Search dialog */
-site-search dialog {
-	background: var(--k-surface);
-	border: 1px solid var(--k-line);
-	box-shadow: var(--k-pop-shadow);
-}
-@media (min-width: 50rem) {
-	site-search dialog {
-		border-radius: var(--k-r-media);
-	}
-}
-#starlight__search {
-	--pagefind-ui-primary: var(--k-ink);
-	--pagefind-ui-text: var(--k-ink);
-	--pagefind-ui-background: var(--k-surface);
-	--pagefind-ui-border: var(--k-line2);
-	--pagefind-ui-tag: var(--k-sunk);
-	--pagefind-ui-font: var(--k-font-body);
-}
-#starlight__search .pagefind-ui__search-input {
-	background: var(--k-sunk);
-}
-#starlight__search .pagefind-ui__result-link,
-#starlight__search .pagefind-ui__result-title {
-	color: var(--k-ink);
-}
-#starlight__search mark {
-	background: var(--k-warn-bg);
-	color: var(--k-warn-text);
-}
-
-/* Version badge */
-.k-badge {
-	display: inline-flex;
-	align-items: center;
-	height: 22px;
-	padding: 0 9px;
-	border: 1px solid var(--k-line);
-	border-radius: var(--k-r-pill);
-	background: var(--k-sunk);
-	color: var(--k-ink2);
-	font: 400 var(--k-fs-label) / 1 var(--k-font-mono);
-	font-variant-numeric: tabular-nums;
-	white-space: nowrap;
-}
-
-/* Theme toggle: one round icon button; the icon shows the current theme. */
-klinos-theme-toggle {
-	display: inline-flex;
-}
-.themebtn {
-	position: relative;
-	width: 36px;
-	height: 36px;
-	flex: none;
-	border: 1px solid var(--k-line2);
-	border-radius: 50%;
-	background: var(--k-surface);
-	color: var(--k-ink);
-	display: inline-grid;
-	place-items: center;
-	cursor: pointer;
-	padding: 0;
-	transition:
-		background-color 0.15s ease,
-		border-color 0.15s ease;
-}
-.themebtn:hover {
-	background: var(--k-hover);
-	border-color: var(--k-ink3);
-}
-.themebtn:focus-visible {
-	border-radius: 50%;
-}
-.themebtn svg {
-	width: 16px;
-	height: 16px;
-	grid-area: 1/1;
-	transition:
-		opacity 0.15s ease,
-		transform 0.2s ease;
-}
-.themebtn .i-moon {
-	opacity: 0;
-	transform: rotate(-30deg);
-}
-:root[data-theme='dark'] .themebtn .i-sun {
-	opacity: 0;
-	transform: rotate(30deg);
-}
-:root[data-theme='dark'] .themebtn .i-moon {
-	opacity: 1;
-	transform: none;
-}
-.themebtn .tt {
-	position: absolute;
-	top: calc(100% + 8px);
-	right: 0;
-	white-space: nowrap;
-	padding: 5px 9px;
-	border-radius: var(--k-r-btn);
-	background: var(--k-ink);
-	color: var(--k-onink);
-	font-size: var(--k-fs-label);
-	font-weight: 500;
-	line-height: 1.3;
-	opacity: 0;
-	pointer-events: none;
-	transition: opacity 0.12s ease;
-	z-index: 30;
-}
-.themebtn:hover .tt,
-.themebtn:focus-visible .tt {
-	opacity: 1;
-	transition-delay: 0.35s;
-}
 /* Mobile menu footer keeps the toggle visible. */
 .mobile-preferences klinos-theme-toggle {
 	margin-inline-start: auto;
@@ -313,17 +211,28 @@ klinos-theme-toggle {
 	color: var(--k-ink2);
 	text-decoration: none;
 }
-.sidebar-content a:hover,
 .sidebar-content a:focus-visible {
 	background: var(--k-hover);
 	color: var(--k-ink);
 }
+@media (hover: hover) and (pointer: fine) {
+.sidebar-content a:hover {
+	background: var(--k-hover);
+	color: var(--k-ink);
+}
+}
 .sidebar-content a[aria-current='page'],
-.sidebar-content a[aria-current='page']:hover,
 .sidebar-content a[aria-current='page']:focus {
 	background: var(--k-nav-active);
 	color: var(--k-ink);
 	font-weight: 600;
+}
+@media (hover: hover) and (pointer: fine) {
+.sidebar-content a[aria-current='page']:hover {
+	background: var(--k-nav-active);
+	color: var(--k-ink);
+	font-weight: 600;
+}
 }
 /* "Unreleased" badges */
 .sl-badge {
@@ -374,18 +283,15 @@ klinos-theme-toggle {
 .right-sidebar-panel starlight-toc ul ul a {
 	padding-left: 24px;
 }
+@media (hover: hover) and (pointer: fine) {
 .right-sidebar-panel starlight-toc a:hover {
 	color: var(--k-ink);
+}
 }
 .right-sidebar-panel starlight-toc a[aria-current='true'] {
 	color: var(--k-ink);
 	border-left-color: var(--k-ink);
 }
-mobile-starlight-toc nav {
-	background: var(--k-surface);
-	border-bottom: 1px solid var(--k-line);
-}
-
 /* ---------- Page title ---------- */
 .content-panel {
 	border-top: 0;
@@ -466,8 +372,10 @@ h1#_top.is-home {
 	text-decoration-thickness: 1px;
 	text-underline-offset: 3px;
 }
+@media (hover: hover) and (pointer: fine) {
 .sl-markdown-content a:hover {
 	text-decoration-color: var(--k-ink);
+}
 }
 .sl-markdown-content .sl-anchor-link {
 	color: var(--k-ink3);
@@ -490,49 +398,6 @@ h1#_top.is-home {
 }
 .sl-markdown-content li + li {
 	margin-top: var(--k-s2);
-}
-
-/* Numbered lists as steps (prototype ol.steps) */
-.sl-markdown-content ol {
-	list-style: none;
-	padding-left: 0;
-	counter-reset: step;
-}
-.sl-markdown-content ol > li {
-	position: relative;
-	padding: 0 0 var(--k-s4) 44px;
-	margin: 0;
-	counter-increment: step;
-}
-.sl-markdown-content ol > li + li {
-	margin-top: 0;
-}
-.sl-markdown-content ol > li::before {
-	content: counter(step);
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 28px;
-	height: 28px;
-	border-radius: 50%;
-	border: 1px solid var(--k-line2);
-	display: grid;
-	place-items: center;
-	font: 600 var(--k-fs-cap) / 1 var(--k-font-body);
-	font-variant-numeric: tabular-nums;
-	color: var(--k-ink);
-}
-.sl-markdown-content ol > li::after {
-	content: '';
-	position: absolute;
-	left: 14px;
-	top: 32px;
-	bottom: 6px;
-	width: 1px;
-	background: var(--k-line);
-}
-.sl-markdown-content ol > li:last-child::after {
-	display: none;
 }
 
 /* Tables: hairline rows (prototype table.prose) */
@@ -837,8 +702,10 @@ h1#_top.is-home {
 	cursor: pointer;
 	margin: 0 !important;
 }
+@media (hover: hover) and (pointer: fine) {
 .minibtn:hover {
 	opacity: 0.88;
+}
 }
 .sl-markdown-content .liveframe {
 	position: relative;
@@ -880,37 +747,113 @@ footer .meta {
 footer .meta:empty {
 	display: none;
 }
-.pagination-links {
-	gap: var(--k-s3);
+/* Previous / Next: two plain links under a hairline; no boxes. */
+.k-pager {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--k-s4);
 	margin-top: var(--k-s5);
+	padding-top: var(--k-s4);
+	border-top: 1px solid var(--k-line);
 }
-.pagination-links a {
-	padding: 12px 16px;
-	border: 1px solid var(--k-line);
-	border-radius: var(--k-r-media);
-	box-shadow: none;
-	color: var(--k-ink2);
-	font-size: var(--k-fs-label);
+.k-pager-link {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 6px 0;
+	color: var(--k-ink);
 	text-decoration: none;
+	border-radius: var(--k-r-btn);
+}
+.k-pager-link.is-next {
+	grid-column: 2;
+	align-items: flex-end;
+	text-align: right;
+}
+.k-pager-label {
+	font-size: var(--k-fs-label);
+	line-height: 1.4;
+	color: var(--k-ink-muted);
+}
+.k-pager-line {
+	display: inline-flex;
 	align-items: center;
+	gap: 6px;
+	font-size: var(--k-fs-body);
+	line-height: 1.4;
 }
-.pagination-links a:hover {
-	border-color: var(--k-line2);
-	background: var(--k-sunk);
+.k-pager-group {
+	color: var(--k-ink-muted);
 }
-.pagination-links a svg {
-	display: none;
-}
-.pagination-links .link-title {
+.k-pager-title {
 	color: var(--k-ink);
 	font-weight: 500;
-	font-size: var(--k-fs-body);
+	text-decoration: underline;
+	text-decoration-color: transparent;
+	text-underline-offset: 3px;
+	text-decoration-thickness: 1px;
+	transition: text-decoration-color 0.15s ease;
+}
+.k-pager-chev {
+	width: 16px;
+	height: 16px;
+	flex: none;
+	color: var(--k-ink-muted);
+	transition: translate 0.15s ease;
+}
+.k-pager-link:focus-visible .k-pager-title {
+	text-decoration-color: currentColor;
+}
+@media (hover: hover) and (pointer: fine) {
+.k-pager-link:hover .k-pager-title {
+	text-decoration-color: currentColor;
+}
+}
+@media (hover: hover) and (pointer: fine) {
+.k-pager-link.is-prev:hover .k-pager-chev {
+	translate: -2px 0;
+}
+}
+@media (hover: hover) and (pointer: fine) {
+.k-pager-link.is-next:hover .k-pager-chev {
+	translate: 2px 0;
+}
+}
+.k-pager-link:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.k-pager-chev,
+	.k-pager-title {
+		transition: none;
+	}
+	@media (hover: hover) and (pointer: fine) {
+	.k-pager-link:hover .k-pager-chev {
+		translate: none !important;
+	}
+	}
+}
+@media (max-width: 639px) {
+	.k-pager {
+		grid-template-columns: 1fr;
+		gap: 0;
+	}
+	.k-pager-link,
+	.k-pager-link.is-next {
+		grid-column: 1;
+		align-items: flex-start;
+		text-align: left;
+		min-height: 56px;
+		justify-content: center;
+		padding: 10px 0;
+	}
+	.k-pager-link + .k-pager-link {
+		border-top: 1px solid var(--k-line);
+	}
 }
 
 @media (max-width: 767px) {
-	.k-header .brand small {
-		display: none;
-	}
 	:root {
 		--k-fs-h1: 30px;
 		--k-fs-h2: 21px;
@@ -981,7 +924,7 @@ footer .meta:empty {
 }
 
 /* Phone header: keep the search icon clear of Starlight's fixed menu button. */
-@media (max-width: 49.99rem) {
+@media (max-width: 980px) {
 	.k-search {
 		margin-inline-start: auto;
 		margin-inline-end: calc(var(--sl-menu-button-size, 2.5rem) + 8px);
@@ -1049,8 +992,10 @@ footer .meta:empty {
 	cursor: pointer;
 	opacity: 0.92;
 }
+@media (hover: hover) and (pointer: fine) {
 .media-toggle:hover {
 	opacity: 1;
+}
 }
 .media-toggle svg {
 	width: 14px;
@@ -1270,9 +1215,11 @@ dialog.lightbox figcaption {
 	font-weight: 500;
 	text-decoration: none;
 }
+@media (hover: hover) and (pointer: fine) {
 .sl-markdown-content a.try-btn:hover {
 	opacity: 0.88;
 	color: var(--k-onink);
+}
 }
 .sl-markdown-content .try-card-art {
 	display: block;
@@ -1323,10 +1270,12 @@ dialog.lightbox figcaption {
 	text-decoration: none;
 	white-space: nowrap;
 }
+@media (hover: hover) and (pointer: fine) {
 .k-try:hover {
 	background: var(--k-hover);
 	border-color: var(--k-ink3);
 	color: var(--k-ink);
+}
 }
 .k-try svg {
 	width: 15px;
@@ -1338,7 +1287,7 @@ dialog.lightbox figcaption {
 .k-try-icon {
 	display: none;
 }
-@media (max-width: 49.99rem) {
+@media (max-width: 980px) {
 	.k-try-icon {
 		display: inline-grid;
 		place-items: center;
@@ -1372,8 +1321,10 @@ dialog.lightbox figcaption {
 	border-radius: var(--k-r-btn);
 	white-space: nowrap;
 }
+@media (hover: hover) and (pointer: fine) {
 .k-whatsnew:hover {
 	color: var(--k-ink);
+}
 }
 .k-whatsnew[hidden],
 .whatsnew[hidden],
@@ -1437,9 +1388,11 @@ dialog.lightbox figcaption {
 	line-height: 1;
 	cursor: pointer;
 }
+@media (hover: hover) and (pointer: fine) {
 .wn-close:hover {
 	background: var(--k-sunk);
 	color: var(--k-ink);
+}
 }
 .wn-slides {
 	list-style: none;

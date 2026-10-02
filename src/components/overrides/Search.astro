@@ -1,0 +1,260 @@
+---
+// Site search. Starlight's trigger button, <dialog> and Ctrl/Cmd+K are kept; the panel inside is ours, built on
+// Pagefind's JavaScript API instead of its default UI. The default UI cannot show an empty state with
+// suggestions, a custom no-results line, an Esc hint in the field, or keyboard-selectable result rows.
+// Icons: Lucide search (ISC), see LICENSES/lucide.txt.
+import { lucide } from '../../icons/lucide';
+
+// Suggested searches: real page and section titles from the docs.
+const SUGGESTIONS = ['Lighting', 'Polished frame', 'Playground', 'Try it live'];
+const searchIcon = lucide('search', 'k-icon');
+---
+
+<site-search class={Astro.props.class} data-dev={import.meta.env.DEV ? '' : undefined}>
+	<button data-open-modal disabled aria-label="Search documentation" aria-keyshortcuts="Control+K">
+		<Fragment set:html={searchIcon} />
+		<span class="k-desktop-only" aria-hidden="true">Search documentation</span>
+		<kbd class="k-desktop-only" style="display: none;"><kbd>Ctrl</kbd><kbd>K</kbd></kbd>
+	</button>
+
+	<dialog class="k-search-dialog" aria-label="Search documentation">
+		<div class="k-search-panel" data-search-panel>
+			<div class="k-search-field">
+				<Fragment set:html={searchIcon} />
+				<input
+					type="search"
+					placeholder="Search documentation"
+					autocomplete="off"
+					spellcheck="false"
+					role="combobox"
+					aria-expanded="false"
+					aria-controls="k-search-results"
+					aria-autocomplete="list"
+					aria-label="Search documentation"
+					data-search-input
+				/>
+				<button class="k-search-esc" type="button" data-close-modal aria-label="Close search"><kbd>Esc</kbd></button>
+				<button class="k-search-close" type="button" data-close-modal>Close</button>
+			</div>
+			<div class="k-search-body" aria-live="polite">
+				<p class="k-search-note" data-state="dev" hidden>
+					Search works in the built site. Run <code>npm run build:draft</code>, then <code>npm run preview</code>.
+				</p>
+				<div data-state="empty">
+					<p class="k-search-hint">Type to search</p>
+					<ul class="k-search-suggest" aria-label="Suggested searches">
+						{SUGGESTIONS.map((s) => (
+							<li>
+								<button type="button" data-suggest={s}>{s}</button>
+							</li>
+						))}
+					</ul>
+				</div>
+				<p class="k-search-hint" data-state="loading" hidden>Searching…</p>
+				<div data-state="none" hidden>
+					<p class="k-search-none">No results for "<span data-none-term></span>".</p>
+					<p class="k-search-hint">Try a shorter word, or a control name like Brightness.</p>
+				</div>
+				<ul class="k-search-results" id="k-search-results" role="listbox" aria-label="Results" data-state="results" hidden></ul>
+			</div>
+		</div>
+	</dialog>
+</site-search>
+
+{
+	/* Show the right shortcut (Cmd on Apple devices) without a flash, as Starlight does. */
+}
+<script is:inline>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script>
+
+<script>
+	type Sub = { title: string; url: string; excerpt: string };
+	type Data = { url: string; meta: { title: string }; excerpt: string; sub_results?: Sub[] };
+	type Pagefind = { options?: (o: object) => Promise<void>; init?: () => Promise<void>; search: (q: string) => Promise<{ results: { data: () => Promise<Data> }[] }> };
+
+	class SiteSearch extends HTMLElement {
+		constructor() {
+			super();
+			const openBtn = this.querySelector<HTMLButtonElement>('button[data-open-modal]')!;
+			const dialog = this.querySelector('dialog')!;
+			const panel = this.querySelector<HTMLElement>('[data-search-panel]')!;
+			const input = this.querySelector<HTMLInputElement>('[data-search-input]')!;
+			const list = this.querySelector<HTMLUListElement>('#k-search-results')!;
+			const states = [...this.querySelectorAll<HTMLElement>('[data-state]')];
+			const noneTerm = this.querySelector<HTMLElement>('[data-none-term]')!;
+			const isDev = this.dataset.dev !== undefined;
+			let pagefind: Pagefind | null = null;
+			let selected = -1;
+			let run = 0;
+
+			const show = (state: string) => states.forEach((el) => (el.hidden = el.dataset.state !== state));
+			const reset = () => {
+				input.value = '';
+				list.replaceChildren();
+				select(-1);
+				show(isDev ? 'dev' : 'empty');
+				input.setAttribute('aria-expanded', 'false');
+			};
+
+			/* ---------- Modal (as Starlight's) ---------- */
+			const openModal = (event?: Event) => {
+				dialog.showModal();
+				document.body.toggleAttribute('data-search-modal-open', true);
+				input.focus();
+				event?.stopPropagation();
+				load();
+			};
+			const closeModal = () => dialog.close();
+			openBtn.addEventListener('click', openModal);
+			openBtn.disabled = false;
+			this.querySelectorAll('[data-close-modal]').forEach((b) => b.addEventListener('click', closeModal));
+			// A click on the dim backdrop (outside the panel) closes it.
+			dialog.addEventListener('click', (e) => {
+				if (!panel.contains(e.target as Node)) closeModal();
+			});
+			dialog.addEventListener('close', () => {
+				document.body.toggleAttribute('data-search-modal-open', false);
+				reset();
+			});
+			window.addEventListener('keydown', (e) => {
+				if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+					dialog.open ? closeModal() : openModal();
+					e.preventDefault();
+				}
+			});
+
+			/* ---------- Pagefind (built site only) ---------- */
+			const load = async () => {
+				if (pagefind || isDev) return;
+				try {
+					const path = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/pagefind.js';
+					pagefind = (await import(/* @vite-ignore */ path)) as Pagefind;
+					await pagefind.options?.({ baseUrl: import.meta.env.BASE_URL });
+					await pagefind.init?.();
+				} catch {
+					pagefind = null;
+				}
+			};
+
+			const render = (term: string, rows: Data[]) => {
+				list.replaceChildren(
+					...rows.map((r, i) => {
+						const best = r.sub_results?.find((s) => s.url !== r.url) ?? r.sub_results?.[0];
+						const li = document.createElement('li');
+						li.id = `k-sr-${i}`;
+						li.setAttribute('role', 'option');
+						li.setAttribute('aria-selected', 'false');
+						const a = document.createElement('a');
+						a.href = best?.url ?? r.url;
+						a.tabIndex = -1;
+						const t = document.createElement('span');
+						t.className = 'k-sr-title';
+						t.textContent = r.meta.title;
+						a.append(t);
+						if (best && best.title && best.title !== r.meta.title) {
+							const sec = document.createElement('span');
+							sec.className = 'k-sr-section';
+							sec.textContent = best.title;
+							a.append(sec);
+						}
+						const ex = document.createElement('span');
+						ex.className = 'k-sr-excerpt';
+						ex.innerHTML = best?.excerpt ?? r.excerpt; // Pagefind's own excerpt: escaped text with <mark>
+						a.append(ex);
+						li.append(a);
+						li.addEventListener('mousemove', () => select(i));
+						return li;
+					})
+				);
+				if (rows.length) {
+					show('results');
+					input.setAttribute('aria-expanded', 'true');
+					select(0);
+				} else {
+					noneTerm.textContent = term;
+					show('none');
+					input.setAttribute('aria-expanded', 'false');
+					select(-1);
+				}
+			};
+
+			const runSearch = async () => {
+				const term = input.value.trim();
+				const id = ++run;
+				if (isDev) return show('dev');
+				if (!term) return reset();
+				show('loading');
+				await load();
+				if (!pagefind) return render(term, []);
+				const res = await pagefind.search(term);
+				const rows = await Promise.all(res.results.slice(0, 8).map((r) => r.data()));
+				if (id === run) render(term, rows);
+			};
+			let timer: number | undefined;
+			input.addEventListener('input', () => {
+				clearTimeout(timer);
+				timer = window.setTimeout(runSearch, 120);
+			});
+
+			/* ---------- Keyboard selection ---------- */
+			function select(i: number) {
+				const items = [...list.children] as HTMLElement[];
+				selected = items.length ? Math.max(-1, Math.min(items.length - 1, i)) : -1;
+				items.forEach((li, n) => li.setAttribute('aria-selected', String(n === selected)));
+				if (selected >= 0) {
+					input.setAttribute('aria-activedescendant', items[selected].id);
+					items[selected].scrollIntoView({ block: 'nearest' });
+				} else input.removeAttribute('aria-activedescendant');
+			}
+			input.addEventListener('keydown', (e) => {
+				// A search field would use the first Esc to clear its text; here Esc always closes the panel.
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					closeModal();
+					return;
+				}
+				const count = list.children.length;
+				if (e.key === 'ArrowDown' && count) {
+					e.preventDefault();
+					select((selected + 1) % count);
+				} else if (e.key === 'ArrowUp' && count) {
+					e.preventDefault();
+					select((selected - 1 + count) % count);
+				} else if (e.key === 'Enter' && selected >= 0) {
+					e.preventDefault();
+					const a = list.children[selected]?.querySelector('a');
+					if (a) {
+						closeModal();
+						location.href = a.href;
+					}
+				}
+			});
+			list.addEventListener('click', (e) => {
+				if ((e.target as HTMLElement).closest('a')) closeModal();
+			});
+
+			/* ---------- Suggestions ---------- */
+			this.querySelectorAll<HTMLButtonElement>('[data-suggest]').forEach((b) =>
+				b.addEventListener('click', () => {
+					input.value = b.dataset.suggest!;
+					input.focus();
+					runSearch();
+				})
+			);
+
+			reset();
+		}
+	}
+	customElements.define('site-search', SiteSearch);
+</script>

@@ -1,18 +1,22 @@
 ---
-// Header: logo + "Klinos Docs", search, Try it live, version badge, theme toggle.
+// Header: logo + "Klinos Docs" + the version (a link to the changelog), search, then Try it live
+// (the only button-shaped item), What's new and the theme toggle.
 import Search from 'virtual:starlight/components/Search';
 import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
 import WhatsNew from '../WhatsNew.astro';
 import { KLINOS_VERSION } from '../../config';
 // Lucide icon (ISC), copied from lucide-static 1.49.0; see LICENSES/lucide.txt.
 import rotate3d from '../../icons/lucide/rotate-3d.svg?raw';
+import { lucide } from '../../icons/lucide';
 
 const brandMark = rotate3d.replace(/<!--[\s\S]*?-->\s*/, '').replace('<svg', '<svg aria-hidden="true" focusable="false"').replace('class="lucide lucide-rotate-3d"', 'class="brand-mark lucide lucide-rotate-3d"');
 
 const LIVE = '/using-klinos/reference/try-it-live/';
+const CHANGELOG = '/using-klinos/reference/changelog/';
+const onChangelog = Astro.url.pathname === CHANGELOG;
 const onLive = Astro.url.pathname === LIVE;
-const tryIcon =
-	'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.8" y="2.8" width="12.4" height="10.4" rx="2"/><path d="M6.6 6v4l3.4-2z" fill="currentColor" stroke="none"/></svg>';
+// One icon set in the header: Lucide at stroke 2, sized by CSS (--k-icon).
+const tryIcon = lucide('square-play', 'k-icon');
 ---
 
 <div class="header k-header">
@@ -21,15 +25,15 @@ const tryIcon =
 			<Fragment set:html={brandMark} />
 			<span translate="no">Klinos <small>Docs</small></span>
 		</a>
+		<a class="k-version" href={CHANGELOG} aria-label={`Version ${KLINOS_VERSION}, open the changelog`} aria-current={onChangelog ? 'page' : undefined} translate="no">v{KLINOS_VERSION}</a>
 	</div>
 	<div class="sl-flex print:hidden k-search">
 		<a class="k-try-icon" href={LIVE} aria-label="Try it live" aria-current={onLive ? 'page' : undefined} set:html={tryIcon} />
 		<Search />
 	</div>
-	<div class="sl-hidden md:sl-flex print:hidden right-group">
+	<div class="k-desktop-only print:hidden right-group">
 		<a class="k-try" href={LIVE} aria-current={onLive ? 'page' : undefined}><Fragment set:html={tryIcon} />Try it live</a>
 		<button class="k-whatsnew" type="button" data-wn-open>What's new</button>
-		<span class="k-badge" title="Packaged build">v{KLINOS_VERSION}</span>
 		<ThemeSelect />
 	</div>
 </div>
@@ -51,10 +55,10 @@ const tryIcon =
 			min-width: 0;
 		}
 		.right-group {
-			gap: 12px;
+			gap: var(--k-header-gap, 16px);
 			align-items: center;
 		}
-		@media (min-width: 50rem) {
+		@media (min-width: 981px) {
 			.header {
 				display: grid;
 				grid-template-columns: calc(var(--sl-sidebar-width) - var(--sl-nav-pad-x)) 1fr auto;
