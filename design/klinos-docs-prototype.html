@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Klinos docs · prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ Klinos Docs: "Panel, Unfolded" (tokens exactly as briefed) ============ */
+:root{
+  color-scheme: light;
+  --surface:#FFFFFF;  --sunk:#F5F5F7;  --hover:#FAFAFA;  --nav-active:#EBEBEE;  --stage:#F2F2F4;  --stage-line:transparent;
+  --line:#EDEDF0;     --line2:#DEDEE3;
+  --ink:#0A0A0B;      --onink:#FFFFFF;
+  --ink2:#6E6E73;     --caption:#636366;  --ink3:#8E8E93;
+  --ok:#14AE5C;   --ok-text:#0E7A41;   --ok-bg:#EEF8F2;   --ok-line:#BFE6CF;
+  --warn:#B86200; --warn-text:#9A5200; --warn-bg:#FDF4EA; --warn-line:#F1D3AE;
+  --focus:#0A0A0B;
+  --clip-shadow:0 0 0 1px rgba(0,0,0,.06), 0 6px 24px rgba(0,0,0,.08);
+  --font-display:"Inter Tight","Inter",-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  --font-body:"Inter",-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  --font-mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --fs-h1:36px;  --lh-h1:1.15;
+  --fs-h2:24px;  --lh-h2:1.25;
+  --fs-h3:18px;  --lh-h3:1.35;
+  --fs-body:16px; --lh-body:1.65;
+  --fs-sm:14px;  --lh-sm:1.5;
+  --fs-cap:13px; --lh-cap:1.45;
+  --fs-label:12px; --lh-label:1.4;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  --r-block:18px; --r-media:12px; --r-nav:10px; --r-btn:7px; --r-pill:999px;
+  --topbar-h:56px; --sidebar-w:248px; --content-w:700px; --rail-w:200px;
+  --row-dense:30px;
+  /* Prototype-only (not in the brief): page side padding and safe areas */
+  --page-pad:40px;
+  --page-w:calc(var(--content-w) + var(--s7) + var(--rail-w));
+  --scroll-w:8px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    /* Vercel-style near-black. Contrast: ink 16.91, ink2 7.66 on surface, 6.74 on sunk, caption 7.13 on stage */
+    --surface:#0A0A0A; --sunk:#1A1A1A; --hover:#121212; --nav-active:#1A1A1A; --stage:#141414; --stage-line:#262626;
+    --line:#1F1F1F;    --line2:#2E2E2E;
+    --ink:#EDEDED;     --onink:#0A0A0A;
+    --ink2:#A1A1A1;    --caption:#A1A1A1;  --ink3:#6B6B6B;
+    --ok:#5DD39E;   --ok-text:#5DD39E;   --ok-bg:#0E2018;   --ok-line:#1E4630;
+    --warn:#F3A54A; --warn-text:#F3A54A; --warn-bg:#24190B; --warn-line:#4D3415;
+    --focus:#EDEDED;
+    --clip-shadow:0 0 0 1px rgba(255,255,255,.08), 0 8px 28px rgba(0,0,0,.60);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  /* Vercel-style near-black. Contrast: ink 16.91, ink2 7.66 on surface, 6.74 on sunk, caption 7.13 on stage */
+  --surface:#0A0A0A; --sunk:#1A1A1A; --hover:#121212; --nav-active:#1A1A1A; --stage:#141414; --stage-line:#262626;
+  --line:#1F1F1F;    --line2:#2E2E2E;
+  --ink:#EDEDED;     --onink:#0A0A0A;
+  --ink2:#A1A1A1;    --caption:#A1A1A1;  --ink3:#6B6B6B;
+  --ok:#5DD39E;   --ok-text:#5DD39E;   --ok-bg:#0E2018;   --ok-line:#1E4630;
+  --warn:#F3A54A; --warn-text:#F3A54A; --warn-bg:#24190B; --warn-line:#4D3415;
+  --focus:#EDEDED;
+  --clip-shadow:0 0 0 1px rgba(255,255,255,.08), 0 8px 28px rgba(0,0,0,.60);
+}
+
+/* ---------- Base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(var(--topbar-h) + 16px + env(safe-area-inset-top,0px))}
+body{margin:0; background:var(--surface); color:var(--ink);
+  font:400 var(--fs-body)/var(--lh-body) var(--font-body); -webkit-font-smoothing:antialiased}
+button,input{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:4px}
+[hidden]{display:none !important}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.skip{position:absolute; left:12px; top:-60px; z-index:50; background:var(--ink); color:var(--onink);
+  padding:8px 12px; border-radius:var(--r-btn); text-decoration:none; font-size:var(--fs-sm)}
+.skip:focus{top:calc(8px + env(safe-area-inset-top,0px))}
+
+a{color:var(--ink); text-decoration:underline; text-decoration-color:var(--line2);
+  text-decoration-thickness:1px; text-underline-offset:3px}
+a:hover{text-decoration-color:var(--ink)}
+a:visited{color:var(--ink)}
+
+/* ---------- Top bar ---------- */
+.topbar{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; height:var(--topbar-h);
+  display:grid; grid-template-columns:var(--sidebar-w) 1fr auto; align-items:center;
+  background:var(--surface); border-bottom:1px solid var(--line); padding:0 var(--s4)}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:600; font-size:15px; color:var(--ink)}
+.brand-mark{width:22px; height:22px; flex:none}
+.brand small{font-weight:400; color:var(--ink2); font-size:var(--fs-cap)}
+.menubtn,.iconbtn{display:none; width:36px; height:36px; border:0; background:none; border-radius:var(--r-nav);
+  align-items:center; justify-content:center; color:var(--ink); cursor:pointer}
+.menubtn:hover,.iconbtn:hover{background:var(--sunk)}
+.menubtn svg,.iconbtn svg{width:18px; height:18px}
+
+.search{position:relative; justify-self:center; width:min(420px,100%)}
+.search input{width:100%; height:36px; border:0; border-radius:var(--r-nav); background:var(--sunk);
+  padding:0 64px 0 36px; font-size:var(--fs-sm); color:var(--ink)}
+.search input::placeholder{color:var(--ink2)}
+.search .glass{position:absolute; left:11px; top:10px; width:16px; height:16px; color:var(--ink2); pointer-events:none}
+.kbd{position:absolute; right:8px; top:8px; height:20px; padding:0 7px; border:1px solid var(--line2);
+  border-radius:var(--r-pill); font:500 11px/18px var(--font-mono); color:var(--ink2); background:var(--surface); pointer-events:none}
+.results{position:absolute; left:0; right:0; top:42px; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-media); padding:6px; box-shadow:0 8px 24px rgba(10,10,11,.10); max-height:60vh; overflow:auto}
+.results a{display:flex; justify-content:space-between; gap:12px; padding:7px 10px; border-radius:8px;
+  text-decoration:none; font-size:var(--fs-sm)}
+.results a span{color:var(--ink2); font-size:var(--fs-label)}
+.results a[aria-selected="true"],.results a:hover{background:var(--sunk)}
+.results p{margin:6px 10px; font-size:var(--fs-sm); color:var(--ink2)}
+
+.tbright{display:flex; align-items:center; gap:var(--s3)}
+.badge{display:inline-flex; align-items:center; height:22px; padding:0 9px; border:1px solid var(--line);
+  border-radius:var(--r-pill); background:var(--sunk); color:var(--ink2);
+  font:400 var(--fs-label)/1 var(--font-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+/* Theme: one round icon button. The icon shows the current theme. */
+.themebtn{position:relative; width:36px; height:36px; flex:none; border:1px solid var(--line2); border-radius:50%;
+  background:var(--surface); color:var(--ink); display:inline-grid; place-items:center; cursor:pointer;
+  transition:background-color .15s ease, border-color .15s ease}
+.themebtn:hover{background:var(--hover); border-color:var(--ink3)}
+.themebtn:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:50%}
+.themebtn svg{width:16px; height:16px; grid-area:1/1; transition:opacity .15s ease, transform .2s ease}
+.themebtn .i-moon{opacity:0; transform:rotate(-30deg)}
+:root[data-theme="dark"] .themebtn .i-sun{opacity:0; transform:rotate(30deg)}
+:root[data-theme="dark"] .themebtn .i-moon{opacity:1; transform:none}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .themebtn .i-sun{opacity:0; transform:rotate(30deg)}
+  :root:not([data-theme="light"]) .themebtn .i-moon{opacity:1; transform:none}
+}
+.tt{position:absolute; top:calc(100% + 8px); right:0; white-space:nowrap; padding:5px 9px; border-radius:var(--r-btn);
+  background:var(--ink); color:var(--onink); font-size:var(--fs-label); font-weight:500; line-height:1.3;
+  opacity:0; pointer-events:none; transition:opacity .12s ease; z-index:30}
+.themebtn:hover .tt,.themebtn:focus-visible .tt{opacity:1; transition-delay:.35s}
+@media (prefers-reduced-motion: reduce){ .themebtn,.themebtn svg,.tt{transition:none !important} }
+
+/* ---------- Scrollbars: thin, no arrows, quiet ---------- */
+/* Chrome, Edge, Safari: WebKit pseudo-elements (these hide the arrow buttons). */
+::-webkit-scrollbar{width:var(--scroll-w); height:var(--scroll-w)}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line2); border-radius:var(--r-pill); border:2px solid transparent; background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background-color:var(--ink3)}
+::-webkit-scrollbar-button{display:none; width:0; height:0}
+::-webkit-scrollbar-corner{background:transparent}
+/* Sidebar: thumb hidden at rest, shown while hovered or scrolling. */
+.sidebar::-webkit-scrollbar-thumb{background-color:transparent}
+.sidebar:hover::-webkit-scrollbar-thumb,.sidebar.scrolling::-webkit-scrollbar-thumb{background-color:var(--line2)}
+/* Firefox only. Kept out of WebKit browsers on purpose: in Chrome 121+ the standard
+   properties override the WebKit rules above and bring the arrow buttons back. */
+@supports not selector(::-webkit-scrollbar){
+  html,.tablewrap,.results,.code pre{scrollbar-width:thin; scrollbar-color:var(--line2) transparent}
+  .sidebar{scrollbar-width:thin; scrollbar-color:transparent transparent}
+  .sidebar:hover,.sidebar.scrolling{scrollbar-color:var(--line2) transparent}
+}
+
+/* ---------- Shell ---------- */
+.shell{display:grid; grid-template-columns:var(--sidebar-w) minmax(0,1fr)}
+.sidebar{position:sticky; top:calc(var(--topbar-h) + env(safe-area-inset-top,0px));
+  height:calc(100vh - var(--topbar-h) - env(safe-area-inset-top,0px)); overflow-y:auto;
+  padding:var(--s5) var(--s4) var(--s7); border-right:1px solid var(--line); background:var(--surface);
+  overscroll-behavior:contain}
+/* Edge fades: sticky overlays that signal the list scrolls; hidden at either end (.at-top / .at-end).
+   Not a CSS mask: Chrome paints a light strip in the scrollbar gutter of a masked scroller. */
+.sidebar::before,.sidebar::after{content:""; position:sticky; display:block; left:0; right:0; z-index:2; pointer-events:none;
+  margin-inline:calc(-1 * var(--s4)); transition:opacity .15s ease}
+.sidebar::before{top:calc(-1 * var(--s5)); height:20px; margin-top:calc(-1 * var(--s5)); margin-bottom:calc(var(--s5) - 20px);
+  background:linear-gradient(var(--surface), transparent)}
+.sidebar::after{bottom:calc(-1 * var(--s7)); height:28px; margin-top:-28px; background:linear-gradient(transparent, var(--surface))}
+.sidebar.at-top::before,.sidebar.at-end::after{opacity:0}
+.navsec{margin:0 0 var(--s2)}
+.navsec + .navsec{margin-top:var(--s6)}
+.navsec > h2{font:500 var(--fs-sm)/1.4 var(--font-body); margin:0 0 var(--s1); padding:0 10px; color:var(--ink)}
+.navgrp{font-size:var(--fs-label); line-height:var(--lh-label); font-weight:400; color:var(--ink2);
+  margin:var(--s5) 0 var(--s1); padding:0 10px}
+.sidebar ul{list-style:none; margin:0; padding:0}
+.sidebar a{display:flex; align-items:center; min-height:32px; padding:5px 10px; border-radius:var(--r-nav);
+  font-size:var(--fs-sm); line-height:1.35; color:var(--ink); text-decoration:none}
+.sidebar a{color:var(--ink2)}
+.sidebar a:hover{background:var(--hover); color:var(--ink)}
+.sidebar a[aria-current="page"]{background:var(--nav-active); color:var(--ink); font-weight:600}
+.backdrop{display:none}
+
+.main{min-width:0; padding:var(--s7) var(--page-pad) var(--s8)}
+/* Every page uses the same box (content + gap + rail), so the left edge never moves. */
+.page{display:grid; grid-template-columns:minmax(0,var(--content-w)) var(--rail-w); gap:var(--s7);
+  max-width:var(--page-w); margin-inline:auto}
+.page.norail > article{grid-column:1}
+.page.wide > article{grid-column:1 / -1}
+article{min-width:0}
+
+/* ---------- Rail ---------- */
+.rail{position:sticky; top:calc(var(--topbar-h) + var(--s7)); align-self:start; font-size:var(--fs-cap); line-height:var(--lh-cap)}
+.rail h2{font:400 var(--fs-label)/var(--lh-label) var(--font-body); color:var(--ink2); margin:0 0 var(--s2)}
+.rail ul{list-style:none; margin:0; padding:0; border-left:1px solid var(--line)}
+.rail a{display:block; padding:4px 0 4px 12px; margin-left:-1px; border-left:2px solid transparent; color:var(--ink2); text-decoration:none}
+.rail a:hover{color:var(--ink)}
+.rail a.on{color:var(--ink); border-left-color:var(--ink)}
+.toc-inline{display:none; margin:0 0 var(--s5); border:1px solid var(--line); border-radius:var(--r-media); padding:0 var(--s4)}
+.toc-inline summary{cursor:pointer; padding:10px 0; font-size:var(--fs-sm); font-weight:500; list-style-position:inside}
+.toc-inline ul{margin:0 0 var(--s3); padding-left:18px; font-size:var(--fs-sm)}
+
+/* ---------- Type ---------- */
+.crumbs{font-size:var(--fs-cap); color:var(--ink2); margin:0 0 var(--s3)}
+h1{font:600 var(--fs-h1)/var(--lh-h1) var(--font-display); letter-spacing:-.02em; margin:0 0 var(--s4)}
+article h2{font:600 var(--fs-h2)/var(--lh-h2) var(--font-display); letter-spacing:-.01em; margin:var(--s7) 0 var(--s3)}
+article h3{font:600 var(--fs-h3)/var(--lh-h3) var(--font-body); margin:var(--s5) 0 var(--s2)}
+article p{margin:0 0 var(--s4)}
+.lede{font-size:18px; line-height:1.55; color:var(--ink); margin-bottom:var(--s5)}
+article ul,article ol{margin:0 0 var(--s4); padding-left:22px}
+article li{margin:0 0 var(--s2)}
+code{font-family:var(--font-mono); font-size:.9em; background:var(--sunk); border-radius:4px; padding:2px 5px}
+.verify{background:var(--warn-bg); color:var(--warn-text); border:1px dashed var(--warn-line);
+  border-radius:4px; padding:1px 5px; font-size:.88em; font-weight:500}
+.unrel{display:inline-flex; align-items:center; height:20px; padding:0 8px; border-radius:var(--r-pill);
+  background:var(--sunk); color:var(--ink2); font-size:var(--fs-label); font-weight:500; vertical-align:2px}
+
+/* ---------- Mode pills ---------- */
+.modes{display:flex; flex-wrap:wrap; gap:var(--s2); margin:0 0 var(--s5)}
+.mode{display:inline-flex; align-items:center; gap:7px; padding:6px 12px; border:1px solid var(--line);
+  border-radius:var(--r-pill); background:var(--surface); font-size:12.5px; font-weight:500; line-height:1.2; color:var(--ink2)}
+.mode svg{width:14px; height:14px}
+.mode.on{background:var(--ink); border-color:var(--ink); color:var(--onink)}
+
+/* ---------- Clip frame (signature) ---------- */
+.clip{margin:0 0 var(--s6); background:var(--stage); border:1px solid var(--stage-line); border-radius:var(--r-media); padding:var(--s5)}
+.clip-media{position:relative; aspect-ratio:16/10; border-radius:6px; box-shadow:var(--clip-shadow); background:var(--surface);
+  display:grid; place-items:center; overflow:hidden}
+.clip-media.tall{aspect-ratio:4/3}
+.clip-media video,.clip-media img{width:100%; height:100%; object-fit:cover; display:block}
+.clip-ph{text-align:center; padding:var(--s5); max-width:420px}
+.clip-ph svg{width:28px; height:28px; color:var(--ink3); margin-bottom:var(--s2)}
+.clip-ph b{display:block; font-size:var(--fs-sm); font-weight:600}
+.clip-ph span{display:block; font-size:var(--fs-cap); line-height:var(--lh-cap); color:var(--ink2); margin-top:4px}
+.clip figcaption{display:flex; justify-content:space-between; gap:var(--s4); margin-top:var(--s3);
+  font-size:var(--fs-cap); line-height:var(--lh-cap); color:var(--caption)}
+.clip figcaption time{font-variant-numeric:tabular-nums}
+
+/* ---------- Steps ---------- */
+ol.steps{list-style:none; padding:0; counter-reset:step; margin:0 0 var(--s5)}
+ol.steps > li{position:relative; padding:0 0 var(--s4) 44px; margin:0; counter-increment:step}
+ol.steps > li::before{content:counter(step); position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%;
+  border:1px solid var(--line2); display:grid; place-items:center; font:600 var(--fs-cap)/1 var(--font-body); font-variant-numeric:tabular-nums}
+ol.steps > li::after{content:""; position:absolute; left:14px; top:32px; bottom:6px; width:1px; background:var(--line)}
+ol.steps > li:last-child::after{display:none}
+ol.steps h3{margin:2px 0 var(--s2); font-size:var(--fs-body)}
+
+/* ---------- Callouts ---------- */
+.callout{display:grid; grid-template-columns:16px 1fr; gap:var(--s3); border:1px solid var(--line);
+  background:var(--sunk); border-radius:var(--r-media); padding:12px 16px; margin:0 0 var(--s5); font-size:15px; line-height:1.6}
+.callout svg{width:16px; height:16px; margin-top:4px; color:var(--ink2)}
+.callout b{display:block; font-size:var(--fs-sm); font-weight:600; margin-bottom:2px}
+.callout p{margin:0}
+.callout.tip{background:var(--ok-bg); border-color:var(--ok-line)}
+.callout.tip svg{color:var(--ok)} .callout.tip b{color:var(--ok-text)}
+.callout.warn{background:var(--warn-bg); border-color:var(--warn-line)}
+.callout.warn svg{color:var(--warn)} .callout.warn b{color:var(--warn-text)}
+
+/* ---------- Code ---------- */
+.code{margin:0 0 var(--s5); border:1px solid var(--line); background:var(--sunk); border-radius:var(--r-media); overflow:hidden}
+.code-head{display:flex; justify-content:space-between; align-items:center; padding:8px 10px 8px 16px; border-bottom:1px solid var(--line)}
+.code-head span{font-size:var(--fs-label); color:var(--ink2); font-family:var(--font-mono)}
+.minibtn{height:26px; padding:0 10px; border:1px solid var(--line); background:var(--surface); border-radius:var(--r-btn);
+  font-size:var(--fs-label); font-weight:500; color:var(--ink); cursor:pointer}
+.minibtn:hover{border-color:var(--line2)}
+.code pre{margin:0; padding:var(--s4); overflow-x:auto; font:400 var(--fs-sm)/1.6 var(--font-mono); color:var(--ink); tab-size:2}
+.code pre code{background:none; padding:0; font-size:inherit}
+.t-c{color:var(--ink2)} .t-s{color:var(--ok-text)} .t-n{color:var(--warn-text)}
+
+/* ---------- Tables ---------- */
+.tablewrap{max-width:100%; overflow-x:auto; margin:0 0 var(--s5); -webkit-overflow-scrolling:touch}
+.tablebox{position:relative; margin:0 0 var(--s5); border:1px solid var(--line); border-radius:var(--r-media); overflow:hidden}
+.tablebox .tablewrap{margin:0; padding:6px 8px 4px}
+/* Fades on whichever edge can still scroll (classes set by script). Overlays, not masks. */
+.tablebox::before,.tablebox::after{content:""; position:absolute; top:0; bottom:0; width:32px; pointer-events:none; z-index:1;
+  opacity:0; transition:opacity .15s ease}
+.tablebox::before{left:0; background:linear-gradient(to right, var(--surface), transparent)}
+.tablebox::after{right:0; background:linear-gradient(to left, var(--surface), transparent)}
+.tablebox.more-l::before,.tablebox.more-r::after{opacity:1}
+@media (prefers-reduced-motion: reduce){ .tablebox::before,.tablebox::after{transition:none} }
+.tablewrap:focus-visible{outline-offset:0}
+table{border-collapse:collapse; width:100%; font-size:var(--fs-sm); line-height:var(--lh-sm)}
+.prose th{font-size:var(--fs-label); font-weight:400; color:var(--ink2); text-align:left; padding:0 12px 8px 0; border-bottom:1px solid var(--line)}
+.prose td{padding:10px 12px 10px 0; border-bottom:1px solid var(--line); vertical-align:top; height:40px}
+table.data{border-collapse:separate; border-spacing:0 4px; font-variant-numeric:tabular-nums; width:100%}
+.data th{font-size:var(--fs-label); font-weight:400; color:var(--ink2); text-align:left; padding:0 10px 2px; white-space:nowrap}
+.data td{background:var(--sunk); height:var(--row-dense); padding:4px 10px; white-space:nowrap; vertical-align:middle}
+.data td:first-child{border-radius:8px 0 0 8px; font-weight:500}
+.data td:last-child{border-radius:0 8px 8px 0}
+.data td.fins{min-width:170px; max-width:240px}
+.data td.wrap{white-space:normal; min-width:150px; max-width:260px; line-height:1.9; padding-top:6px; padding-bottom:6px}
+.sw{display:inline-block; width:12px; height:12px; border-radius:4px; margin-right:4px; vertical-align:-1px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.fin{display:inline-flex; align-items:center; margin-right:10px}
+
+/* ---------- Status pills ---------- */
+.pill{display:inline-flex; align-items:center; gap:6px; height:20px; padding:0 8px; border-radius:var(--r-pill);
+  font-size:var(--fs-label); font-weight:500; line-height:1; white-space:nowrap; background:var(--sunk); color:var(--ink2)}
+.data .pill{background:var(--surface)}
+.data td.wrap .pill{white-space:normal; height:auto; min-height:20px; padding:2px 8px; line-height:1.35}
+.pill::before{content:none}
+.pill.ok{background:var(--ok-bg); color:var(--ok-text)} .pill.ok::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--ok)}
+.pill.warn{background:var(--warn-bg); color:var(--warn-text)} .pill.warn::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--warn)}
+
+/* ---------- Page furniture ---------- */
+.meta{display:flex; flex-wrap:wrap; gap:var(--s4); justify-content:space-between; align-items:center;
+  margin-top:var(--s7); padding-top:var(--s4); border-top:1px solid var(--line); font-size:var(--fs-cap); color:var(--ink2)}
+.pager{display:grid; grid-template-columns:1fr 1fr; gap:var(--s3); margin-top:var(--s5)}
+.pager a{display:block; padding:12px 16px; border:1px solid var(--line); border-radius:var(--r-media); text-decoration:none}
+.pager a:hover{border-color:var(--line2); background:var(--sunk)}
+.pager a span{display:block; font-size:var(--fs-label); color:var(--ink2)}
+.pager a b{font-weight:500; font-size:var(--fs-body)}
+.pager a.next{text-align:right; grid-column:2}
+
+/* ---------- Home ---------- */
+.home h1{font-size:44px; max-width:16ch}
+.quick{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s3); margin:0 0 var(--s7)}
+.quick a{display:block; padding:var(--s4); border:1px solid var(--line); border-radius:var(--r-block); text-decoration:none; min-height:112px}
+.quick a:hover{background:var(--sunk); border-color:var(--line2)}
+.quick b{display:block; font-weight:600; margin-bottom:4px}
+.quick span{display:block; color:var(--ink2); font-size:var(--fs-sm); line-height:var(--lh-sm)}
+.modegrid{display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:1px solid var(--line); border-radius:var(--r-block); margin:0 0 var(--s6)}
+.modegrid > div{padding:var(--s4) var(--s4) var(--s5)}
+.modegrid > div + div{border-left:1px solid var(--line)}
+.modegrid h3{display:flex; align-items:center; gap:8px; margin:0 0 var(--s2); font-size:var(--fs-body)}
+.modegrid h3 svg{width:16px; height:16px; color:var(--ink2)}
+.modegrid p{font-size:var(--fs-sm); line-height:var(--lh-sm); color:var(--ink2); margin:0}
+
+/* ---------- Try it live ---------- */
+.live{background:var(--stage); border:1px solid var(--stage-line); border-radius:var(--r-media); padding:var(--s4)}
+.livebar{display:flex; justify-content:space-between; align-items:center; gap:var(--s3); margin:0 0 var(--s3)}
+.livebar .status{display:flex; align-items:center; gap:8px; font-size:var(--fs-cap); color:var(--caption)}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--ink3)}
+.dot.ready{background:var(--ok)}
+.liveframe{position:relative; height:min(760px,78vh); min-height:480px; border-radius:6px; box-shadow:var(--clip-shadow);
+  background:var(--surface); display:grid; place-items:center; overflow:hidden}
+.loader{display:flex; flex-direction:column; align-items:center; gap:var(--s3); color:var(--ink2); font-size:var(--fs-sm); text-align:center; padding:var(--s5)}
+.spin{width:22px; height:22px; border-radius:50%; border:2px solid var(--line2); border-top-color:var(--ink); animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){ .spin{animation:none} }
+.cando{display:grid; grid-template-columns:1fr 1fr; gap:var(--s4); margin-top:var(--s5)}
+.cando h3{margin-top:0}
+
+/* ---------- Stub ---------- */
+.stub{border:1px dashed var(--line2); border-radius:var(--r-block); padding:var(--s5); color:var(--ink2); font-size:var(--fs-sm)}
+.stub code{color:var(--ink)}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1199px){
+  .page{grid-template-columns:minmax(0,1fr)}
+  .page > article{max-width:var(--content-w)}
+  .page.wide > article{max-width:none; grid-column:1}
+  .rail{display:none}
+  .toc-inline{display:block}
+}
+@media (max-width:959px){
+  :root{--page-pad:28px}
+  .quick,.modegrid{grid-template-columns:1fr}
+  .modegrid > div + div{border-left:0; border-top:1px solid var(--line)}
+}
+@media (max-width:767px){
+  :root{--page-pad:20px; --fs-h1:30px; --fs-h2:21px}
+  .home h1{font-size:34px}
+  .topbar{grid-template-columns:auto 1fr auto; gap:var(--s2); padding:0 var(--s3)}
+  .menubtn,.iconbtn{display:inline-flex}
+  .brand small{display:none}
+  .search{display:none; position:fixed; left:0; right:0; top:calc(var(--topbar-h) + env(safe-area-inset-top,0px));
+    width:auto; padding:var(--s3); background:var(--surface); border-bottom:1px solid var(--line)}
+  .search.open{display:block}
+  .search .glass{left:23px; top:22px}
+  .search .kbd{display:none}
+  .search input{padding-right:12px}
+  .results{left:12px; right:12px; top:54px}
+  .tbright .badge{display:none}
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .sidebar{position:fixed; z-index:40; left:0; top:0; bottom:0; width:min(300px,86vw); height:100%;
+    padding-top:calc(var(--s5) + env(safe-area-inset-top,0px)); padding-bottom:calc(var(--s7) + env(safe-area-inset-bottom,0px));
+    transform:translateX(-102%); transition:transform .2s ease; border-right:1px solid var(--line)}
+  .sidebar.open{transform:none}
+  .backdrop{display:block; position:fixed; inset:0; z-index:35; background:rgba(10,10,11,.4)}
+  .backdrop[hidden]{display:none !important}
+  .clip{padding:var(--s4)}
+  .pager{grid-template-columns:1fr}
+  .pager a.next{grid-column:1}
+  .cando{grid-template-columns:1fr}
+  .data td.wrap{min-width:150px}
+}
+@media (prefers-reduced-motion: reduce){ .sidebar,.sidebar::before,.sidebar::after{transition:none} }
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:6px">
+    <button class="menubtn" id="menubtn" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+    </button>
+    <a class="brand" href="#/home" aria-label="Klinos docs, home">
+      <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true"><rect x="5.5" y="1.5" width="11" height="19" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="7.5" y="4" width="7" height="14" rx="1.5" fill="currentColor" opacity=".18"/></svg>
+      Klinos <small>Docs</small>
+    </a>
+  </div>
+  <div class="search" id="search" role="search">
+    <svg class="glass" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+    <label for="q" class="sr">Search the docs</label>
+    <input id="q" type="search" placeholder="Search the docs" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list">
+    <span class="kbd" id="kbd" aria-hidden="true">Ctrl K</span>
+    <div class="results" id="results" role="listbox" aria-label="Search results" hidden></div>
+  </div>
+  <div class="tbright">
+    <button class="iconbtn" id="searchbtn" type="button" aria-label="Search" aria-expanded="false" aria-controls="search">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14" stroke-linecap="round"/></svg>
+    </button>
+    <span class="badge" title="Packaged build">v3.15</span>
+    <button class="themebtn" id="themebtn" type="button" aria-label="Switch to dark theme">
+      <svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9"/></svg>
+      <svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M13.3 9.6A5.6 5.6 0 0 1 6.4 2.7a5.6 5.6 0 1 0 6.9 6.9z"/></svg>
+      <span class="tt" id="themetip" aria-hidden="true">Switch to dark</span>
+    </button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar" aria-label="Documentation"></nav>
+  <div class="backdrop" id="backdrop" hidden></div>
+  <main class="main" id="content" tabindex="-1"></main>
+</div>
+
+<!-- ======================= PAGES ======================= -->
+
+<template id="tpl-home">
+  <div class="page norail home"><article>
+    <h1>Mockups from your Figma frames, without leaving Figma</h1>
+    <p class="lede">Klinos is our in-house Figma plugin for making mockups. It puts a Figma frame onto a device, or turns any Figma layer into a card at an angle, and places the result back on the canvas.</p>
+    <figure class="clip">
+      <div class="clip-media" role="img" aria-label="Placeholder for the home clip">
+        <div class="clip-ph"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="6" width="22" height="16" rx="3"/><path d="M12 11v6l5-3z" fill="currentColor" stroke="none"/></svg>
+          <b>Clip to record</b><span>A Figma frame selected, Klinos opened, a device chosen, the angle turned, then Insert placing the mockup beside the frame.</span></div>
+      </div>
+      <figcaption><span>Studio · From frame to mockup</span><time>0:08</time></figcaption>
+    </figure>
+    <div class="quick">
+      <a href="#/getting-started"><b>Getting started</b><span>Load the plugin and make your first mockup.</span></a>
+      <a href="#/devices"><b>Device library</b><span>Every device, its finishes and its screen size.</span></a>
+      <a href="#/changelog"><b>Changelog</b><span>What changed in each build, from v3-8.</span></a>
+    </div>
+    <h2>Three modes</h2>
+    <div class="modegrid">
+      <div><h3><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5z"/><path d="M2.5 5 8 8.2 13.5 5M8 8.2v6"/></svg>Studio</h3>
+        <p>3D device mockups: iPhone 13, iPhone 17 Pro, Galaxy S26, MacBook Pro 16″ and iPad Pro 11″, with editable lighting.</p></div>
+      <div><h3><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.8" y="4.2" width="12.4" height="9" rx="2"/><circle cx="8" cy="8.7" r="2.4"/><path d="M5.5 4.2 6.6 2.4h2.8l1.1 1.8"/></svg>Photoreal</h3>
+        <p>Static front-on renders of real devices: iPhone 17 Pro in two finishes and MacBook Pro 14″. Your design is keyed into the screen.</p></div>
+      <div><h3><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 4.5 11 2.6l2 8.9-8 1.9z"/></svg>Playground</h3>
+        <p>Any Figma layer as a flat card at an angle, or several layers arranged as a layout. No device, no material, no light.</p></div>
+    </div>
+    <div class="callout">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.3v4M8 4.8v.1" stroke-linecap="round"/></svg>
+      <div><b>Which build am I on?</b><p>The build number is the small label at the right of the preview's status bar, for example v3.15.</p></div>
+    </div>
+  </article></div>
+</template>
+
+<template id="tpl-lighting">
+  <div class="page"><article>
+    <p class="crumbs">Using Klinos / Studio</p>
+    <h1 id="top">Lighting</h1>
+    <div class="modes" aria-label="Modes this page covers">
+      <span class="mode on"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5z"/><path d="M2.5 5 8 8.2 13.5 5M8 8.2v6"/></svg>Studio</span>
+      <span class="mode"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.8" y="4.2" width="12.4" height="9" rx="2"/><circle cx="8" cy="8.7" r="2.4"/></svg>Photoreal</span>
+      <span class="mode"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 4.5 11 2.6l2 8.9-8 1.9z"/></svg>Playground</span>
+    </div>
+    <p class="lede">The Lighting card sets how the device is lit. You pick a Look, check it against a neutral background, and fine-tune the lights if you need to.</p>
+    <figure class="clip">
+      <div class="clip-media" role="img" aria-label="Placeholder for the Lighting clip">
+        <div class="clip-ph"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="6" width="22" height="16" rx="3"/><path d="M12 11v6l5-3z" fill="currentColor" stroke="none"/></svg>
+          <b>Clip to record</b><span>iPhone 17 Pro in Cosmic Orange. Click through Calibrated, Stage, Studio White, Warm and Keynote, holding each for a second.</span></div>
+      </div>
+      <figcaption><span>Studio · Lighting looks</span><time>0:06</time></figcaption>
+    </figure>
+
+    <details class="toc-inline"><summary>On this page</summary>
+      <ul><li><a href="#how">How lighting works</a></li><li><a href="#steps">Light a mockup</a></li><li><a href="#looks">The Looks</a></li><li><a href="#edit">Edit the lights</a></li><li><a href="#mistakes">Common mistakes</a></li></ul>
+    </details>
+
+    <h2 id="how">How lighting works</h2>
+    <p>The device is lit by up to six softboxes, which are flat, rectangular lights, plus a soft ambient glow from the whole studio. What you see on the device are their reflections. Moving a light changes where the highlights fall on the glass and metal.</p>
+    <p>A Look is a ready-made set of these lights. Calibrated is the default. It is V2's colour-matched studio, and the device finishes were fitted under it.</p>
+
+    <h2 id="steps">Light a mockup</h2>
+    <ol class="steps">
+      <li><h3>Pick a Look</h3><p>In the Lighting card, click a Look. Hover a Look to read what it is for. Picking a Look also sets the backdrop: its colour, sweep and reflection.</p></li>
+      <li><h3>Check it against a neutral background</h3><p>Under <b>Preview background</b>, choose Grey or Dark to judge the highlights. Choose Output to see exactly what Insert, Export and Copy produce. This setting is preview only and never exported.</p></li>
+      <li><h3>See where the lights are</h3><p>Turn on <b>Reference spheres</b>. A chrome ball mirrors every light's position and shape, and a grey ball shows the overall direction. They are never exported.</p></li>
+      <li><h3>Set the brightness</h3><p><b>Brightness</b> scales the whole rig without moving any light. 100% on Calibrated is V2's colour-matched lighting. The top of the slider is 110% on the iPhone 13, MacBook Pro 16″ and iPad Pro 11″, and 105% on the iPhone 17 Pro and Galaxy S26.</p></li>
+      <li><h3>Fine-tune, if you need to</h3><p>Open <b>Edit lights</b> to move, add or change individual lights. See <a href="#edit">Edit the lights</a>.</p></li>
+    </ol>
+
+    <div class="callout tip">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><path d="m5.4 8.2 1.8 1.8 3.5-3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><b>Tip</b><p>For colour-accurate finishes, use Calibrated at 100% brightness. The finishes were fitted under that light, so every other Look is art direction.</p></div>
+    </div>
+
+    <h2 id="looks">The Looks</h2>
+    <div class="tablewrap"><table class="prose">
+      <thead><tr><th scope="col">Look</th><th scope="col">What it is</th></tr></thead>
+      <tbody>
+        <tr><td><b>Calibrated</b></td><td>V2's colour-matched studio. The finishes were fitted under this light.</td></tr>
+        <tr><td><b>Stage</b></td><td>Black stage, a soft overhead key and tall strip lights raking the rails. The Pro product-page look.</td></tr>
+        <tr><td><b>Studio White</b></td><td>Bright seamless white, a big overhead diffuser and narrow side strips for crisp edges.</td></tr>
+        <tr><td><b>Warm</b></td><td>A low warm key from the left and a cool rim from behind. Late-afternoon studio.</td></tr>
+        <tr><td><b>Keynote</b></td><td>Graphite stage built around the laptop: a big soft overhead, a low rake that picks out the keys and ports, a cool rim along the lid, and almost nothing on the glass.</td></tr>
+        <tr><td><b>Spotlight</b> <span class="unrel">Unreleased</span></td><td>One narrow light from above on a near-black stage, a faint rim behind and just enough front light to read the glass.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout warn">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2.2 14.3 13H1.7z" stroke-linejoin="round"/><path d="M8 6.6v3.2M8 11.6v.1" stroke-linecap="round"/></svg>
+      <div><b>Warning</b><p>Picking a Look replaces your backdrop colour, sweep and reflection with the Look's own. Set the Look first, then adjust the backdrop.</p></div>
+    </div>
+
+    <h2 id="edit">Edit the lights</h2>
+    <p>Open <b>Edit lights</b>. Its summary shows how many lights are on and which Look you are on. Inside you get a plot, a list and the controls for the selected light. The (?) button next to it opens the in-app guide, "How lighting works".</p>
+    <h3>The plot</h3>
+    <p>You look down from above. The camera is at the bottom and behind is at the top. Each dot is a light, drawn in its colour and size. Drag a dot to move that light: around the circle changes Around, and from the edge toward the centre raises it.</p>
+    <h3>The list</h3>
+    <p>Click a light to select it. <b>Add</b> creates a new one, up to six. <b>Remove</b> deletes the selected one. <b>Reset</b> puts the chosen Look's lights back. Editing any light turns the Look into Custom.</p>
+    <h3>Controls for the selected light</h3>
+    <div class="tablewrap"><table class="prose">
+      <thead><tr><th scope="col">Control</th><th scope="col">What it does</th></tr></thead>
+      <tbody>
+        <tr><td>On</td><td>Switches the light off without losing its settings.</td></tr>
+        <tr><td>Around</td><td>Where it sits around the device, in degrees. 0 is beside the camera, ±90 is right or left, 180 is behind.</td></tr>
+        <tr><td>Height</td><td>0 is level with the device, 90 is straight overhead. Below 0 it lights from underneath.</td></tr>
+        <tr><td>Width</td><td>How wide the softbox is. Bigger lights give broader, gentler highlights.</td></tr>
+        <tr><td>Length</td><td>How tall the softbox is. Long, thin lights make strip highlights along the rails.</td></tr>
+        <tr><td>Intensity</td><td>How bright this light is, independent of the others.</td></tr>
+        <tr><td>Softness</td><td>How gradually its edge fades. Low gives a crisp reflection, high a diffuse glow.</td></tr>
+        <tr><td>Colour</td><td>The light's tint.</td></tr>
+        <tr><td>Ambient</td><td>The soft light from the whole studio. It sets how dark the unlit parts of the device get.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>For maintainers: how a Look is defined</h3>
+    <p>Looks live in <code>LOOKS</code> in <code>src/ui.html</code>. A Look is always art direction. The Calibrated rig is measured and must not be edited by eye.</p>
+    <div class="code">
+      <div class="code-head"><span>src/ui.html</span><button class="minibtn copy" type="button">Copy</button></div>
+<pre><code>warm: {
+  label: <span class="t-s">'Warm'</span>,
+  about: <span class="t-s">'A low warm key from the left and a cool rim from behind - late-afternoon studio.'</span>,
+  rig: {
+    ambLo: [<span class="t-n">0.050</span>, <span class="t-n">0.042</span>, <span class="t-n">0.036</span>], ambHi: [<span class="t-n">0.150</span>, <span class="t-n">0.132</span>, <span class="t-n">0.112</span>], amb: <span class="t-n">1</span>,
+    boxes: [
+      fromAngles(<span class="t-s">'Warm key'</span>, <span class="t-n">-52</span>, <span class="t-n">26</span>, <span class="t-n">0.62</span>, <span class="t-n">0.62</span>, [<span class="t-n">1.00</span>, <span class="t-n">0.84</span>, <span class="t-n">0.64</span>], <span class="t-n">5.8</span>, <span class="t-n">0.45</span>),
+      fromAngles(<span class="t-s">'Cool rim'</span>, <span class="t-n">138</span>, <span class="t-n">20</span>, <span class="t-n">0.16</span>, <span class="t-n">0.95</span>, [<span class="t-n">0.70</span>, <span class="t-n">0.80</span>, <span class="t-n">1.00</span>], <span class="t-n">5.0</span>, <span class="t-n">0.22</span>),
+      fromAngles(<span class="t-s">'Top'</span>,        <span class="t-n">0</span>, <span class="t-n">80</span>, <span class="t-n">0.80</span>, <span class="t-n">0.80</span>, [<span class="t-n">1.00</span>, <span class="t-n">0.95</span>, <span class="t-n">0.90</span>], <span class="t-n">1.4</span>, <span class="t-n">0.60</span>)
+    ]
+  },
+  <span class="t-c">// a Look also carries its backdrop</span>
+  backdrop: { bg: <span class="t-s">'#e8dfd3'</span>, bgMode: <span class="t-s">'sweep'</span>, reflectStyle: <span class="t-s">'mirror'</span>, reflect: <span class="t-n">28</span>, highlight: <span class="t-n">true</span>, highlightStrength: <span class="t-n">80</span> }
+}</code></pre>
+    </div>
+
+    <h2 id="mistakes">Common mistakes</h2>
+    <ul>
+      <li>Judging highlights on a busy backdrop. Switch Preview background to Grey or Dark first.</li>
+      <li>Expecting Grey, Dark or Lights in the export. They are preview only. Output shows what you will get.</li>
+      <li>Losing a custom backdrop by clicking a Look afterwards. Pick the Look first.</li>
+    </ul>
+
+    <div class="meta"><span>Last updated <span class="verify">[VERIFY: date]</span></span><span>Source: the Lighting card in <code>src/ui.html</code></span></div>
+    <nav class="pager" aria-label="Previous and next page">
+      <a href="#/backdrop"><span>Previous</span><b>Backdrop and shadow</b></a>
+      <a class="next" href="#/staging"><span>Next</span><b>Staging</b></a>
+    </nav>
+    <!-- Media to capture:
+      1. Clip, 6 s, 16:10: iPhone 17 Pro, Cosmic Orange, default angle. Click each Look in order (Calibrated, Stage, Studio White, Warm, Keynote), about 1 s each.
+      2. Screenshot: Preview background set to Lights, Reference spheres on.
+      3. Clip, 5 s: Edit lights open, drag the Key light's dot around the plot.
+      4. Screenshot: the "How lighting works" dialog. -->
+  </article>
+  <aside class="rail" aria-label="On this page"><h2>On this page</h2>
+    <ul id="railnav"><li><a href="#how">How lighting works</a></li><li><a href="#steps">Light a mockup</a></li><li><a href="#looks">The Looks</a></li><li><a href="#edit">Edit the lights</a></li><li><a href="#mistakes">Common mistakes</a></li></ul>
+  </aside></div>
+</template>
+
+<template id="tpl-devices">
+  <div class="page wide"><article>
+    <p class="crumbs">Using Klinos / Reference</p>
+    <h1>Device library</h1>
+    <p class="lede" style="max-width:var(--content-w)">Every device Klinos can render, its finishes, and its size. Sizes are in millimetres, from the plugin's own geometry.</p>
+    <h2 style="margin-top:var(--s5)">Studio</h2>
+    <div class="tablebox"><div class="tablewrap" tabindex="0" role="region" aria-label="Scrollable table"><table class="data">
+      <thead><tr><th scope="col">Device</th><th scope="col">Finishes</th><th scope="col">Body W × H × D (mm)</th><th scope="col">Display W × H (mm)</th><th scope="col">Design frame</th><th scope="col">Notes</th></tr></thead>
+      <tbody>
+        <tr><td>iPhone 13</td><td class="wrap fins"><span class="fin"><i class="sw" style="background:#232A31"></i>Midnight</span><span class="fin"><i class="sw" style="background:#276787"></i>Blue</span><span class="fin"><i class="sw" style="background:#FADDD7"></i>Pink</span><span class="fin"><i class="sw" style="background:#FAF6F2"></i>Starlight</span></td><td>71.5 × 146.7 × 7.65</td><td>66.7 × 141.9</td><td>360 wide</td><td class="wrap"><span class="pill ok">Midnight, Pink measured</span> <span class="pill warn">Blue, Starlight estimated</span></td></tr>
+        <tr><td>iPhone 17 Pro</td><td class="wrap fins"><span class="fin"><i class="sw" style="background:#BEBFBE"></i>Silver</span><span class="fin"><i class="sw" style="background:#D36C2C"></i>Cosmic Orange</span><span class="fin"><i class="sw" style="background:#3B4153"></i>Deep Blue</span></td><td>71.9 × 150.0 × 8.75</td><td>66.592 × 144.776</td><td>360 wide</td><td class="wrap"></td></tr>
+        <tr><td>Galaxy S26</td><td class="wrap fins"><span class="fin"><i class="sw" style="background:#494D53"></i>Black</span><span class="fin"><i class="sw" style="background:#C7C8CA"></i>Silver Shadow</span><span class="fin"><i class="sw" style="background:#B3CBD9"></i>Sky Blue</span></td><td>71.7 × 149.6 × 7.2</td><td>66.74 × 144.61</td><td>360 wide</td><td class="wrap"><span class="pill ok">Black fitted</span> <span class="pill warn">Silver Shadow, Sky Blue estimated</span></td></tr>
+        <tr><td>MacBook Pro 16″</td><td class="wrap fins"><span class="fin"><i class="sw" style="background:#2E2F33"></i>Space Black</span><span class="fin"><i class="sw" style="background:#D6D7DA"></i>Silver</span></td><td>Base 355.7 × 248.1 × 11.95</td><td>345.6 × 223.4</td><td>TBD</td><td class="wrap"><span class="pill ok">V2 finishes</span></td></tr>
+        <tr><td>iPad Pro 11″</td><td class="wrap fins"><span class="fin"><i class="sw" style="background:#2E2F33"></i>Space Black</span><span class="fin"><i class="sw" style="background:#D6D7DA"></i>Silver</span></td><td>177.5 × 249.7 × 5.3</td><td>160.5 × 232.8</td><td>TBD</td><td class="wrap"><span class="pill ok">V2 finishes</span></td></tr>
+      </tbody>
+    </table></div></div>
+
+    <h2>Photoreal</h2>
+    <div class="tablebox"><div class="tablewrap" tabindex="0" role="region" aria-label="Scrollable table"><table class="data">
+      <thead><tr><th scope="col">Render</th><th scope="col">Finishes</th><th scope="col">View</th><th scope="col">Design frame</th><th scope="col">Notes</th></tr></thead>
+      <tbody>
+        <tr><td>iPhone 17 Pro</td><td class="wrap fins"><span class="fin"><i class="sw" style="background:#D36C2C"></i>Cosmic Orange</span><span class="fin"><i class="sw" style="background:#3B4153"></i>Deep Blue</span></td><td>Front-on only</td><td>360 wide</td><td class="wrap">No screen glass or reflection.</td></tr>
+        <tr><td>MacBook Pro 14″</td><td class="wrap fins"><span class="fin"><i class="sw" style="background:#D6D7DA"></i>Silver</span></td><td>Front-on only</td><td>TBD</td><td class="wrap">No screen glass or reflection.</td></tr>
+      </tbody>
+    </table></div></div>
+
+    <h2>Per-device options</h2>
+    <div class="tablebox"><div class="tablewrap" tabindex="0" role="region" aria-label="Scrollable table"><table class="data">
+      <thead><tr><th scope="col">Device</th><th scope="col">Polished frame</th><th scope="col">Surface texture default</th><th scope="col">Match a photo</th><th scope="col">Other</th></tr></thead>
+      <tbody>
+        <tr><td>iPhone 13</td><td><span class="pill ok">Yes</span></td><td>45%, frame and buttons only</td><td><span class="pill ok">Yes</span></td><td></td></tr>
+        <tr><td>iPhone 17 Pro</td><td><span class="pill ok">Yes</span></td><td>65%, whole unibody</td><td><span class="pill ok">Yes</span></td><td></td></tr>
+        <tr><td>Galaxy S26</td><td><span class="pill ok">Yes</span></td><td>55%, frame and frosted back</td><td><span class="pill ok">Yes</span></td><td></td></tr>
+        <tr><td>MacBook Pro 16″</td><td><span class="pill">No</span></td><td>100%, whole body</td><td><span class="pill">No</span></td><td>Lid 0–135°</td></tr>
+        <tr><td>iPad Pro 11″</td><td><span class="pill">No</span></td><td>85%, whole body</td><td><span class="pill ok">Yes</span></td><td>Portrait or landscape</td></tr>
+      </tbody>
+    </table></div></div>
+    <div class="callout" style="max-width:var(--content-w)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2.2 14.3 13H1.7z" stroke-linejoin="round"/><path d="M8 6.6v3.2M8 11.6v.1" stroke-linecap="round"/></svg>
+      <div><b>Note</b><p>Phones: design at 360 wide, about 800 tall. Any frame that is 360 wide works. iPad and MacBook: TBD.</p></div>
+    </div>
+    <div class="meta"><span>Last updated <span class="verify">[VERIFY: date]</span></span><span>Source: <code>DEVICES</code> and <code>PR_DEVICES</code> in <code>src/ui.html</code></span></div>
+  </article></div>
+</template>
+
+<template id="tpl-live">
+  <div class="page wide"><article>
+    <p class="crumbs">Using Klinos / Reference</p>
+    <h1>Try it live</h1>
+    <p class="lede" style="max-width:var(--content-w)">This is the Klinos panel running in your browser, without Figma. Try the controls before you install the plugin.</p>
+    <div class="live">
+      <div class="livebar">
+        <span class="status" id="livestatus" role="status"><i class="dot" id="livedot"></i><span id="livetext">Loading the plugin</span></span>
+        <button class="minibtn" type="button" id="livereset">Reset</button>
+      </div>
+      <div class="liveframe" id="liveframe">
+        <!-- The standalone preview (dist/preview.html) is embedded here later. Left empty on purpose. -->
+        <div class="loader" id="loader"><div class="spin" aria-hidden="true"></div><span>Loading the plugin preview…</span><span style="font-size:var(--fs-cap)">The live demo is added in a later build. This frame is the placeholder.</span></div>
+      </div>
+    </div>
+    <div class="cando" style="max-width:var(--content-w)">
+      <div><h3>Works here</h3><ul><li>Switching modes, devices and finishes</li><li>Angle, Lighting, Staging and Backdrop controls</li><li>The preview itself, with stand-in images for Figma layers</li></ul></div>
+      <div><h3>Needs Figma</h3><ul><li>Reading your selection</li><li>Placing the mockup on the canvas</li><li>Refreshing a saved mockup in place</li></ul></div>
+    </div>
+    <p style="max-width:var(--content-w)"><span class="verify">[VERIFY: which controls fully work in dist/preview.html, and whether Export and Copy work there]</span></p>
+  </article></div>
+</template>
+
+<template id="tpl-stub">
+  <div class="page norail"><article>
+    <p class="crumbs" data-crumbs></p>
+    <h1 data-title></h1>
+    <div class="stub"><p style="margin:0 0 6px">This page is written in Stage 2.</p><p style="margin:0">File: <code data-path></code></p></div>
+  </article></div>
+</template>
+
+<script>
+(function(){
+  /* ---------- Site map (both sections, full page list) ---------- */
+  var NAV = [
+    { section:'Using Klinos', base:'using-klinos', groups:[
+      { label:'Start here', items:[['home','Home'],['about','About Klinos'],['getting-started','Getting started']] },
+      { label:'Studio', items:[['studio-devices','Devices and finishes'],['framing','Framing and aspect ratios'],['backdrop','Backdrop and shadow'],['lighting','Lighting',1],['staging','Staging'],['match-photo','Match a photo'],['screen','Screen']] },
+      { label:'Photoreal', items:[['photoreal','Photoreal']] },
+      { label:'Playground', items:[['playground','Single card'],['layouts','Layouts'],['insert-layers','Insert image vs layers'],['exploded','Exploded layers'],['reset-layout','Reset layout and guide']] },
+      { label:'Working with the panel', items:[['exporting','Exporting and copy'],['card-order','Reordering the panel cards']] },
+      { label:'Reference', items:[['devices','Device library',1],['tips','Tips and best practices'],['troubleshooting','Troubleshooting and FAQ'],['feedback','Feedback and bug reports'],['changelog','Changelog'],['live','Try it live',1]] }
+    ]},
+    { section:'Maintaining Klinos', base:'maintaining-klinos', groups:[
+      { label:'Understand', items:[['architecture','Architecture overview'],['repo','Repository guide'],['decisions','Decisions log'],['data','Data and compatibility']] },
+      { label:'Work on it', items:[['setup','Local setup'],['branching','Branching and contribution'],['new-device','Adding a new device'],['testing','Testing and QA checklist'],['ai-notes','AI-assisted development']] },
+      { label:'Ship it', items:[['versioning','Versioning'],['release','Release process'],['known-issues','Known issues and roadmap'],['ownership','Ownership and access']] }
+    ]}
+  ];
+  var PAGES = {};
+  NAV.forEach(function(s){ s.groups.forEach(function(g){ g.items.forEach(function(it){
+    PAGES[it[0]] = { title: it[1], section: s.section, group: g.label, done: !!it[2] || it[0]==='home',
+      path: s.base + '/' + g.label.toLowerCase().replace(/[^a-z]+/g,'-').replace(/-$/,'') + '/' + it[0] + '.md' };
+  }); }); });
+  PAGES.home.done = true;
+
+  /* ---------- Sidebar ---------- */
+  var sb = document.getElementById('sidebar');
+  var html = '';
+  NAV.forEach(function(s){
+    html += '<div class="navsec"><h2>' + s.section + '</h2>';
+    s.groups.forEach(function(g){
+      html += '<p class="navgrp">' + g.label + '</p><ul>';
+      g.items.forEach(function(it){
+        html += '<li><a href="#/' + it[0] + '" data-id="' + it[0] + '">' + it[1] + '</a></li>';
+      });
+      html += '</ul>';
+    });
+    html += '</div>';
+  });
+  sb.innerHTML = html;
+
+  /* ---------- Sidebar scrolling: reveal active item, edge fades, show thumb while scrolling ---------- */
+  function revealActive(){
+    var a = sb.querySelector('[aria-current="page"]'); if (!a) return;
+    var top = a.offsetTop, h = a.offsetHeight, view = sb.clientHeight, cur = sb.scrollTop, pad = 48;
+    if (top < cur + pad || top + h > cur + view - pad) sb.scrollTop = Math.max(0, top - view / 2 + h / 2);
+    updateFades();
+  }
+  var scrollTimer = null;
+  function updateFades(){
+    sb.classList.toggle('at-top', sb.scrollTop <= 1);
+    sb.classList.toggle('at-end', sb.scrollTop + sb.clientHeight >= sb.scrollHeight - 1);
+  }
+  sb.addEventListener('scroll', function(){
+    updateFades();
+    sb.classList.add('scrolling');
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function(){ sb.classList.remove('scrolling'); }, 700);
+  }, { passive: true });
+  window.addEventListener('resize', updateFades);
+
+  /* ---------- Router ---------- */
+  var main = document.getElementById('content');
+  var TPL = { home:'tpl-home', lighting:'tpl-lighting', devices:'tpl-devices', live:'tpl-live' };
+  function render(){
+    var id = (location.hash.match(/^#\/([\w-]+)/) || [])[1] || 'home';
+    if (!PAGES[id]) id = 'home';
+    var t = document.getElementById(TPL[id] || 'tpl-stub').content.cloneNode(true);
+    if (!TPL[id]) {
+      var p = PAGES[id];
+      t.querySelector('[data-title]').textContent = p.title;
+      t.querySelector('[data-crumbs]').textContent = p.section + ' / ' + p.group;
+      t.querySelector('[data-path]').textContent = p.path;
+    }
+    main.innerHTML = ''; main.appendChild(t);
+    document.title = PAGES[id].title + ' · Klinos docs';
+    sb.querySelectorAll('a').forEach(function(a){
+      if (a.dataset.id === id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    closeMenu();
+    revealActive();
+    window.scrollTo(0,0);
+    wirePage(id);
+  }
+  window.addEventListener('hashchange', function(){
+    if (/^#\/[\w-]+/.test(location.hash)) { render(); main.focus({preventScroll:true}); }
+  });
+
+  /* In-page anchors (#how etc.) must not trigger the router */
+  main.addEventListener('click', function(e){
+    var a = e.target.closest('a[href^="#"]');
+    if (a && !/^#\//.test(a.getAttribute('href'))) {
+      e.preventDefault();
+      var el = document.getElementById(a.getAttribute('href').slice(1));
+      if (el) { el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); el.setAttribute('tabindex','-1'); el.focus({preventScroll:true}); }
+    }
+  });
+
+  function wirePage(id){
+    main.querySelectorAll('.copy').forEach(function(b){
+      b.addEventListener('click', function(){
+        var txt = b.closest('.code').querySelector('pre').innerText;
+        var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1400); };
+        try { navigator.clipboard.writeText(txt).then(done, function(){ b.textContent = 'Copy failed'; }); } catch (err) { b.textContent = 'Copy failed'; }
+      });
+    });
+    main.querySelectorAll('.tablebox').forEach(function(box){
+      var w = box.querySelector('.tablewrap');
+      var upd = function(){
+        box.classList.toggle('more-l', w.scrollLeft > 1);
+        box.classList.toggle('more-r', w.scrollLeft + w.clientWidth < w.scrollWidth - 1);
+      };
+      w.addEventListener('scroll', upd, { passive: true });
+      window.addEventListener('resize', upd);
+      upd();
+    });
+    var rail = document.getElementById('railnav');
+    if (rail && 'IntersectionObserver' in window) {
+      var links = rail.querySelectorAll('a');
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if (en.isIntersecting) links.forEach(function(l){ l.classList.toggle('on', l.getAttribute('href') === '#' + en.target.id); });
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      links.forEach(function(l){ var h = document.getElementById(l.getAttribute('href').slice(1)); if (h) io.observe(h); });
+    }
+    if (id === 'live') {
+      var reset = document.getElementById('livereset');
+      reset.addEventListener('click', function(){
+        document.getElementById('livetext').textContent = 'Reset. Loading the plugin';
+        var l = document.getElementById('loader'); l.hidden = false;
+      });
+    }
+  }
+
+  /* ---------- Mobile menu ---------- */
+  var menubtn = document.getElementById('menubtn'), backdrop = document.getElementById('backdrop');
+  function openMenu(){ sb.classList.add('open'); backdrop.hidden = false; menubtn.setAttribute('aria-expanded','true');
+    var cur = sb.querySelector('[aria-current="page"]') || sb.querySelector('a'); if (cur) cur.focus(); }
+  function closeMenu(){ if (!sb.classList.contains('open')) return; sb.classList.remove('open'); backdrop.hidden = true; menubtn.setAttribute('aria-expanded','false'); }
+  menubtn.addEventListener('click', function(){ sb.classList.contains('open') ? closeMenu() : openMenu(); });
+  backdrop.addEventListener('click', function(){ closeMenu(); menubtn.focus(); });
+
+  /* ---------- Search ---------- */
+  var q = document.getElementById('q'), res = document.getElementById('results'), search = document.getElementById('search');
+  var searchbtn = document.getElementById('searchbtn'), sel = 0, hits = [];
+  if (/Mac|iPhone|iPad/.test(navigator.platform || '')) document.getElementById('kbd').textContent = '⌘K';
+  function runSearch(){
+    var term = q.value.trim().toLowerCase();
+    if (!term) { res.hidden = true; q.setAttribute('aria-expanded','false'); return; }
+    hits = Object.keys(PAGES).filter(function(k){ return (PAGES[k].title + ' ' + PAGES[k].group + ' ' + PAGES[k].section).toLowerCase().indexOf(term) > -1; }).slice(0,8);
+    sel = 0;
+    res.innerHTML = hits.length ? hits.map(function(k,i){
+      return '<a role="option" id="opt-' + k + '" href="#/' + k + '" aria-selected="' + (i===0) + '">' + PAGES[k].title + '<span>' + PAGES[k].group + '</span></a>';
+    }).join('') : '<p>No page matches "' + q.value.replace(/[<>&]/g,'') + '". Try a control name, like Brightness.</p>';
+    res.hidden = false; q.setAttribute('aria-expanded','true');
+    if (hits.length) q.setAttribute('aria-activedescendant', 'opt-' + hits[0]);
+  }
+  function move(d){
+    if (!hits.length) return;
+    sel = (sel + d + hits.length) % hits.length;
+    res.querySelectorAll('a').forEach(function(a,i){ a.setAttribute('aria-selected', i === sel); });
+    q.setAttribute('aria-activedescendant', 'opt-' + hits[sel]);
+  }
+  function endSearch(){ res.hidden = true; q.value = ''; q.setAttribute('aria-expanded','false'); search.classList.remove('open'); searchbtn.setAttribute('aria-expanded','false'); }
+  q.addEventListener('input', runSearch);
+  q.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+    else if (e.key === 'Enter' && hits.length) { location.hash = '#/' + hits[sel]; endSearch(); }
+    else if (e.key === 'Escape') { endSearch(); q.blur(); }
+  });
+  res.addEventListener('click', function(){ setTimeout(endSearch, 0); });
+  document.addEventListener('click', function(e){ if (!search.contains(e.target) && e.target !== searchbtn && !searchbtn.contains(e.target)) { res.hidden = true; } });
+  searchbtn.addEventListener('click', function(){
+    var open = !search.classList.contains('open');
+    search.classList.toggle('open', open); searchbtn.setAttribute('aria-expanded', String(open));
+    if (open) q.focus();
+  });
+  document.addEventListener('keydown', function(e){
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (getComputedStyle(searchbtn).display !== 'none') { search.classList.add('open'); searchbtn.setAttribute('aria-expanded','true'); }
+      q.focus();
+    }
+    if (e.key === 'Escape' && sb.classList.contains('open')) { closeMenu(); menubtn.focus(); }
+  });
+
+  /* ---------- Theme: first visit follows the system; a click toggles and is remembered ---------- */
+  var root = document.documentElement, themebtn = document.getElementById('themebtn'), themetip = document.getElementById('themetip');
+  var mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+  var KEY = 'klinos-docs-theme';
+  function stored(){ try { var v = localStorage.getItem(KEY); return v === 'light' || v === 'dark' ? v : null; } catch (err) { return null; } }
+  function current(){ return root.getAttribute('data-theme') || (mq && mq.matches ? 'dark' : 'light'); }
+  function syncThemeButton(){
+    var next = current() === 'dark' ? 'light' : 'dark';
+    themebtn.setAttribute('aria-label', 'Switch to ' + next + ' theme');
+    themetip.textContent = 'Switch to ' + next;
+  }
+  var saved = stored();
+  if (saved) root.setAttribute('data-theme', saved);
+  syncThemeButton();
+  themebtn.addEventListener('click', function(){
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (err) {}
+    syncThemeButton();
+  });
+  if (mq) {
+    var onSys = function(){ if (!stored()) syncThemeButton(); };
+    if (mq.addEventListener) mq.addEventListener('change', onSys); else if (mq.addListener) mq.addListener(onSys);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
