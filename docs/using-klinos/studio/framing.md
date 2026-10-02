@@ -7,6 +7,8 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Studio
 
+[Try this in the live demo](../reference/try-it-live.md)
+
 Framing is two cards. The Angle card turns the device. The Frame card sets the shape of the image, how much of it the device fills, and where the device sits.
 
 ## Choose an angle
@@ -45,9 +47,6 @@ The default is Turn left. On the MacBook Pro 16″ it is Three-quarter left.
 | Lid angle | 0° to 135° | MacBook Pro 16″ only. |
 
 Past 90°, Tilt back and Turn show the back of the device. Your design then faces away.
-
-> **Warning**
-> The detailed back cameras on the three phones are unreleased. They are merged to main and ship in the next package, v3.16. The packaged 3.15 build doesn't have them.
 
 ## Set the frame
 

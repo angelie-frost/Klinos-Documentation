@@ -7,8 +7,7 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Playground
 
-> **Warning**
-> Playground is unreleased. It is merged to main and ships in the next package, v3.16. The packaged 3.15 build doesn't have it.
+[Try this in the live demo](../reference/try-it-live.md). Use an image stands in for your Figma layers there, and Insert as layers needs Figma.
 
 Select two or more layers and Klinos can arrange them as one picture: along an arc, as a cover flow, a fan, a cylinder, a tunnel or a stack. Each layer becomes one card.
 
@@ -53,8 +52,7 @@ One card faces you. The others step out to the sides and back, turned so their i
 
 Use it to feature one screen with the rest around it.
 
-> **Warning**
-> **Unreleased:** a Cover flow update lets the side cards overlap the focus card. Centre gap goes negative, down to -75%. The Focus card becomes a number field with a **Middle** option, and you can click a card in the preview to focus it. It is merged to main and ships in the next package, v3.16. The packaged 3.15 build doesn't have it.
+A Cover flow update lets the side cards overlap the focus card. Centre gap goes negative, down to -75%. The Focus card becomes a number field with a **Middle** option, and you can click a card in the preview to focus it.
 
 ### Fan
 

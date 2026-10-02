@@ -1,8 +1,13 @@
 ---
-// Header: logo + "Klinos Docs", search, version badge, theme toggle.
+// Header: logo + "Klinos Docs", search, Try it live, version badge, theme toggle.
 import Search from 'virtual:starlight/components/Search';
 import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
 import { KLINOS_VERSION } from '../../config';
+
+const LIVE = '/using-klinos/reference/try-it-live/';
+const onLive = Astro.url.pathname === LIVE;
+const tryIcon =
+	'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.8" y="2.8" width="12.4" height="10.4" rx="2"/><path d="M6.6 6v4l3.4-2z" fill="currentColor" stroke="none"/></svg>';
 ---
 
 <div class="header k-header">
@@ -16,9 +21,11 @@ import { KLINOS_VERSION } from '../../config';
 		</a>
 	</div>
 	<div class="sl-flex print:hidden k-search">
+		<a class="k-try-icon" href={LIVE} aria-label="Try it live" aria-current={onLive ? 'page' : undefined} set:html={tryIcon} />
 		<Search />
 	</div>
 	<div class="sl-hidden md:sl-flex print:hidden right-group">
+		<a class="k-try" href={LIVE} aria-current={onLive ? 'page' : undefined}><Fragment set:html={tryIcon} />Try it live</a>
 		<span class="k-badge" title="Packaged build">v{KLINOS_VERSION}</span>
 		<ThemeSelect />
 	</div>

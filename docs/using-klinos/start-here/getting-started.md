@@ -5,6 +5,9 @@ order: 3
 lastUpdated: "[VERIFY: date]"
 ---
 
+> **Tip**
+> Not installed yet? [Try Klinos in your browser first](../reference/try-it-live.md).
+
 This page shows where to find Klinos and walks you through your first mockup.
 
 ## Open Klinos

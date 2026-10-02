@@ -7,9 +7,6 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Playground
 
-> **Warning**
-> Playground is unreleased. It is merged to main and ships in the next package, v3.16. The packaged 3.15 build doesn't have it.
-
 Playground has a short guide built into the panel, and a Reset layout control on every layout. This page covers both.
 
 ## Open the in-app guide
@@ -20,15 +17,17 @@ Playground has a short guide built into the panel, and a Reset layout control on
 
 The guide only opens from the (?). It never opens by itself.
 
-### What the guide covers
+### In-app guide: Using Playground
 
-1. **Select layers.** Images, shapes, frames or components. One layer becomes one card. Two or more can be arranged.
-2. **Set the angle.** Drag the preview, or use Tilt, Turn, Roll and Perspective. The image is always the size of your selection.
-3. **Pick a layout.** Turn on Arrange as a layout and pick Arc, Cover flow, Fan, Cylinder, Tunnel or Stack. Drag rows in the Selection card to change the order.
-4. **Insert image or Insert as layers.** Insert as layers works for Arc, Fan and Stack when Perspective, Tilt and Turn are 0.
-5. **Refresh.** Select something you inserted, edit it, then click Refresh image or Rebuild layers.
-6. **Exploded layers.** Select one frame and pick Exploded. Use the layer list to hide, keep in the Base, or Merge ↓.
-7. **Reset layout.** Puts the current layout's settings back to their defaults.
+Playground shows any Figma layer as a flat card at an angle. There is no device.
+
+1. ![](/guides/playground-step-1.svg) **Select layers** Select any layers in Figma: images, shapes, frames or components. One layer becomes one card. Two or more can be arranged.
+2. ![](/guides/playground-step-2.svg) **Set the angle** Drag the preview, or use Tilt, Turn, Roll and Perspective. The image is always the size of your selection.
+3. ![](/guides/playground-step-3.svg) **Pick a layout** Turn on **Arrange as a layout** and pick Arc, Cover flow, Fan, Cylinder, Tunnel or Stack. Drag the sliders to shape it. Drag rows in the Selection card to change the order. In Cover flow, click a card in the preview to bring it to the front.
+4. ![](/guides/playground-step-4.svg) **Insert image or Insert as layers** **Insert image** places a picture and keeps any angle. **Insert as layers** places editable copies of your layers. It works for Arc, Fan and Stack when the view is flat: Perspective, Tilt and Turn at 0.
+5. ![](/guides/playground-step-5.svg) **Refresh** Select something you inserted. Your settings come back. Edit them, then click **Refresh image** or **Rebuild layers** to update it in place.
+6. ![](/guides/playground-step-6.svg) **Exploded layers** Select one frame and pick Exploded. Its layers stack apart in depth. In the layer list, hide a layer, keep it in the **Base**, or **Merge ↓** it into the card below. Reset in the list goes back to the automatic grouping.
+7. ![](/guides/playground-step-7.svg) **Reset layout** **Reset layout** puts the current layout's settings back to their defaults. Undo appears in the status bar for a few seconds. Double-click a slider's name or value to reset only that slider. Nothing else changes: not your selection, the angle, the background or the layer list.
 
 ## Reset a whole layout
 

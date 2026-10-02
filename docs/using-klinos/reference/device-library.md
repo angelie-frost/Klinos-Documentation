@@ -18,7 +18,7 @@ Every device Klinos can render, in Studio and Photoreal. Sizes are in millimetre
 - **Design frame:** 360 wide, about 800 tall. Any frame that is 360 wide works.
 - **Options:** Polished frame, Surface texture (default 65%, whole unibody), Match a photo
 - **Brightness:** up to 105%
-- **Notes:** The camera plateau is part of the model. The detailed back cameras are unreleased.
+- **Notes:** The camera plateau is part of the model.
 
 ### iPhone 13
 

@@ -1,5 +1,5 @@
 ---
-// One round toggle. The first visit follows the system; a click switches light/dark and is remembered.
+// One round toggle. The first visit opens in light (ThemeProvider.astro); a click switches light/dark and is remembered.
 // Uses Starlight's storage key so its inline ThemeProvider sets the theme before paint (no flash).
 ---
 
@@ -19,17 +19,8 @@
 <script>
 	const KEY = 'starlight-theme';
 	const root = document.documentElement;
-	const mq = matchMedia('(prefers-color-scheme: light)');
 
-	const stored = (): 'light' | 'dark' | null => {
-		try {
-			const v = localStorage.getItem(KEY);
-			return v === 'light' || v === 'dark' ? v : null;
-		} catch {
-			return null;
-		}
-	};
-	const current = () => (root.dataset.theme === 'light' ? 'light' : 'dark');
+	const current = () => (root.dataset.theme === 'dark' ? 'dark' : 'light');
 
 	function sync() {
 		const next = current() === 'dark' ? 'light' : 'dark';
@@ -45,10 +36,6 @@
 		sync();
 		window.dispatchEvent(new CustomEvent('klinos:theme', { detail: theme }));
 	}
-
-	mq.addEventListener('change', () => {
-		if (!stored()) apply(mq.matches ? 'light' : 'dark');
-	});
 
 	class KlinosThemeToggle extends HTMLElement {
 		connectedCallback() {

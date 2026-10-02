@@ -7,6 +7,8 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Studio
 
+[Try this in the live demo](../reference/try-it-live.md)
+
 The Device card sets which device your design sits on and what it is made of. You pick a device, a finish, and two optional extras: Polished frame and Surface texture.
 
 ## Pick a device
@@ -45,36 +47,66 @@ Most finishes were colour-matched to photos of the real device. A few were not, 
 
 ## Polished frame (phones only)
 
-Polished frame turns a phone's satin metal frame into a mirror-polished one. The rounded edge picks up a sharp line of light that fades to darker tones across the curve. It is off by default.
+Polished frame is on the three phones only, and it is off by default. The (?) next to its switch opens the in-app guide below.
 
-1. Turn on **Polished frame**.
-2. Pick a colour. **Match finish** polishes the frame in the phone's own finish. **Graphite**, **Pacific Blue**, **Deep Purple**, **Rose Gold** or a **Custom colour** recolour the whole body in that metal.
-3. Set **Shine**: 0% is satin, 100% is polished (the default), 150% is a brighter mirror.
+### In-app guide: Polished frame
 
-Picking a finish again takes you back to Match finish. The (?) next to the switch opens a short guide.
+Turns the phone's satin metal frame into a **mirror-polished** one. Instead of a soft, even sheen, the rounded edge picks up a **sharp line of light** that fades to darker tones across the curve - the look of polished steel or chrome.
 
-> **Tip**
-> A mirror needs lights to reflect. Stage, Keynote and Studio White give crisp lines; Calibrated is softer. The frame also has to be in view: Turn, Laid and Steep angles show the rails, a straight-on front view hides them.
+#### How the shine works
 
-> **Warning**
-> Polished frame is art direction, not a colour-matched finish. Turn it off to get the standard finish back exactly.
+![Cross-section of the rounded frame: a light at the top left reflects off the top of the curve toward the camera, making a bright line that fades around the curve](/guides/polish-frame.svg)
+
+A mirror only shows a light where the surface faces halfway between the light and the camera. On a **rounded** edge that happens along one narrow line, so the frame gets a bright stripe with the rest of the curve falling away to dark. **Turn the phone** and the line slides around the curve, as it does on the real thing.
+
+#### Using it
+
+1. **Turn on Polished frame.** Existing mockups stay as they were until you do.
+2. **Pick a colour.** **Match finish** polishes the frame in the phone's own finish. **Graphite**, **Pacific Blue**, **Deep Purple**, **Rose Gold** or a **custom colour** recolour the **whole body** in that metal. Picking a Finish again takes you back to Match finish.
+3. **Set the Shine.**
+
+![Shine at 0% - satin, 100% - polished (default) and 150% - brighter mirror](/guides/polish-shine.html)
+
+Below 100% the polish fades back into the satin frame; above it the mirror gets brighter. 100% is the standard polished look.
+
+#### Getting the best result
+
+**Lighting:** a mirror needs lights to reflect. **Stage**, **Keynote** and **Studio White** have sharp softboxes that give crisp lines; Calibrated is softer. **Angle:** the frame has to be in view - **Turn**, **Laid** and **Steep** show the rails, a straight-on front view hides them. **Moving the lights** (Edit lights) moves the highlight line.
+
+This is **art direction**, not a colour-matched finish: the standard finishes are fitted to photos of the real phones, the polish is styled by eye. Turning it off gives back exactly the standard finish.
 
 ## Surface texture
 
-Surface texture adds the fine grain of bead-blasted, anodised metal, so the body reads as metal rather than plastic up close. It works on every device and is off by default.
+Surface texture works on every device and is off by default.
 
 1. Turn on **Surface texture**.
 2. Adjust **Strength** (0 to 150%). Each device starts at its own default. Click **Default** to put it back.
 
-| Device | Where the texture goes | Default |
-|---|---|---|
-| MacBook Pro 16″ | Whole aluminium body | 100% |
-| iPad Pro 11″ | Whole body | 85% |
-| iPhone 17 Pro | Whole unibody | 65% |
-| Galaxy S26 | Frame and frosted-glass back | 55% |
-| iPhone 13 | Aluminium frame and buttons only | 45% |
+The (?) next to its switch opens the in-app guide below.
 
-Moving the slider changes only the device you are on. Only the MacBook's default is matched to a photo; the others are art direction.
+### In-app guide: Surface texture
+
+Real device metal is not perfectly smooth. Bead-blasted, anodised aluminium has a fine **grain** - tiny dents that scatter light - and a faint, larger **mottle** from the anodising. Surface texture adds both, so the body reads as metal rather than plastic when you look closely.
+
+#### What you will see
+
+![Small mockup - a soft tooth, Large export - fine grain, Zoomed in - visible grain](/guides/grain-strip.html)
+
+Like the real surface, the grain is smaller than a pixel at ordinary sizes: there it only takes the plastic sheen off. It resolves as you **zoom the preview** or **export at 2x or more**. It never shimmers or stair-steps - each layer of it fades out once it is finer than the render can show.
+
+#### Strength
+
+Each device starts at its own **default**, set to how coarse its finish is. The MacBook's 100% reproduces the grain in Apple's own MacBook Pro product shot at that shot's scale; the iPad Pro, iPhone 17 Pro, Galaxy S26 and iPhone 13 are progressively finer. Moving the slider changes only the device you are on; **Default** puts it back.
+
+| Device | Where the texture goes |
+|---|---|
+| MacBook | Whole aluminium body. Default 100%. |
+| iPad Pro | Whole body. Default 85%. |
+| iPhone 17 Pro | Whole unibody. Default 65%. |
+| Galaxy S26 | Frame and the frosted-glass back. Default 55%. |
+| iPhone 13 | The aluminium frame and buttons only - its back is glossy glass. Default 45%. |
+
+It works with every finish and with Polished frame: a polished rail stays a clean mirror while the rest of the body keeps its grain. Only the MacBook's value is anchored to a photo; the rest are art direction. Off gives back exactly the smooth finish.
 
 ## What you'll see
 

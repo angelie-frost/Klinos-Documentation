@@ -7,9 +7,6 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Playground
 
-> **Warning**
-> Playground is unreleased. It is merged to main and ships in the next package, v3.16. The packaged 3.15 build doesn't have it.
-
 Playground can place its result two ways. **Insert image** places a picture and keeps any angle. **Insert as layers** places editable copies of your layers, rotated and positioned like the preview.
 
 ## Insert image

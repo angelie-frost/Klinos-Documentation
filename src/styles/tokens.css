@@ -1,6 +1,6 @@
 /* Klinos Docs tokens ("Panel, Unfolded"), taken from design/klinos-docs-prototype.html,
    and mapped onto Starlight's custom properties. Starlight's ThemeProvider always sets
-   data-theme on <html> before paint (stored choice, else the system setting). */
+   data-theme on <html> before paint (the stored choice, else light). */
 
 :root {
 	--k-font-display: 'Inter Tight', 'Inter', -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
@@ -27,6 +27,35 @@
 	--k-r-pill: 999px;
 	--k-scroll-w: 8px;
 
+	/* Light is the default theme. */
+	color-scheme: light;
+	--k-surface: #ffffff;
+	--k-sunk: #f5f5f7;
+	--k-hover: #fafafa;
+	--k-nav-active: #ebebee;
+	--k-stage: #f2f2f4;
+	--k-stage-line: transparent;
+	--k-line: #ededf0;
+	--k-line2: #dedee3;
+	--k-ink: #0a0a0b;
+	--k-onink: #ffffff;
+	--k-ink2: #6e6e73;
+	--k-caption: #636366;
+	--k-ink3: #8e8e93;
+	--k-ok: #14ae5c;
+	--k-ok-text: #0e7a41;
+	--k-ok-bg: #eef8f2;
+	--k-ok-line: #bfe6cf;
+	--k-warn: #b86200;
+	--k-warn-text: #9a5200;
+	--k-warn-bg: #fdf4ea;
+	--k-warn-line: #f1d3ae;
+	--k-focus: #0a0a0b;
+	--k-clip-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 6px 24px rgba(0, 0, 0, 0.08);
+	--k-pop-shadow: 0 8px 24px rgba(10, 10, 11, 0.1);
+}
+
+:root[data-theme='dark'] {
 	/* Dark: Vercel-style near-black */
 	color-scheme: dark;
 	--k-surface: #0a0a0a;
@@ -55,37 +84,9 @@
 	--k-pop-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-:root[data-theme='light'] {
-	color-scheme: light;
-	--k-surface: #ffffff;
-	--k-sunk: #f5f5f7;
-	--k-hover: #fafafa;
-	--k-nav-active: #ebebee;
-	--k-stage: #f2f2f4;
-	--k-stage-line: transparent;
-	--k-line: #ededf0;
-	--k-line2: #dedee3;
-	--k-ink: #0a0a0b;
-	--k-onink: #ffffff;
-	--k-ink2: #6e6e73;
-	--k-caption: #636366;
-	--k-ink3: #8e8e93;
-	--k-ok: #14ae5c;
-	--k-ok-text: #0e7a41;
-	--k-ok-bg: #eef8f2;
-	--k-ok-line: #bfe6cf;
-	--k-warn: #b86200;
-	--k-warn-text: #9a5200;
-	--k-warn-bg: #fdf4ea;
-	--k-warn-line: #f1d3ae;
-	--k-focus: #0a0a0b;
-	--k-clip-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 6px 24px rgba(0, 0, 0, 0.08);
-	--k-pop-shadow: 0 8px 24px rgba(10, 10, 11, 0.1);
-}
-
 /* Starlight mapping (both themes resolve through the --k-* tokens above). */
 :root,
-:root[data-theme='light'] {
+:root[data-theme='dark'] {
 	--sl-font: var(--k-font-body);
 	--sl-font-mono: var(--k-font-mono);
 

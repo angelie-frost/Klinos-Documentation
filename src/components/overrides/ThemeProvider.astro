@@ -1,0 +1,16 @@
+---
+// Starlight's ThemeProvider, changed so that a first visit (nothing stored) opens in light,
+// whatever the system setting. Inlined to set the theme before first paint (no flash).
+// Starlight's dropdown picker is replaced by our round toggle (ThemeSelect.astro), so its icon template is not needed.
+---
+
+<script is:inline>
+	window.StarlightThemeProvider = (() => {
+		let storedTheme = null;
+		try {
+			storedTheme = localStorage.getItem('starlight-theme');
+		} catch {}
+		document.documentElement.dataset.theme = storedTheme === 'dark' ? 'dark' : 'light';
+		return { updatePickers() {} };
+	})();
+</script>

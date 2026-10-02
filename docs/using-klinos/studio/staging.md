@@ -7,9 +7,6 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Studio
 
-> **Warning**
-> Staging is unreleased. It is merged to main and ships in the next package, v3.16. The packaged 3.15 build doesn't have it.
-
 The Staging card has ready-made scenes. A scene sets the Look, backdrop, shadow, angle and size for you. Every value stays editable afterwards in its own card.
 
 ## Apply a scene

@@ -7,9 +7,6 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Playground
 
-> **Warning**
-> Playground is unreleased. It is merged to main and ships in the next package, v3.16. The packaged 3.15 build doesn't have it.
-
 Exploded layers is the "anatomy of a screen" shot. Klinos takes one frame and stacks its layers apart in depth, so you can show how the screen is built.
 
 ## Explode a frame

@@ -13,11 +13,11 @@ lastUpdated: "[VERIFY: date]"
 
 `tools/build.py --package` refuses to build if `VERSION` and the zip number disagree. That way the label in the panel always names the zip it shipped in.
 
-## Unreleased work
+## Work between packages
 
 Work after a package keeps the last `VERSION` until the next package.
 
-Today `VERSION` is 3.15 and the newest package is `dist/klinos-v3-15.zip`. Staging, the back cameras, card reordering, Playground and the Cover flow overlap are merged to `main` but not packaged. They will ship together in the next package, v3.16. The labels "v3-16" and "v3-17" in the handoff notes were only working labels.
+Today `VERSION` is 3.15 and the newest package is `dist/klinos-v3-15.zip`. The labels "v3-16" and "v3-17" in the handoff notes were only working labels.
 
 ## The plugin ID
 

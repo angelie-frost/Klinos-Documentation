@@ -37,7 +37,7 @@ Playground sync and export requests carry a sequence number. Stale replies are d
 | Mesh building | `buildPhone13()`, `buildPhone17()`, `buildLaptop()`, `buildTablet()` in `src/ui.html`, from the shaders' own constants |
 | Backdrop and sweep | `src/shaders/backdrop.glsl` |
 | Playground cards | `src/shaders/card.glsl` |
-| Staging props | `src/shaders/prop.glsl` (unreleased feature) |
+| Staging props | `src/shaders/prop.glsl` |
 | Looks | `LOOKS` in `src/ui.html` |
 | Photoreal renders | `src/assets/*.b64` and `src/assets/photoreal.json`, generated from `reference/photoreal/` |
 | What lands on the Figma canvas | `code.js` |

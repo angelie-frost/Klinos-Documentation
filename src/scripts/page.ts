@@ -88,3 +88,95 @@ if (pane && currentLink) {
 		pane.scrollTop += a.top - p.top - p.height / 2 + a.height / 2;
 	}
 }
+
+/* ---------- Media: lightbox for images ---------- */
+const zoomButtons = document.querySelectorAll<HTMLButtonElement>('[data-zoom]');
+if (zoomButtons.length) {
+	const box = document.createElement('dialog');
+	box.className = 'lightbox';
+	box.setAttribute('aria-label', 'Enlarged image');
+	box.innerHTML =
+		'<button class="lightbox-close" type="button" aria-label="Close">&times;</button><figure><img alt=""><figcaption></figcaption></figure>';
+	document.body.append(box);
+	const img = box.querySelector('img')!;
+	const cap = box.querySelector('figcaption')!;
+	let opener: HTMLElement | null = null;
+	const close = () => box.open && box.close();
+	box.querySelector('.lightbox-close')!.addEventListener('click', close);
+	// Click on the dim backdrop (outside the figure) closes; Esc closes natively (the 'cancel' event).
+	box.addEventListener('click', (e) => {
+		if (e.target === box) close();
+	});
+	box.addEventListener('close', () => opener?.focus());
+	zoomButtons.forEach((btn) =>
+		btn.addEventListener('click', () => {
+			// The variant that is visible in the current theme.
+			const shown = [...btn.querySelectorAll('img')].find((i) => i.offsetParent !== null) ?? btn.querySelector('img');
+			if (!shown) return;
+			opener = btn;
+			img.src = shown.currentSrc || shown.src;
+			img.alt = shown.alt;
+			cap.textContent = btn.closest('figure')?.querySelector('figcaption span')?.textContent ?? '';
+			box.showModal(); // modal dialog: focus moves inside and stays there until it closes
+		})
+	);
+}
+
+/* ---------- Media: videos play while visible, with a pause control; reduced motion shows the poster ---------- */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const videoBoxes = document.querySelectorAll<HTMLElement>('.clip-media.is-video');
+if (videoBoxes.length) {
+	const visibleVideo = (box: HTMLElement) =>
+		[...box.querySelectorAll<HTMLVideoElement>('video')].find((v) => v.offsetParent !== null) ?? null;
+	const setButton = (box: HTMLElement, playing: boolean) => {
+		const b = box.closest('figure')?.querySelector<HTMLButtonElement>('[data-media-toggle]');
+		if (!b) return;
+		b.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+		b.dataset.state = playing ? 'playing' : 'paused';
+	};
+	const pausedByUser = new WeakSet<HTMLElement>();
+	const playBox = (box: HTMLElement) => {
+		box.querySelectorAll('video').forEach((v) => v !== visibleVideo(box) && v.pause());
+		const v = visibleVideo(box);
+		if (!v) return;
+		v.play().then(
+			() => setButton(box, true),
+			() => setButton(box, false)
+		);
+	};
+	const pauseBox = (box: HTMLElement) => {
+		box.querySelectorAll('video').forEach((v) => v.pause());
+		setButton(box, false);
+	};
+	const io = new IntersectionObserver(
+		(entries) => {
+			for (const e of entries) {
+				const box = e.target as HTMLElement;
+				if (e.isIntersecting && !reduceMotion.matches && !pausedByUser.has(box)) playBox(box);
+				else pauseBox(box);
+			}
+		},
+		{ threshold: 0.35 }
+	);
+	videoBoxes.forEach((box) => {
+		setButton(box, false);
+		io.observe(box);
+		box.closest('figure')?.querySelector('[data-media-toggle]')?.addEventListener('click', () => {
+			const v = visibleVideo(box);
+			if (v && !v.paused) {
+				pausedByUser.add(box);
+				pauseBox(box);
+			} else {
+				pausedByUser.delete(box);
+				playBox(box);
+			}
+		});
+	});
+	// Theme switch: the other variant becomes visible, so restart whichever is now shown.
+	window.addEventListener('klinos:theme', () =>
+		videoBoxes.forEach((box) => {
+			const playing = [...box.querySelectorAll('video')].some((v) => !v.paused);
+			if (playing) playBox(box);
+		})
+	);
+}

@@ -1,0 +1,11 @@
+{
+  "type": "image",
+  "w": 684,
+  "h": 1024,
+  "light": {
+    "src": "5.webp"
+  },
+  "dark": {
+    "src": "5-dark.webp"
+  }
+}

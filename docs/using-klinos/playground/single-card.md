@@ -7,8 +7,7 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Playground
 
-> **Warning**
-> Playground is unreleased. It is merged to main and ships in the next package, v3.16. The packaged 3.15 build doesn't have it.
+[Try this in the live demo](../reference/try-it-live.md). Use an image stands in for your Figma layer there.
 
 Playground shows any Figma layer as a flat card at an angle. There is no device, no material and no light. The layer itself is never changed.
 

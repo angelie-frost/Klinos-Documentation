@@ -7,11 +7,9 @@ lastUpdated: "[VERIFY: date]"
 
 The packaged build is **v3.15**. Dates are not recorded in the repository.
 
-## Unreleased: merged to main, ships in the next package (v3.16)
+## v3.16
 
-`v3.16` · [VERIFY: date]
-
-These changes are merged to main but not packaged yet. The plugin still shows v3.15. They will ship together in the next package, v3.16.
+`v3.16`
 
 **What's new**
 - **Staging.** Ready-made scenes: Plain, Floating, Gradient sweep, Podium, Plinth and Spotlight, with Revert. A new Spotlight Look.
@@ -35,7 +33,7 @@ These changes are merged to main but not packaged yet. The plugin still shows v3
 
 ## v3.15 · Packaged
 
-`v3.15` · [VERIFY: date] · The current packaged build.
+`v3.15` · The current packaged build.
 
 **What's new**
 - **Photoreal mode:** iPhone 17 Pro in two finishes and MacBook Pro 14″ renders, with your design keyed into the screen.
@@ -48,7 +46,7 @@ These changes are merged to main but not packaged yet. The plugin still shows v3
 
 ## v3.14
 
-`v3.14` · [VERIFY: date]
+`v3.14`
 
 **What's new**
 - **Match a photo:** remove the photo, Reset corners, and Undo angle after Apply.
@@ -63,7 +61,7 @@ These changes are merged to main but not packaged yet. The plugin still shows v3
 
 ## v3.13
 
-`v3.13` · [VERIFY: date]
+`v3.13`
 
 **What's new**
 - **Shine** slider for Polished frame, and body recolour: Graphite, Pacific Blue, Deep Purple, Rose Gold and custom colours.
@@ -73,14 +71,14 @@ These changes are merged to main but not packaged yet. The plugin still shows v3
 
 ## v3.12
 
-`v3.12` · [VERIFY: date]
+`v3.12`
 
 **What's new**
 - **Polished frame** for the phones, off by default.
 
 ## v3.11
 
-`v3.11` · [VERIFY: date]
+`v3.11`
 
 **What's new**
 - **Lighting editor** redesign.
@@ -90,21 +88,21 @@ These changes are merged to main but not packaged yet. The plugin still shows v3
 
 ## v3.10
 
-`v3.10` · [VERIFY: date]
+`v3.10`
 
 **What's new**
 - **Device position:** drag, X and Y, and Center.
 
 ## v3.9
 
-`v3.9` · [VERIFY: date]
+`v3.9`
 
 **What's new**
 - **Galaxy S26,** with its shape taken from Samsung's views and the Black finish fitted.
 
 ## v3.8
 
-`v3.8` · [VERIFY: date]
+`v3.8`
 
 **What's fixed**
 - The iPhone 13 finishes are re-fitted: Midnight, Blue, Pink and Starlight.

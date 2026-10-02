@@ -7,6 +7,8 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Studio
 
+[Try this in the live demo](../reference/try-it-live.md)
+
 The Lighting card sets how the device is lit. You pick a Look, check it against a neutral background, and fine-tune the lights if you need to.
 
 ## How lighting works
@@ -38,7 +40,7 @@ A Look is a ready-made set of these lights. Calibrated is the default. It is V2'
 | Studio White | Bright seamless white, a big overhead diffuser and narrow side strips for crisp edges. |
 | Warm | A low warm key from the left and a cool rim from behind. Late-afternoon studio. |
 | Keynote | Graphite stage built around the laptop: a big soft overhead, a low rake that picks out the keys and ports, a cool rim along the lid, and almost nothing on the glass. |
-| Spotlight (unreleased) | One narrow light from above on a near-black stage, a faint rim behind and just enough front light to read the glass. |
+| Spotlight | One narrow light from above on a near-black stage, a faint rim behind and just enough front light to read the glass. |
 
 > **Warning**
 > Picking a Look replaces your backdrop colour, sweep and reflection with the Look's own. Set the Look first, then adjust the backdrop.
@@ -47,27 +49,39 @@ A Look is a ready-made set of these lights. Calibrated is the default. It is V2'
 
 Open **Edit lights**. Its summary shows how many lights are on and which Look you are on. Inside you get a plot, a list and the controls for the selected light. While Edit lights is open, the (?) button next to it opens the in-app guide, "How lighting works".
 
+## In-app guide: How lighting works
+
+This is the guide the (?) next to **Edit lights** opens in the panel.
+
+The device is lit by up to **six softboxes** - flat, rectangular lights - plus a soft **ambient** glow from the whole studio. What you see on the device are their **reflections**: a light shows where its reflection lands on the glass and metal, so moving it changes where the highlights fall.
+
 ### The plot
 
-You look down from above. The camera is at the bottom and behind is at the top. Each dot is a light, drawn in its colour and size. Drag a dot to move that light: around the circle changes Around, and from the edge toward the centre raises it.
+![The light plot seen from above: the camera at the bottom, overhead at the centre, the horizon at the edge](/guides/lighting-plot.svg)
+
+You are looking down from above. The camera is at the bottom and **behind** is at the top. Each dot is a light: its colour is the light's colour, its size the light's size. **Drag a dot** to move that light: going around the circle changes **Around**; going from the edge to the centre raises it, from level at the rim to straight overhead in the middle.
 
 ### The list
 
-Click a light to select it. **Add** creates a new one, up to six. **Remove** deletes the selected one. **Reset** puts the chosen Look's lights back. Editing any light turns the Look into Custom.
+Click a light to select it; the controls below then edit that light. **Add** creates a new one (up to six), **Remove** deletes the selected one, and **Reset** puts the chosen Look's lights back. Editing any light turns the Look into **Custom**.
 
 ### Controls for the selected light
 
 | Control | What it does |
 |---|---|
-| On | Switches the light off without losing its settings. |
-| Around | Where it sits around the device, in degrees. 0 is beside the camera, ±90 is right or left, 180 is behind. |
-| Height | 0 is level with the device, 90 is straight overhead. Below 0 it lights from underneath. |
+| On | Switch the light off without losing its settings. |
+| Around | Where it sits around the device, in degrees. 0 is beside the camera, ±90 is to the right or left, 180 is behind. |
+| Height | How high it is. 0 is level with the device, 90 is straight overhead; below 0 it lights from underneath. |
 | Width | How wide the softbox is. Bigger lights give broader, gentler highlights. |
-| Length | How tall the softbox is. Long, thin lights make strip highlights along the rails. |
+| Length | How tall the softbox is. Long, thin lights make the strip highlights you see along the rails. |
 | Intensity | How bright this light is, independent of the others. |
-| Softness | How gradually its edge fades. Low gives a crisp reflection, high a diffuse glow. |
-| Colour | The light's tint. |
-| Ambient | The soft light from the whole studio. It sets how dark the unlit parts of the device get. |
+| Softness | How gradually its edge fades. Low gives a crisp-edged reflection, high a diffuse glow. |
+| Colour | The light's tint - warm, cool or anything else. |
+| Ambient | The soft light from the whole studio at once. It sets how dark the unlit parts of the device get. |
+
+### Seeing the lights
+
+**Preview background** above changes only what is behind the device in the preview: **Grey** and **Dark** make highlights easy to judge, and **Lights** draws the rig itself around the device, with the camera side in the middle. **Reference spheres** adds a chrome ball, which mirrors every light's position and shape, and a grey ball, which shows the overall direction. Neither is ever exported. **Brightness** scales every light at once without moving any.
 
 ## What you'll see
 

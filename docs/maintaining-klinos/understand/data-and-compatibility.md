@@ -12,7 +12,7 @@ lastUpdated: "[VERIFY: date]"
 | A mockup's settings | Plugin data on the inserted node, key `perspectiveMockup` | Travels with the Figma file |
 | Panel layout | `figma.clientStorage`, key `layout` | Per user, per plugin, on one machine |
 | Theme | `figma.clientStorage`, key `theme` | Per user, per plugin |
-| Card order | `figma.clientStorage`, key `cardOrder` | Per user, per mode (unreleased feature) |
+| Card order | `figma.clientStorage`, key `cardOrder` | Per user, per mode |
 
 `clientStorage` can be cleared, and it never goes in the file. In the standalone preview, card order is kept in `localStorage` under `klinos-card-order`.
 

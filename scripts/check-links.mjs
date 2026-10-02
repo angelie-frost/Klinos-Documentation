@@ -37,7 +37,7 @@ const problems = [];
 for (const file of htmlFiles) {
 	const html = readFileSync(file, 'utf8');
 	const pageUrl = '/' + relative(DIST, file).split(sep).join('/').replace(/index\.html$/, '');
-	for (const m of html.matchAll(/\s(href|src)="([^"]*)"/g)) {
+	for (const m of html.matchAll(/\s(href|src|poster)="([^"]*)"/g)) {
 		const raw = decode(m[2]);
 		if (!raw || /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(raw)) continue; // external, data:, mailto:, etc.
 		checked++;

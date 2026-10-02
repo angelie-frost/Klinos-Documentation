@@ -228,11 +228,11 @@ klinos-theme-toggle {
 	opacity: 0;
 	transform: rotate(-30deg);
 }
-:root:not([data-theme='light']) .themebtn .i-sun {
+:root[data-theme='dark'] .themebtn .i-sun {
 	opacity: 0;
 	transform: rotate(30deg);
 }
-:root:not([data-theme='light']) .themebtn .i-moon {
+:root[data-theme='dark'] .themebtn .i-moon {
 	opacity: 1;
 	transform: none;
 }
@@ -956,4 +956,326 @@ footer .meta:empty {
 	font-size: 0.88em;
 	font-weight: 500;
 	white-space: nowrap;
+}
+
+/* ======================= Stage 3 ======================= */
+
+/* ---------- Captured media: theme variants, zoom, video control ---------- */
+:root[data-theme='dark'] .media-light,
+:root:not([data-theme='dark']) .media-dark {
+	display: none !important;
+}
+.clip-media.is-image,
+.clip-media.is-video {
+	aspect-ratio: auto;
+	background: transparent;
+	box-shadow: var(--k-clip-shadow);
+}
+.clip-media.is-image img,
+.clip-media.is-video video {
+	width: 100%;
+	height: auto;
+	object-fit: contain;
+	display: block;
+}
+.sl-markdown-content .clip-media .zoom {
+	all: unset;
+	display: block;
+	width: 100%;
+	cursor: zoom-in;
+	margin: 0;
+}
+.sl-markdown-content .clip-media .zoom:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+}
+.sl-markdown-content .media-toggle {
+	flex: none;
+	width: 28px;
+	height: 28px;
+	margin: 0;
+	display: grid;
+	place-items: center;
+	border: 1px solid var(--k-line2);
+	border-radius: 50%;
+	background: var(--k-surface);
+	color: var(--k-ink);
+	cursor: pointer;
+	opacity: 0.92;
+}
+.media-toggle:hover {
+	opacity: 1;
+}
+.media-toggle svg {
+	width: 14px;
+	height: 14px;
+	grid-area: 1/1;
+	margin: 0;
+}
+.media-toggle[data-state='playing'] svg:first-child,
+.media-toggle:not([data-state='playing']) svg:last-child {
+	display: none;
+}
+.sl-markdown-content .clip.has-media figcaption span {
+	max-width: 60ch;
+}
+
+/* Lightbox */
+dialog.lightbox {
+	max-width: min(96vw, 1600px);
+	max-height: 94vh;
+	padding: 0;
+	border: 0;
+	border-radius: var(--k-r-media);
+	background: var(--k-surface);
+	box-shadow: var(--k-pop-shadow);
+	overflow: hidden;
+}
+dialog.lightbox::backdrop {
+	background: rgba(10, 10, 11, 0.72);
+}
+dialog.lightbox figure {
+	margin: 0;
+	padding: var(--k-s4);
+}
+dialog.lightbox img {
+	display: block;
+	max-width: calc(96vw - 32px);
+	max-height: calc(94vh - 90px);
+	width: auto;
+	height: auto;
+	margin: 0 auto;
+}
+dialog.lightbox figcaption {
+	margin-top: var(--k-s3);
+	font-size: var(--k-fs-cap);
+	color: var(--k-caption);
+	max-width: 70ch;
+}
+.lightbox-close {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 32px;
+	height: 32px;
+	border: 1px solid var(--k-line2);
+	border-radius: 50%;
+	background: var(--k-surface);
+	color: var(--k-ink);
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+/* ---------- In-app guide visuals (ported from the panel's .helpfig, .shinestrip, .plsteps) ---------- */
+.sl-markdown-content .guide-fig {
+	display: flex;
+	gap: var(--k-s4);
+	align-items: center;
+	padding: var(--k-s4);
+	background: var(--k-sunk);
+	border-radius: var(--k-r-media);
+}
+.guide-art {
+	flex: none;
+	color: var(--k-ink);
+}
+.guide-art svg {
+	width: 150px;
+	height: auto;
+	display: block;
+}
+.guide-art .ring {
+	fill: none;
+	stroke: var(--k-line2);
+}
+.guide-art .lbl {
+	font-size: 8px;
+	fill: var(--k-ink2);
+	font-family: var(--k-font-body);
+}
+.sl-markdown-content .guide-fig-text > * {
+	margin: 0;
+}
+.sl-markdown-content .guide-strip {
+	display: block;
+}
+.sl-markdown-content .guide-strip .shinestrip {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--k-s3);
+	margin: 0;
+}
+.sl-markdown-content .guide-strip figure {
+	margin: 0;
+	text-align: center;
+	font-size: var(--k-fs-cap);
+	color: var(--k-ink2);
+}
+.sl-markdown-content .guide-strip svg {
+	width: 100%;
+	height: 40px;
+	display: block;
+	border-radius: 8px;
+	margin: 0 0 6px;
+}
+.sl-markdown-content ol.guide-steps > li {
+	display: grid;
+	grid-template-columns: 34px 1fr;
+	gap: var(--k-s3);
+	align-items: start;
+	padding: 0 0 var(--k-s4);
+}
+.sl-markdown-content ol.guide-steps > li::before,
+.sl-markdown-content ol.guide-steps > li::after {
+	display: none;
+}
+.guide-step-icon svg {
+	width: 34px;
+	height: 34px;
+	padding: 6px;
+	border-radius: 8px;
+	background: var(--k-sunk);
+	color: var(--k-ink);
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.25;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	display: block;
+}
+.guide-step-text > strong:first-child {
+	display: block;
+}
+.guide-step-text > strong:first-child::before {
+	content: counter(step) '. ';
+}
+@media (max-width: 600px) {
+	.sl-markdown-content .guide-fig {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+/* ---------- Try it live: card, inline row, header button ---------- */
+.sl-markdown-content aside.try-card {
+	display: grid;
+	grid-template-columns: 1fr minmax(0, 260px);
+	gap: var(--k-s5);
+	align-items: center;
+	padding: var(--k-s5);
+	border: 1px solid var(--k-line);
+	border-radius: var(--k-r-block);
+	background: var(--k-stage);
+}
+.sl-markdown-content .try-card-body > * {
+	margin: 0;
+}
+.sl-markdown-content .try-card-body > * + * {
+	margin-top: var(--k-s3);
+}
+.sl-markdown-content .try-card-title {
+	font: 600 var(--k-fs-h3) / 1.3 var(--k-font-display);
+	color: var(--k-ink);
+}
+.sl-markdown-content a.try-btn {
+	display: inline-flex;
+	align-items: center;
+	height: 36px;
+	padding: 0 16px;
+	border-radius: var(--k-r-btn);
+	background: var(--k-ink);
+	color: var(--k-onink);
+	font-size: var(--k-fs-sm);
+	font-weight: 500;
+	text-decoration: none;
+}
+.sl-markdown-content a.try-btn:hover {
+	opacity: 0.88;
+	color: var(--k-onink);
+}
+.sl-markdown-content .try-card-art {
+	display: block;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: var(--k-clip-shadow);
+	margin: 0;
+}
+.try-card-art img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+@media (max-width: 640px) {
+	.sl-markdown-content aside.try-card {
+		grid-template-columns: 1fr;
+	}
+}
+.sl-markdown-content p.try-inline {
+	font-size: var(--k-fs-sm);
+	color: var(--k-ink2);
+}
+.sl-markdown-content p.try-inline > svg {
+	width: 16px;
+	height: 16px;
+	color: var(--k-ink);
+	display: inline-block;
+	vertical-align: -3px;
+	margin: 0 6px 0 0;
+}
+.sl-markdown-content p.try-inline > a:first-of-type {
+	font-weight: 500;
+}
+
+/* Header: "Try it live" (secondary: hairline border, never ink-filled) */
+.k-try {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	height: 32px;
+	padding: 0 12px;
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-pill);
+	background: var(--k-surface);
+	color: var(--k-ink);
+	font-size: var(--k-fs-sm);
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.k-try:hover {
+	background: var(--k-hover);
+	border-color: var(--k-ink3);
+	color: var(--k-ink);
+}
+.k-try svg {
+	width: 15px;
+	height: 15px;
+}
+.k-try[aria-current='page'] {
+	background: var(--k-nav-active);
+}
+.k-try-icon {
+	display: none;
+}
+@media (max-width: 49.99rem) {
+	.k-try-icon {
+		display: inline-grid;
+		place-items: center;
+		width: 36px;
+		height: 36px;
+		color: var(--k-ink);
+		border-radius: var(--k-r-nav);
+	}
+	.k-try-icon svg {
+		width: 20px;
+		height: 20px;
+	}
+}
+.sl-markdown-content .clip.has-media figcaption {
+	align-items: center;
+	justify-content: flex-start;
+}
+.sl-markdown-content .clip.has-media figcaption span {
+	flex: 1;
 }

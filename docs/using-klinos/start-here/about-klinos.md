@@ -1,6 +1,6 @@
 ---
 title: About Klinos
-description: What the name means, why the plugin exists, and how V3 grew out of V2.
+description: What the name means, why we built it, and how V3 grew out of V2.
 order: 2
 lastUpdated: "[VERIFY: date]"
 ---
@@ -9,17 +9,17 @@ lastUpdated: "[VERIFY: date]"
 
 Klinos comes from the Greek word *klino*, meaning to tilt or to lean. The name describes what the plugin does: it tilts a device screen into a 3D perspective angle.
 
-## Why it exists
+## Why we built it
 
-Klinos is our in-house Figma plugin for making mockups. It lets you put a frame onto a device, or turn any layer into an angled card, without leaving Figma. The result goes back onto the canvas next to your design.
+The idea started from something small. While searching Pinterest for mockup inspiration for Checkpoint slides, these tilted, floating device mockups kept showing up — a style that stood out and raised a simple question: aside from paid rendering apps, was there a free tool that could achieve the same effect?
 
-The idea started from tilted, floating device mockups seen on Pinterest while looking for inspiration for Checkpoint slides. Existing mockup plugins mostly locked users into fixed presets and were not fully free.
+Existing mockup plugins were available, and while many offered high-quality mockups and preset angle options, most were limited in scope and not entirely free. Few, if any, allowed designers to freely adjust the angle or perspective of a mockup; most locked users into a fixed set of presets.
 
-Klinos is a free Figma plugin with a library of device mockups where you can explore any angle or perspective.
+That gap led to a simple idea: build a Figma plugin around a library of device mockups, with the flexibility to explore any angle or perspective. It's built for anyone who wants to work with this kind of tilted, perspective layout style.
 
 ## Who it's for
 
-The design team, and anyone who wants this tilted, angled mockup style.
+The design team first. Beyond that, anyone who likes this style, as described above.
 
 ## From V2 to V3
 
@@ -40,7 +40,7 @@ The team compared the two before switching. The mesh version came within 0.33 to
 - **Editable lighting.** Looks, plus an editor for the softbox lights. Calibrated is the default and matches V2.
 - **Galaxy S26.** A new device with no V2 version.
 - **Photoreal mode.** Static renders of real devices with your design keyed into the screen.
-- **Playground mode** (unreleased, ships in the next package, v3.16). Any Figma layer as an angled card, or several layers as a layout. This is new in V3, not a V2 feature.
+- **Playground mode.** Any Figma layer as an angled card, or several layers as a layout. This is new in V3, not a V2 feature.
 - **Dark theme.** V2's panel was light only. V3 keeps V2's panel design and adds a dark version on Figma's dark grey.
 
 Smaller changes are listed in the [Changelog](../reference/changelog.md).

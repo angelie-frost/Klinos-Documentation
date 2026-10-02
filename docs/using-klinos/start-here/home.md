@@ -1,11 +1,16 @@
 ---
 title: Klinos
-description: An in-house Figma plugin for making device mockups and angled cards from your Figma layers.
+description: A Figma plugin built around a library of device mockups that tilt into a 3D perspective angle, and angled cards from your Figma layers.
 order: 1
 lastUpdated: "[VERIFY: date]"
 ---
 
-Klinos is our in-house Figma plugin for making mockups. It puts a Figma frame onto a device, or turns any Figma layer into a card at an angle, and places the result back on the canvas.
+Klinos is a Figma plugin built around a library of device mockups that tilt into a 3D perspective angle. It puts a Figma frame onto a device, or turns any Figma layer into a card at an angle, and places the result back on the canvas.
+
+> **Try Klinos in your browser**
+> It's the real Klinos panel, running right here in the docs, with nothing to install.
+>
+> [Open Try it live](../reference/try-it-live.md)
 
 The packaged build is **v3.15**. To see which build you have, look at the small label at the right of the preview's status bar.
 
@@ -28,8 +33,6 @@ Klinos has three modes. You switch between them with the tabs at the top of the 
 Static front-on renders of real devices: the iPhone 17 Pro in two finishes and the MacBook Pro 14″. Your design is keyed into the screen. There is no angle, and no screen glass or reflection.
 
 ### Playground
-
-Unreleased. Merged to main, ships in the next package (v3.16).
 
 Any Figma element as a flat card at an angle: an image, shape, vector, text, frame, component or instance. Select two or more layers to arrange them as a layout. There is no device, no material and no light.
 

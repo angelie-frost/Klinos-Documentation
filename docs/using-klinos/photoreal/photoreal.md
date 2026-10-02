@@ -7,6 +7,8 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Photoreal
 
+[Try this in the live demo](../reference/try-it-live.md)
+
 Photoreal puts your design on a photographic render of a real device. The device is always seen from the front. Your design is keyed into its screen.
 
 ## What's available

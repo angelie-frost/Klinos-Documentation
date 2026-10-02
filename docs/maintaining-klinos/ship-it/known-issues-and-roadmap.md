@@ -24,7 +24,7 @@ lastUpdated: "[VERIFY: date]"
 - Photoreal has no screen glass or reflection and one front-on view per render. New angles or devices need new renders.
 - Tilt and Turn past 90° show the device's back; the design faces away.
 - Drafts are 1 to 2 samples by design and stair-step until the frame settles (140 ms). Past the preview's 4096 px backing cap (about 5x zoom on a 2x screen, always past 8x), the canvas is enlarged by CSS and edges soften.
-- The body detail pass renders the device twice in settled frames below 4x4 samples. If a slow GPU struggles in a zoomed preview, lower `BODY_DETAIL_PX.preview`. In the unreleased work, 4x exports take the 4x4 pass on the device, about 1.7 times the cost of a 2x export.
+- The body detail pass renders the device twice in settled frames below 4x4 samples. If a slow GPU struggles in a zoomed preview, lower `BODY_DETAIL_PX.preview`. 4x exports take the 4x4 pass on the device, about 1.7 times the cost of a 2x export.
 
 **Estimates, not measurements**
 - Lens-ring heights above the plateau, bump or island (17 Pro 1.30, iPhone 13 0.90, S26 1.11 mm) and the optic radii.
@@ -36,17 +36,6 @@ lastUpdated: "[VERIFY: date]"
 - Two plugins named "Klinos": with V2 and V3 both imported, rename one in its local manifest. The IDs differ, so saved mockups are unaffected.
 - A Figma paste lands as a frame containing the image. In a plain-text field it pastes as SVG code. Where a paste fails, export the mockup as a PNG.
 - Card order is per user, not per file.
-
-## Unreleased and in progress
-
-Merged to `main`, not packaged. All of this ships together in the next package, v3.16:
-- Staging, with Revert and the Spotlight Look.
-- Back cameras on the three phones.
-- Card reordering.
-- Playground: Layouts, Stack, Insert as layers, Exploded layers, Reset layout and the guide.
-- The Cover flow overlap: negative Centre gap down to -75%, a Focus card number field with Middle, click a card to focus it.
-
-"v3-16" and "v3-17" in the handoff notes were only working labels.
 
 ## Roadmap
 

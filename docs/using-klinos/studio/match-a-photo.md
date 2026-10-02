@@ -7,6 +7,8 @@ lastUpdated: "[VERIFY: date]"
 
 **Mode:** Studio
 
+[Try this in the live demo](../reference/try-it-live.md)
+
 Match a photo reads the camera angle from a photo of a real device. You trace its screen's four corners. Klinos can then put your design into the photo, or copy the angle onto the 3D device.
 
 It works on every Studio device except the MacBook Pro 16″. On the MacBook the card is hidden, because a traced lid mixes the body's rotation with the hinge.

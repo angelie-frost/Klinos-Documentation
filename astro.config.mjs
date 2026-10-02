@@ -16,7 +16,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Klinos Docs',
-			description: 'Documentation for Klinos, the in-house Figma plugin for device mockups and angled cards.',
+			description: 'Documentation for Klinos, a Figma plugin for device mockups and angled cards.',
 			favicon: '/favicon.svg',
 			sidebar: starlightSidebar(),
 			// Dates come from git, written into the frontmatter by scripts/sync-content.mjs.
@@ -38,9 +38,11 @@ export default defineConfig({
 				ThemeSelect: './src/components/overrides/ThemeSelect.astro',
 				PageTitle: './src/components/overrides/PageTitle.astro',
 				Head: './src/components/overrides/Head.astro',
+				ThemeProvider: './src/components/overrides/ThemeProvider.astro',
 			},
 			expressiveCode: {
-				themes: ['github-dark-default', 'github-light-default'],
+				// Light first: it is the site's default theme.
+				themes: ['github-light-default', 'github-dark-default'],
 				styleOverrides: {
 					borderRadius: '12px',
 					borderColor: 'var(--k-line)',

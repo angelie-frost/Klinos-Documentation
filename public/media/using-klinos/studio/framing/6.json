@@ -1,0 +1,14 @@
+{
+  "type": "video",
+  "w": 1056,
+  "h": 660,
+  "seconds": 6,
+  "light": {
+    "src": "6.webm",
+    "poster": "6.poster.webp"
+  },
+  "dark": {
+    "src": "6-dark.webm",
+    "poster": "6-dark.poster.webp"
+  }
+}
