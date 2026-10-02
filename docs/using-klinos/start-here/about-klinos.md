@@ -38,6 +38,8 @@ The team compared the two before switching. The mesh version came within 0.33 to
 ### What V3 added
 
 - **Editable lighting.** Looks, plus an editor for the softbox lights. Calibrated is the default and matches V2.
+- **Sharper preview.** The preview renders at your screen's own pixel density and stays sharp when you zoom in. Drag it to turn the device and check the result, or try it in the [live demo](../reference/try-it-live.md).
+- **Polished frame and Surface texture.** A mirror-polished frame for the phones, and a fine grain that makes the body read as metal on every device. Both are switches that start off. When you turn on Surface texture, it starts at its own default strength on each device. See [Devices and finishes](../studio/devices.md).
 - **Galaxy S26.** A new device with no V2 version.
 - **Photoreal mode.** Static renders of real devices with your design keyed into the screen.
 - **Playground mode.** Any Figma layer as an angled card, or several layers as a layout. This is new in V3, not a V2 feature.

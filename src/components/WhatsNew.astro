@@ -11,6 +11,9 @@ const ABOUT = join(ROOT, 'docs', 'using-klinos', 'start-here', 'about-klinos.md'
 // Which bullets become slides, where each links, and which captured screenshot illustrates it.
 const SLIDES = [
 	{ label: 'Editable lighting', href: '/using-klinos/studio/lighting/', media: 'using-klinos/studio/lighting/2' },
+	// The preview has no docs page of its own; the live demo is where to try it.
+	{ label: 'Sharper preview', href: '/using-klinos/reference/try-it-live/', media: 'whatsnew/preview' },
+	{ label: 'Polished frame and Surface texture', href: '/using-klinos/studio/devices/#polished-frame-phones-only', media: 'whatsnew/finish' },
 	{ label: 'Photoreal mode', href: '/using-klinos/photoreal/photoreal/', media: 'using-klinos/photoreal/photoreal/2' },
 	{ label: 'Playground mode', href: '/using-klinos/playground/layouts/', media: 'using-klinos/playground/layouts/2' },
 	// The panel's own dark theme: always the dark capture of the panel.
@@ -19,7 +22,15 @@ const SLIDES = [
 
 const list = (readFileSync(ABOUT, 'utf8').split('### What V3 added')[1] ?? '').split(/\n#{2,3} |\nSmaller changes/)[0];
 const bullets = new Map(
-	[...list.matchAll(/^- \*\*(.+?)\.?\*\*\s*(.+)$/gm)].map((m) => [m[1].replace(/\.$/, ''), m[2].trim()])
+	[...list.matchAll(/^- \*\*(.+?)\.?\*\*\s*(.+)$/gm)].map((m) => [
+		m[1].replace(/\.$/, ''),
+		// Links in the bullet become plain text on the slide; "Read more" carries the link, so a closing
+		// "See [page](…)." sentence is dropped rather than shown as unlinked text.
+		m[2]
+			.replace(/\s*See \[[^\]]+\]\([^)]*\)\.?\s*$/, '')
+			.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+			.trim(),
+	])
 );
 
 function media(id, only) {

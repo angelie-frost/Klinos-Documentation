@@ -656,7 +656,36 @@ const R = {
 			await h.wait(2600);
 		},
 	},
+
+	/* ---------- Extras for the "What's new in V3" card (not in any docs comment) ---------- */
+	// The sharper preview: zoomed in on the frame corner and left to settle, so the HD re-render has run.
+	'whatsnew#preview': {
+		kind: 'shot',
+		prep: async (h) => {
+			await h.zoomPreview(6, -0.28);
+			await h.wait(400); // the backing re-renders at the new zoom 180 ms after the wheel stops
+		},
+		target: '#stage',
+	},
+	// Polished frame at full Shine with Surface texture on, under Stage (sharp softboxes give a crisp line).
+	'whatsnew#finish': {
+		kind: 'shot',
+		prep: async (h) => {
+			await h.js(() => applyLook('stage'));
+			await h.angle('Turn left');
+			await h.check('#polishOn', true);
+			await h.range('#polishAmt', 150);
+			await h.check('#grainOn', true);
+		},
+		target: '#stage',
+	},
 };
+
+// Extra captures used outside the docs pages (written to public/media/<slug>/<n>.*, like the others).
+const EXTRAS = [
+	{ slug: 'whatsnew', n: 'preview', kind: 'Screenshot', desc: 'The preview zoomed in on the frame of an iPhone 17 Pro.' },
+	{ slug: 'whatsnew', n: 'finish', kind: 'Screenshot', desc: 'An iPhone 17 Pro with Polished frame at full Shine and Surface texture on.' },
+].map((it) => ({ notes: [], seconds: null, ratio: null, isClip: false, title: "What's new", key: `${it.slug}#${it.n}`, ...it }));
 
 /* ======================= Helpers ======================= */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -935,7 +964,7 @@ async function grab(page, target, pad = 0) {
 }
 
 /* ======================= Run ======================= */
-const manifest = allMediaItems().flatMap((p) => p.items.map((it) => ({ ...it, slug: p.slug, title: p.title, key: `${p.slug}#${it.n}` })));
+const manifest = allMediaItems().flatMap((p) => p.items.map((it) => ({ ...it, slug: p.slug, title: p.title, key: `${p.slug}#${it.n}` }))).concat(EXTRAS);
 const report = { captured: [], figma: [], missing: [], failed: [] };
 
 if (args.includes('--list')) {
