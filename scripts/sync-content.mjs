@@ -1,10 +1,9 @@
 // Copies the source pages (docs/) into Starlight's content folder (src/content/docs/, generated),
 // and the standalone panel (demo/preview.html) into public/demo/. Source files are never modified.
 //
-// The only change made to a page is in its frontmatter: `lastUpdated` holds the placeholder
-// "[VERIFY: date]", which Starlight rejects, so it is replaced by the file's last git commit date,
-// or removed when the file has no git history. The body is copied byte for byte.
-import { execFileSync } from 'node:child_process';
+// The only change made to a page is in its frontmatter: the `lastUpdated` placeholder "[VERIFY: date]"
+// (which Starlight rejects) is removed. Pages show no "Last updated" line, so nothing replaces it.
+// The body is copied byte for byte.
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,19 +22,6 @@ function walk(dir) {
 	return readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
 		d.isDirectory() ? walk(join(dir, d.name)) : d.name.endsWith('.md') ? [join(dir, d.name)] : []
 	);
-}
-
-function gitDate(file) {
-	try {
-		const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', relative(ROOT, file)], {
-			cwd: ROOT,
-			encoding: 'utf8',
-			stdio: ['ignore', 'pipe', 'ignore'],
-		}).trim();
-		return out || null;
-	} catch {
-		return null;
-	}
 }
 
 /** Split "---\n…\n---\n" frontmatter from the body, keeping the body untouched. */
@@ -59,19 +45,15 @@ for (const dir of ['.astro', join('node_modules', '.astro')]) rmSync(join(ROOT, 
 const files = walk(SRC);
 let full = 0;
 let stubs = 0;
-let dated = 0;
 for (const file of files) {
 	const rel = relative(SRC, file).replace(/\\/g, '/');
 	const slug = slugFor(rel);
 	if (!pages.has(slug)) console.warn(`[sync] ${rel} is not listed in sidebar.md`);
 	const { fm, body } = splitFrontmatter(readFileSync(file, 'utf8'), rel);
 
-	const date = gitDate(file);
-	if (date) dated++;
 	const newFm = fm
 		.split(/\r?\n/)
 		.filter((l) => !/^lastUpdated:/.test(l))
-		.concat(date ? [`lastUpdated: ${date}`] : [])
 		.join('\n');
 
 	let out;
@@ -99,5 +81,5 @@ mkdirSync(dirname(DEMO_OUT), { recursive: true });
 cpSync(DEMO_SRC, DEMO_OUT);
 
 console.log(
-	`[sync] ${files.length} pages (${full} full, ${stubs} stubs), ${dated} with a git date; demo copied to public/demo/preview.html`
+	`[sync] ${files.length} pages (${full} full, ${stubs} stubs), no "Last updated" dates; demo copied to public/demo/preview.html`
 );

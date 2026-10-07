@@ -13,8 +13,25 @@ lastUpdated: "[VERIFY: date]"
 | Panel layout | `figma.clientStorage`, key `layout` | Per user, per plugin, on one machine |
 | Theme | `figma.clientStorage`, key `theme` | Per user, per plugin |
 | Card order | `figma.clientStorage`, key `cardOrder` | Per user, per mode |
+| What's new tour seen | `figma.clientStorage`, key `klinos-panel-whatsnew-v3` | Per user, per plugin |
 
-`clientStorage` can be cleared, and it never goes in the file. In the standalone preview, card order is kept in `localStorage` under `klinos-card-order`.
+`clientStorage` can be cleared, and it never goes in the file. In the standalone preview, the same preferences are kept in `localStorage`: `klinos-theme`, `klinos-card-order` and `klinos-panel-whatsnew-v3`.
+
+## The What's new tour
+
+The first-run tour, **What's new in V3**, has 9 slides (`WN_SLIDES` in `src/ui.html`).
+
+- **When it opens:** by itself once, on the first run, and it is marked seen the moment it opens, so quitting halfway never brings it back. Storage that can't be read counts as not seen. A new key means existing users see it once after updating.
+- **Where "seen" is kept:** under `klinos-panel-whatsnew-v3`, in `figma.clientStorage` through `code.js` in Figma, and in `localStorage` in the standalone preview. It is not `klinos-whatsnew-v3`, which the docs site's own What's new card uses, because the docs' live demo shares the docs site's origin.
+- **`?nomodal=1`:** on the preview's URL, stops the tour opening by itself and leaves the key alone. The docs' live demo and the media captures use it.
+- **Reopening:** the build label at the right of the status bar reopens it at slide 1, without changing the key.
+
+<!-- REMOVE-AT-3.17: tour note -->
+
+> **Note**
+> The installed v3.16 plugin shows 8 slides. The first slide, "Built on real 3D models", was added on `main` after the v3.16 package and ships in the next release.
+
+<!-- /REMOVE-AT-3.17 -->
 
 ## What is stored on a mockup
 

@@ -43,7 +43,9 @@ if (live) {
 	const frame = live.querySelector<HTMLIFrameElement>('[data-live-frame]')!;
 	const dot = live.querySelector<HTMLElement>('[data-live-dot]')!;
 	const text = live.querySelector<HTMLElement>('[data-live-text]')!;
-	const DEMO_KEYS = ['klinos-theme', 'klinos-card-order'];
+	// Everything the panel keeps in the browser (the demo shares this site's origin). The tour key is never set
+	// here, because the demo loads with ?nomodal=1, but Reset clears it too so it truly restores the defaults.
+	const DEMO_KEYS = ['klinos-theme', 'klinos-card-order', 'klinos-panel-whatsnew-v3'];
 	let timer: number | undefined;
 	const status = (state: 'loading' | 'ready' | 'offline', msg: string) => {
 		dot.className = 'dot ' + state;
@@ -67,7 +69,7 @@ if (live) {
 	frame.addEventListener('load', check);
 	// The frame may have finished loading before this script ran.
 	try {
-		if (frame.contentDocument?.readyState === 'complete' && frame.contentWindow?.location.href.endsWith('/demo/preview.html')) check();
+		if (frame.contentDocument?.readyState === 'complete' && frame.contentWindow?.location.pathname === '/demo/preview.html') check();
 	} catch {}
 	live.querySelector('[data-live-reset]')?.addEventListener('click', () => {
 		try {

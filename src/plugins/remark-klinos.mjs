@@ -275,7 +275,7 @@ const liveDemo = () =>
 	html(`<div class="live" data-live-demo data-pagefind-ignore>
 <div class="livebar"><span class="status" role="status"><i class="dot" data-live-dot></i><span data-live-text>Loading the Klinos panel…</span></span>
 <button class="minibtn" type="button" data-live-reset>Reset</button></div>
-<div class="liveframe"><iframe src="/demo/preview.html" title="Klinos panel, live demo" loading="lazy" data-live-frame></iframe></div>
+<div class="liveframe"><iframe src="/demo/preview.html?nomodal=1" title="Klinos panel, live demo" loading="lazy" data-live-frame></iframe></div>
 </div>`);
 
 /* ---------- Plugin ---------- */

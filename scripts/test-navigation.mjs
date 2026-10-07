@@ -151,7 +151,7 @@ for (const theme of ['light', 'dark']) {
 	check('to Try it live: skipped', (await lastReveal(p))?.vt === false);
 	const frame = await p.waitForSelector('iframe[data-live-frame]');
 	await p.waitForFunction(() => document.querySelector('iframe[data-live-frame]')?.contentDocument?.readyState === 'complete', null, { timeout: 15000 });
-	check('Try it live: the demo loads', (await frame.getAttribute('src')) === '/demo/preview.html');
+	check('Try it live: the demo loads, without the first-run tour (?nomodal=1)', (await frame.getAttribute('src')) === '/demo/preview.html?nomodal=1');
 	await go(p, sidebarLink(P.screen));
 	check('from Try it live: skipped', (await lastReveal(p))?.vt === false);
 	check('no console errors (anchor, Try it live)', errors.length === 0, errors.join(' | '));

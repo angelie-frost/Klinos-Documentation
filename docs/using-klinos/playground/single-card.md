@@ -67,7 +67,7 @@ The image is always the size of your selection. Klinos fits the turned card insi
 > Hidden layers are skipped for now. Klinos shows what Figma exported for each hidden layer in its row, because how Figma exports hidden layers is not yet confirmed.
 
 > **Note**
-> Parts of Playground have only been tested in the standalone preview and against a mock of the Figma API. Placement for layers inside auto layout, groups and rotated parents is not yet confirmed in Figma.
+> Playground was tested in Figma for v3.16, including Insert as layers, Stack, Exploded layers and Reset layout. Two things are not yet confirmed in Figma: what it exports for a hidden layer (see above), and placement for layers inside auto layout, groups and rotated parents.
 
 ## Common mistakes
 

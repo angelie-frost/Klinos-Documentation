@@ -110,7 +110,11 @@ button,input{font:inherit;color:inherit}
    edge; the bar pads both sides equally so the status pill stays centred and
    never runs under it. */
 .ver{position:absolute; right:10px; bottom:12px; font-size:10.5px; line-height:1; color:var(--text2); opacity:.6;
-  font-variant-numeric:tabular-nums; letter-spacing:.02em; user-select:none; pointer-events:auto}
+  font-variant-numeric:tabular-nums; letter-spacing:.02em; user-select:none; pointer-events:auto;
+  background:none; border:0; padding:2px 0; margin:0; font-family:inherit; cursor:pointer}
+/* It also opens What's new in V3. */
+.ver:hover{opacity:1; text-decoration:underline; text-underline-offset:2px}
+.ver:focus-visible{opacity:1; outline:2px solid var(--k-ink2); outline-offset:2px; border-radius:3px}
 /* Mode switcher (v3-15): the first thing in the controls, sticky while they
    scroll, because the mode decides which cards exist. Built from MODES. */
 .modebar{position:sticky; top:-14px; z-index:3; display:flex; gap:4px; margin:-14px -16px 0; padding:12px 16px 10px;
@@ -571,6 +575,25 @@ body.scrubbing, body.scrubbing *{cursor:ew-resize !important; user-select:none}
 .plsteps li > svg{width:30px; height:30px; padding:5px; border-radius:8px; background:var(--k-sunk); color:var(--k-ink); fill:none; stroke:currentColor; stroke-width:1.25; stroke-linecap:round; stroke-linejoin:round}
 .plsteps li b.t{display:block; color:var(--k-ink); font-weight:600; margin-bottom:1px}
 .plsteps li b.t::before{counter-increment:plstep; content:counter(plstep) ". "}
+/* What's new in V3: the guide dialog with one slide at a time. */
+.modal .helpbox.wnbox{width:min(400px,100%)}
+#wnbody{box-sizing:border-box}
+.wnslide{display:flex; flex-direction:column; gap:8px; overflow-wrap:anywhere}
+.wnslide h3{margin:0; font-size:13.5px; font-weight:600; color:var(--k-ink); text-transform:none; letter-spacing:0}
+.wnslide p{margin:0 0 4px}
+.wnintro{font-size:12px}
+.wnfig{display:block; width:100%; height:72px; padding:6px 0; box-sizing:border-box; border-radius:10px; background:var(--k-sunk); color:var(--k-ink);
+  fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round}
+.wnfig .f{fill:currentColor; fill-opacity:.16} .wnfig .f2{fill:currentColor; stroke:none}
+.wnfig .hi{stroke-width:2.5; stroke-opacity:.45} .wnfig .d{fill:currentColor; stroke:none}
+.wnanim{animation:wnfade .14s ease-out}
+@keyframes wnfade{from{opacity:.35}}
+@media (prefers-reduced-motion: reduce){ .wnanim{animation:none} }
+.helpfoot.wnfoot{justify-content:space-between; align-items:center; gap:8px; flex-wrap:nowrap}
+.wncount{font-size:12px; color:var(--k-ink2); white-space:nowrap; font-variant-numeric:tabular-nums}
+.wnbtns{display:flex; gap:8px; flex:none}
+.wnbtns .minibtn{white-space:nowrap}
+.wnbtns .wnnext{background:var(--k-ink); border-color:var(--k-ink); color:var(--k-onink); min-width:68px}   /* Next and Done one width: the footer never shifts */
 .helpfoot{display:flex; justify-content:flex-end; padding:10px 16px 14px; border-top:1px solid var(--k-line)}
 
 /* Copy: a secondary pill beside Insert/Export; icon-only in the narrow side layout. */
@@ -615,7 +638,7 @@ body.scrubbing, body.scrubbing *{cursor:ew-resize !important; user-select:none}
       <div class="seg" id="layout"></div>
     </div>
     <div class="stage" id="stage"><canvas id="preview"></canvas><div class="envbadge" id="envbadge" hidden><i></i><span id="envbadgetext"></span></div></div>
-    <div class="statusbar"><div class="pill" id="status"><span class="dot idle"></span><span id="statustext">Loading</span></div><span class="ver" id="ver" title="Klinos V3, build 3.15">v3.15</span></div>
+    <div class="statusbar"><div class="pill" id="status"><span class="dot idle"></span><span id="statustext">Loading</span></div><button type="button" class="ver" id="ver" aria-haspopup="dialog" aria-label="What's new in V3 (build 3.16)" title="What's new in V3 · Klinos V3, build 3.16">v3.16</button></div>
   </div>
 
   <div class="right" id="right">
@@ -899,6 +922,16 @@ body.scrubbing, body.scrubbing *{cursor:ew-resize !important; user-select:none}
 
 <div class="cardmenu" id="cardmenu" role="menu" hidden></div>
 
+<div class="modal" id="wnmodal" hidden>
+  <div class="box helpbox wnbox" role="dialog" aria-modal="true" aria-labelledby="wntitle" aria-describedby="wnbody">
+    <div class="helphead"><h2 id="wntitle">What's new in V3</h2><button class="xbtn" id="wnx" type="button" aria-label="Close">&times;</button></div>
+    <div class="helpbody" id="wnbody"></div>
+    <div class="helpfoot wnfoot">
+      <span class="wncount" id="wncount" aria-live="polite"></span>
+      <span class="wnbtns"><button class="minibtn" id="wnback" type="button">Back</button><button class="minibtn wnnext" id="wnnext" type="button">Next</button></span>
+    </div>
+  </div>
+</div>
 <div class="modal" id="plhelpmodal" hidden>
   <div class="box helpbox" role="dialog" aria-modal="true" aria-labelledby="plhelptitle" aria-describedby="plhelpintro">
     <div class="helphead"><h2 id="plhelptitle">Using Playground</h2><button class="xbtn" id="plhelpx" type="button" aria-label="Close">&times;</button></div>
@@ -10835,14 +10868,16 @@ $('lighthelp').addEventListener('click', openLightHelp);
    from a small (?) beside the Polished frame label, shown whether or not the
    polish is on, so the guide can be read before opting in. */
 // The same dialog wiring serves the Surface texture guide (v3-15).
+// btn and ok may be null (What's new opens from code and steps instead of
+// closing); returns { open, close }. The guides below pass all four, as before.
 function wireGuide(btn, modal, x, ok) {
   const m = $(modal);
   let back = null;
   const open = () => { back = document.activeElement; m.hidden = false; $(x).focus(); };
   const close = () => { if (m.hidden) return; m.hidden = true; if (back && back.focus) back.focus(); };
-  $(btn).addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); open(); });
+  if (btn) $(btn).addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); open(); });
   $(x).addEventListener('click', close);
-  $(ok).addEventListener('click', close);
+  if (ok) $(ok).addEventListener('click', close);
   m.addEventListener('click', e => { if (e.target === m) close(); });
   m.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
@@ -10852,10 +10887,93 @@ function wireGuide(btn, modal, x, ok) {
     if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
     else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
   });
+  return { open, close };
 }
 wireGuide('polishhelp', 'polishhelpmodal', 'polishhelpx', 'polishhelpok');
 wireGuide('grainhelp', 'grainhelpmodal', 'grainhelpx', 'grainhelpok');
 wireGuide('plhelp', 'plhelpmodal', 'plhelpx', 'plhelpok');   // Playground guide
+/* ---------- What's new in V3 ----------
+   Opens by itself once, the first time the plugin is opened, and from the
+   build label (v3.xx, the status bar's right edge) at any time. "Seen" is a
+   per-user preference stored like the theme: figma.clientStorage through
+   code.js (restoreWhatsNew posts it on ready; {type:'whatsNew'} saves it), or
+   localStorage in the standalone preview - never in state or on a mockup, so
+   SETTINGS_V is unchanged. It is marked seen the moment it is shown, so
+   quitting halfway never brings it back. ?nomodal=1 keeps it from opening by
+   itself and leaves the key alone (the docs' live demo and captures). It is
+   page DOM over the panel: nothing of it reaches the canvas or an export. */
+const WN_KEY = 'klinos-panel-whatsnew-v3';
+const WN_OFF = (() => { try { return new URLSearchParams(location.search).get('nomodal') === '1'; } catch (e) { return false; } })();
+const WN_SLIDES = [
+  { t: 'Built on real 3D models', p: 'V2 drew each device with a raymarching shader. V3 builds them as 3D models in Three.js and keeps V2\'s calibrated finishes, so devices still match V2. The models add what the old renderer lacked: a mirror floor reflection, raised camera lenses, podiums and smoother edges.',
+    svg: '<path d="M22 20 40 10l18 10v22L40 52 22 42z"/><path d="M22 20l18 10 18-10M40 30v22" stroke-opacity=".55"/><rect x="72" y="6" width="28" height="52" rx="7" class="f"/><path d="M72 22 100 10M72 38l28-16M72 52 100 38M86 6v52" stroke-opacity=".45"/>' },
+  { t: 'Editable lighting', p: 'Looks, plus an editor for the softbox lights. Calibrated is the default and matches V2.',
+    svg: '<rect x="8" y="6" width="38" height="13" rx="3" class="f"/><path d="M27 21 64 30M27 21 58 52M27 21 44 40"/><rect x="62" y="12" width="26" height="46" rx="6"/><path d="M66 18v34" class="hi"/><circle cx="100" cy="14" r="3"/><path d="M100 4v4M100 20v4M90 14h4M106 14h4"/>' },
+  { t: 'Staging and positioning', p: 'In Studio, the Staging card sets up a ready-made scene, such as Floating, Podium or Spotlight. Every value stays editable, and Revert puts back what the scene changed, until you edit one of those values. Turn on Position in the Frame card, then drag the device in the preview to move it.',
+    svg: '<path d="M30 6 18 20h24z" class="f"/><path d="M30 20 22 34M30 20 38 34" stroke-opacity=".4"/><rect x="22" y="22" width="16" height="26" rx="4"/><path d="M12 50h36v8H12z" class="f"/><path d="M84 18v28M70 32h28M84 18l-4 4M84 18l4 4M84 46l-4-4M84 46l4-4M70 32l4-4M70 32l4 4M98 32l-4-4M98 32l-4 4"/>' },
+  { t: 'A sharper preview', p: 'It renders at your screen\'s pixel density and stays sharp when you zoom. In Studio, drag the preview to turn the device and check your mockup.',
+    svg: '<path d="M38 12 64 7v50l-26-5z"/><path d="M42 16 60 12.5v38.5L42 48z" class="f"/><path d="M78 44c10-6 10-22 0-28"/><path d="M78 16l-1 6M78 16l5 3"/><path d="M90 40l0 14 4-4 3 6 3-1.5-3-6 5-.5z" class="f"/>' },
+  { t: 'Polished frame and Surface texture', p: 'A mirror-polished frame for the phones, and a fine grain that makes the body read as metal. Both start off.',
+    svg: '<rect x="14" y="6" width="34" height="52" rx="10" stroke-width="3"/><path d="M17 20v24" class="hi"/><rect x="66" y="6" width="40" height="52" rx="8" class="f"/><g class="d"><circle cx="73" cy="14" r=".9"/><circle cx="81" cy="19" r=".9"/><circle cx="92" cy="13" r=".9"/><circle cx="99" cy="22" r=".9"/><circle cx="75" cy="28" r=".9"/><circle cx="87" cy="31" r=".9"/><circle cx="97" cy="35" r=".9"/><circle cx="72" cy="42" r=".9"/><circle cx="83" cy="45" r=".9"/><circle cx="93" cy="48" r=".9"/><circle cx="78" cy="52" r=".9"/><circle cx="100" cy="51" r=".9"/></g>' },
+  { t: 'Photoreal mode', p: 'Static renders of real devices, the iPhone 17 Pro and the MacBook Pro 14 inch, with your design in the screen.',
+    svg: '<rect x="14" y="6" width="24" height="48" rx="6"/><rect x="17" y="10" width="18" height="40" rx="4" class="f"/><ellipse cx="26" cy="59" rx="12" ry="2" class="f"/><rect x="54" y="14" width="52" height="34" rx="3"/><rect x="58" y="18" width="44" height="26" rx="1.5" class="f"/><path d="M48 52h64"/>' },
+  { t: 'Playground mode', p: 'Any Figma layer as an angled card, or several layers as a layout.',
+    svg: '<path d="M14 18l20 4v30l-20 4z"/><path d="M46 12h28v40H46z" class="f"/><path d="M106 18l-20 4v30l20 4z"/>' },
+  { t: 'Arrange the panel', p: 'Drag a card by the grip at its top right to move it, or open the grip for Move up, Move down and Reset order. Each mode keeps its own order, and Klinos remembers it.',
+    svg: '<rect x="20" y="6" width="60" height="14" rx="4"/><rect x="28" y="24" width="60" height="14" rx="4" class="f"/><rect x="20" y="44" width="60" height="14" rx="4"/><g class="d"><circle cx="80" cy="28.5" r="1.1"/><circle cx="84" cy="28.5" r="1.1"/><circle cx="80" cy="31" r="1.1"/><circle cx="84" cy="31" r="1.1"/><circle cx="80" cy="33.5" r="1.1"/><circle cx="84" cy="33.5" r="1.1"/></g><path d="M102 20v24M102 20l-4 5M102 20l4 5M102 44l-4-5M102 44l4-5"/>' },
+  { t: 'Dark theme', p: 'The panel now has a dark version, and follows Figma by default. Change it with the switch at the top left.',
+    svg: '<rect x="20" y="8" width="80" height="48" rx="8"/><path d="M60 8h32a8 8 0 0 1 8 8v32a8 8 0 0 1-8 8H60z" class="f2"/><path d="M28 20h22M28 28h16M68 20h22M68 28h16"/>' }
+];
+const wnGuide = wireGuide(null, 'wnmodal', 'wnx', null);
+let wnAt = 0;
+function wnSlideHTML(i, anim) {
+  const s = WN_SLIDES[i];
+  return '<div class="wnslide' + (anim ? ' wnanim' : '') + '">' +
+    '<svg class="wnfig" viewBox="0 0 120 64" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' + s.svg + '</svg>' +
+    '<h3>' + s.t + '</h3><p>' + s.p + '</p>' +
+    (i === 0 ? '<p class="wnintro">Open this again any time from the build number at the bottom right.</p>' : '') + '</div>';
+}
+// The tallest slide at the current width becomes the body's min-height, so the
+// footer stays put on every slide (the dialog's max-height still applies).
+function wnFitHeight() {
+  const b = $('wnbody');
+  b.style.minHeight = '';
+  let max = 0;
+  for (let i = 0; i < WN_SLIDES.length; i++) { b.innerHTML = wnSlideHTML(i, false); max = Math.max(max, b.scrollHeight); }
+  b.style.minHeight = max + 'px';
+}
+function wnRender() {
+  const n = WN_SLIDES.length;
+  $('wnbody').innerHTML = wnSlideHTML(wnAt, true);
+  $('wnbody').scrollTop = 0;
+  $('wncount').textContent = (wnAt + 1) + ' of ' + n;
+  const back = $('wnback'), next = $('wnnext');
+  back.disabled = wnAt === 0;
+  next.textContent = wnAt === n - 1 ? 'Done' : 'Next';
+  if (document.activeElement === back && back.disabled) next.focus();
+}
+function wnShow() { wnAt = 0; $('wnmodal').hidden = false; wnFitHeight(); wnRender(); wnGuide.open(); }
+window.addEventListener('resize', () => { if (!$('wnmodal').hidden) { wnFitHeight(); wnRender(); } });
+function wnStep(d) {
+  if (wnAt + d >= WN_SLIDES.length) { wnGuide.close(); return; }
+  wnAt = Math.max(0, wnAt + d); wnRender();
+}
+function wnMarkSeen() {
+  if (STANDALONE) { try { localStorage.setItem(WN_KEY, '1'); } catch (e) { /* storage off */ } }
+  else post({ type: 'whatsNew', seen: true });
+}
+// First run: code.js says whether it has been shown (or, standalone, localStorage).
+function wnFirstRun(seen) {
+  if (seen || WN_OFF || !$('wnmodal').hidden) return;
+  wnShow(); wnMarkSeen();
+}
+$('wnnext').addEventListener('click', () => wnStep(1));
+$('wnback').addEventListener('click', () => wnStep(-1));
+$('wnmodal').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault(); wnStep(e.key === 'ArrowRight' && wnAt < WN_SLIDES.length - 1 ? 1 : e.key === 'ArrowLeft' ? -1 : 0);
+});
+$('ver').addEventListener('click', e => { e.preventDefault(); wnShow(); });
 $('envSpheres').addEventListener('change', e => { ui.spheres = e.target.checked; draw(); });
 $('lighthelpx').addEventListener('click', closeLightHelp);
 $('lighthelpok').addEventListener('click', closeLightHelp);
@@ -11323,6 +11441,7 @@ window.addEventListener('message', async (event) => {
   if (msg.type === 'layout') { state.layout = msg.layout === 'side' ? 'side' : 'stacked'; applyLayout(false); return; }
   if (msg.type === 'theme') { applyTheme(msg.theme, false); return; }
   if (msg.type === 'cardOrder') { setSavedOrder(msg.order); return; }
+  if (msg.type === 'whatsNew') { wnFirstRun(!!msg.seen); return; }
   if (msg.type === 'plSelection') { plOnSelection(msg); return; }
   if (msg.type === 'plItem') { plOnItem(msg); return; }
   if (msg.type === 'plExplodeInfo') { plOnExplodeInfo(msg); return; }
@@ -11863,4 +11982,9 @@ $('stagingundo').addEventListener('click', () => {
 });
 
 post({ type: 'ready' });
+if (STANDALONE) {
+  let seen = false;
+  try { seen = !!localStorage.getItem(WN_KEY); } catch (e) { /* storage off: show it */ }
+  if (!seen) requestAnimationFrame(() => wnFirstRun(false));
+}
 </script>

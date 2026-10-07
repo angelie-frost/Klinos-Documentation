@@ -29,7 +29,7 @@ A Look is a ready-made set of these lights. Calibrated is the default. It is V2'
 > For colour-accurate finishes, use Calibrated at 100% brightness. The finishes were fitted under that light, so every other Look is art direction.
 
 > **Note**
-> **Preview background** sits at the foot of the Lighting card. It used to be called **Preview scene**, which is the name in the packaged 3.15 build. The options are the same four: Output, Grey, Dark and Lights.
+> **Preview background** sits at the foot of the Lighting card. It used to be called **Preview scene**, its name in v3.15 and earlier. The options are the same four: Output, Grey, Dark and Lights.
 
 ## The Looks
 

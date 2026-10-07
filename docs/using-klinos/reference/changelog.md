@@ -5,15 +5,15 @@ order: 5
 lastUpdated: "[VERIFY: date]"
 ---
 
-The packaged build is **v3.15**. Dates are not recorded in the repository.
+The current release is **v3.16**, released on 2 October 2026 (the date of its `v3.16` tag). Earlier builds have no recorded dates.
 
 ## v3.16
 
-`v3.16`
+`v3.16` · The current release, 2 October 2026.
 
 **What's new**
 - **Staging.** Ready-made scenes: Plain, Floating, Gradient sweep, Podium, Plinth and Spotlight, with Revert. A new Spotlight Look.
-- **Back cameras** on all three phones: lens rings, glass, flash, LiDAR, mic, and the Samsung wordmark on the S26.
+- **Back cameras** on all three phones: lens rings, glass, flash, LiDAR, mic, and the Samsung wordmark on the S26. Some lens and ring sizes are estimates.
 - **Card reordering** in the panel, with a new Studio default order: Device, Match a photo, Angle, Lighting, Staging, Screen, Frame, Backdrop and shadow.
 - **Playground mode.** Any Figma layer as a flat card at an angle, with Tilt, Turn, Roll, Perspective, Size, Position, its own background and shadow. The output is exactly the selection's size, placed beside it, and refreshes in place.
 - **Layouts.** Arrange several layers as Arc, Cover flow, Fan, Cylinder, Tunnel or Stack, with Order, Equal heights and Repeat. Stack has per-card shadows.
@@ -22,18 +22,25 @@ The packaged build is **v3.15**. Dates are not recorded in the repository.
 - **Reset layout and the Playground guide.** Reset a layout with Undo, or double-click a slider to reset just that one. A short guide opens from the (?) beside "Arrange as a layout".
 - **Cover flow overlap.** Side cards can overlap the focus card: Centre gap goes down to -75%. The Focus card is a number field with a Middle option, and you can click a card in the preview to focus it.
 - **Preview background** in the Lighting card, renamed from Preview scene.
+- **What's new in V3.** A short tour of what V3 added. It opens once, the first time you open the plugin, and again any time from the build label at the right of the status bar.
+
+<!-- REMOVE-AT-3.17: tour note -->
+
+**After the v3.16 package:** a new first slide for the tour, "Built on real 3D models" (V3's move to Three.js models), is on `main`. It was added after the v3.16 package and will ship in the next release, so the installed v3.16 tour has 8 slides.
+
+<!-- /REMOVE-AT-3.17 -->
 
 **What's fixed**
 - The iPhone 13 camera bump is re-measured and on its real side.
 - The Galaxy S26 lens barrels are re-measured from a back view.
 - A dotted row no longer appears where the sweep's floor meets its curve.
 - A white line no longer runs along the back edge of the polished frame.
-- Sharper edges in the zoomed preview, and larger exports use the high-quality pass on the device.
+- Sharper edges in the zoomed preview, and larger exports use the high-quality pass on the device: 4× exports now take the 4×4 pass.
 - Layout sliders now change the render. Before the fix, only Repeat worked.
 
-## v3.15 · Packaged
+## v3.15
 
-`v3.15` · The current packaged build.
+`v3.15`
 
 **What's new**
 - **Photoreal mode:** iPhone 17 Pro in two finishes and MacBook Pro 14″ renders, with your design keyed into the screen.

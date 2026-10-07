@@ -57,7 +57,7 @@ A test tool renders V2's shaders and V3's meshes at the same pose, finish and si
 - V3 can't refresh mockups made in V2. A mockup's settings are private to the plugin that made it.
 
 > **Tip**
-> Not sure which one you have open? V3 shows its build number, for example v3.15, at the right of the preview's status bar.
+> Not sure which one you have open? V3 shows its build number, for example v3.16, at the right of the preview's status bar.
 
 <!-- Media to capture:
   1. Optional screenshot: the same device and finish rendered in V2 and V3, side by side, Calibrated look.

@@ -43,6 +43,17 @@ The order is saved per user and per mode on your computer, like your theme and p
 > **Tip**
 > Put the cards you use most at the top. For lighting work, try Lighting right under Device.
 
+## The What's new tour
+
+The panel's own tour, **What's new in V3**, has 9 slides on what V3 added. One of them, **Arrange the panel**, is about the card order on this page. The tour opens by itself once, the first time you open the plugin. To open it again, click the build label at the right of the preview's status bar. Klinos remembers that you've seen it per user, like the card order.
+
+<!-- REMOVE-AT-3.17: tour note -->
+
+> **Note**
+> The installed v3.16 plugin shows 8 slides. The first slide, "Built on real 3D models", was added after the v3.16 package and ships in the next release.
+
+<!-- /REMOVE-AT-3.17 -->
+
 ## What you'll see
 
 - While you drag, the card is outlined and lifted.

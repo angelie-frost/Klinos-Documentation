@@ -1,6 +1,6 @@
 // Lists every [VERIFY…] mark left in the page text of docs/ and fails (exit 1) while any remain.
-// The frontmatter `lastUpdated: "[VERIFY: date]"` placeholders are not counted: the build replaces
-// them with each file's git commit date (scripts/sync-content.mjs). They are reported for information.
+// The frontmatter `lastUpdated: "[VERIFY: date]"` placeholders are not counted: the build removes them
+// (scripts/sync-content.mjs; pages show no "Last updated" line). They are reported for information.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,7 +31,7 @@ for (const file of walk(DOCS).sort()) {
 	});
 }
 
-if (frontmatterMarks) console.log(`(info) ${frontmatterMarks} frontmatter lastUpdated placeholders, replaced by git dates at build time`);
+if (frontmatterMarks) console.log(`(info) ${frontmatterMarks} frontmatter lastUpdated placeholders, removed at build time (no "Last updated" line is shown)`);
 if (found.length) {
 	console.error(`check:verify: ${found.length} [VERIFY] mark(s) left in page text:\n`);
 	for (const f of found) console.error('  ' + f);

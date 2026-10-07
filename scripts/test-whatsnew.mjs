@@ -1,4 +1,6 @@
 // Behaviour test for the "What's new in V3" card. Usage: node scripts/test-whatsnew.mjs [baseUrl]
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
 const BASE = process.argv[2] || 'http://localhost:4322';
@@ -9,15 +11,32 @@ const check = (name, ok, extra = '') => results.push({ check: name, result: ok ?
 const visible = (p) => p.evaluate(() => !document.getElementById('whatsnew').hidden);
 const fresh = (opts = {}) => browser.newContext({ viewport: { width: 1440, height: 900 }, ...opts });
 
-// The six slides, in order, with the page each "Read more" opens.
+// The nine slides, in the plugin's order, with the page each "Read more" opens.
 const SLIDES = [
+	['Built on real 3D models', '/using-klinos/studio/devices/'],
 	['Editable lighting', '/using-klinos/studio/lighting/'],
-	['Sharper preview', '/using-klinos/reference/try-it-live/'],
+	['Staging and positioning', '/using-klinos/studio/staging/'],
+	['A sharper preview', '/using-klinos/reference/try-it-live/'],
 	['Polished frame and Surface texture', '/using-klinos/studio/devices/#polished-frame-phones-only'],
 	['Photoreal mode', '/using-klinos/photoreal/photoreal/'],
 	['Playground mode', '/using-klinos/playground/layouts/'],
+	['Arrange the panel', '/using-klinos/panel/panel-cards/'],
 	['Dark theme', '/using-klinos/start-here/about-klinos/#what-v3-added'],
 ];
+const N = SLIDES.length;
+// The plugin's own tour (WN_SLIDES in the standalone panel, demo/preview.html, read only): the card must
+// keep its titles and text.
+const PLUGIN = (() => {
+	const html = readFileSync(fileURLToPath(new URL('../demo/preview.html', import.meta.url)), 'utf8');
+	const start = html.indexOf('const WN_SLIDES = [') + 'const WN_SLIDES = '.length;
+	let depth = 0;
+	let end = start;
+	for (; end < html.length; end++) {
+		if (html[end] === '[') depth++;
+		else if (html[end] === ']' && !--depth) break;
+	}
+	return Function(`return ${html.slice(start, end + 1)}`)().map((x) => [x.t, x.p]);
+})();
 const slideState = (p) =>
 	p.evaluate(() => {
 		const s = [...document.querySelectorAll('[data-wn-slide]')].find((x) => !x.hidden);
@@ -38,7 +57,7 @@ for (const [name, opts] of [
 	const ctx = await fresh(opts);
 	const p = await ctx.newPage();
 	await p.goto(HOME, { waitUntil: 'networkidle' });
-	check(`${name}: six slides`, (await p.locator('[data-wn-slide]').count()) === 6);
+	check(`${name}: nine slides`, (await p.locator('[data-wn-slide]').count()) === N);
 	const seen = [];
 	for (let i = 0; i < SLIDES.length; i++) {
 		const s = await slideState(p);
@@ -46,8 +65,9 @@ for (const [name, opts] of [
 		if (i < SLIDES.length - 1) await p.click('[data-wn-next]');
 	}
 	check(`${name}: slides in order with the right Read more links`, seen.every((s, i) => s.title === SLIDES[i][0] && s.more === SLIDES[i][1]), seen.map((s) => s.title).join(' | '));
+	check(`${name}: same titles and text as the plugin's tour (WN_SLIDES)`, PLUGIN.length === N && seen.every((s, i) => s.title === PLUGIN[i][0] && s.text === PLUGIN[i][1]), seen.map((s, i) => (s.text === PLUGIN[i]?.[1] ? 'ok' : `slide ${i + 1} differs`)).join(' '));
 	check(`${name}: every slide has a picture and plain text (no Markdown)`, seen.every((s) => s.img && s.text && !/[[\]()*]/.test(s.text)));
-	check(`${name}: counter reads 1 of 6 … 6 of 6, last button is Done`, seen[0].count === '1 of 6' && seen[5].count === '6 of 6' && seen[5].next === 'Done');
+	check(`${name}: counter reads 1 of ${N} … ${N} of ${N}, last button is Done`, seen[0].count === `1 of ${N}` && seen[N - 1].count === `${N} of ${N}` && seen[N - 1].next === 'Done');
 	const fit = await p.evaluate(() => {
 		const card = document.getElementById('whatsnew').getBoundingClientRect();
 		const nav = document.querySelector('.wn-nav').getBoundingClientRect();
@@ -56,7 +76,7 @@ for (const [name, opts] of [
 	});
 	check(`${name}: Back, counter and Done fit on one row inside the card`, fit.inside && fit.oneRow && fit.noScroll, JSON.stringify(fit));
 	await p.click('[data-wn-prev]');
-	check(`${name}: Back from the last slide shows 5 of 6`, (await slideState(p)).count === '5 of 6');
+	check(`${name}: Back from the last slide shows ${N - 1} of ${N}`, (await slideState(p)).count === `${N - 1} of ${N}`);
 	await ctx.close();
 }
 {
@@ -133,7 +153,7 @@ for (const [name, opts] of [
 		await p.keyboard.press('Tab');
 		stops.push(await p.evaluate(() => document.activeElement?.getAttribute('aria-label') || document.activeElement?.textContent.trim().slice(0, 40) || document.activeElement?.tagName));
 	}
-	check('keyboard: controls reachable in order', ['Close What\'s new', 'Read more about Editable lighting'].every((s) => stops.includes(s)) && stops.some((s) => /Next/.test(s)), stops.join(' → '));
+	check('keyboard: controls reachable in order', ['Close What\'s new', 'Read more about Built on real 3D models'].every((s) => stops.includes(s)) && stops.some((s) => /Next/.test(s)), stops.join(' → '));
 	await p.keyboard.press('Escape');
 	check('keyboard: Esc closes, focus back on the button', !(await visible(p)) && (await p.evaluate(() => document.activeElement?.matches('.right-group [data-wn-open]'))));
 	await ctx.close();

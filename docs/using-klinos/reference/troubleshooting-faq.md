@@ -40,7 +40,7 @@ lastUpdated: "[VERIFY: date]"
 - The Glass blur gets slower with more cards. For 6 cards: about 36 ms for a draft (drafts skip the blur) and 880 ms settled.
 - Hidden layers are skipped until it is confirmed what Figma exports for them.
 - Placement for layers inside auto layout, groups and rotated parents is not yet confirmed in Figma.
-- Large parts of Playground have only been tested in the standalone preview and against a mock of the Figma API: Insert as layers, Stack's editable result, Exploded's reading of frames, Reset layout and the guide.
+- Insert as layers, Stack, Exploded layers, Reset layout and the guide were tested in Figma for v3.16. The two points above are the ones still to be confirmed in Figma.
 - Insert as layers differs from the preview: Figma's drop-shadow blur is its own; scaling also scales strokes, effects and text; a layer inside auto layout is copied there for a moment, so the layout reflows and returns.
 - Undo after Reset layout lives in the status bar. A new selection or a re-read replaces it, and it ends after 10 seconds anyway.
 
@@ -67,4 +67,4 @@ Each render is one photograph, taken front-on. Use Studio for an angle.
 It needs Arc, Fan or Stack, with Perspective, Tilt and Turn at 0. The button's note gives the exact reason.
 
 **Which build do I have?**
-Look at the small label at the right of the preview's status bar, for example v3.15.
+Look at the small label at the right of the preview's status bar, for example v3.16.

@@ -1,37 +1,74 @@
 ---
 // "What's new in V3": a small, non-blocking card for first-time visitors (Home only), reopened from the header.
-// The slide text is read at build time from the "What V3 added" list in docs/using-klinos/start-here/about-klinos.md,
-// so it never says more than the docs. Visuals are media already captured from the panel (public/media/).
+// The slides follow the plugin's own first-run tour: the same order, titles and text as WN_SLIDES in the plugin's
+// src/ui.html (v3.16 and main). When WN_SLIDES changes in the plugin, update this list to match.
+// Visuals are media already captured from the panel (public/media/); "Read more" links to the docs page.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
-const ABOUT = join(ROOT, 'docs', 'using-klinos', 'start-here', 'about-klinos.md');
 
-// Which bullets become slides, where each links, and which captured screenshot illustrates it.
 const SLIDES = [
-	{ label: 'Editable lighting', href: '/using-klinos/studio/lighting/', media: 'using-klinos/studio/lighting/2' },
-	// The preview has no docs page of its own; the live demo is where to try it.
-	{ label: 'Sharper preview', href: '/using-klinos/reference/try-it-live/', media: 'whatsnew/preview' },
-	{ label: 'Polished frame and Surface texture', href: '/using-klinos/studio/devices/#polished-frame-phones-only', media: 'whatsnew/finish' },
-	{ label: 'Photoreal mode', href: '/using-klinos/photoreal/photoreal/', media: 'using-klinos/photoreal/photoreal/2' },
-	{ label: 'Playground mode', href: '/using-klinos/playground/layouts/', media: 'using-klinos/playground/layouts/2' },
-	// The panel's own dark theme: always the dark capture of the panel.
-	{ label: 'Dark theme', href: '/using-klinos/start-here/about-klinos/#what-v3-added', media: 'using-klinos/reference/try-it-live/1', only: 'dark' },
+	{
+		label: 'Built on real 3D models',
+		text: "V2 drew each device with a raymarching shader. V3 builds them as 3D models in Three.js and keeps V2's calibrated finishes, so devices still match V2. The models add what the old renderer lacked: a mirror floor reflection, raised camera lenses, podiums and smoother edges.",
+		href: '/using-klinos/studio/devices/',
+		// The floor reflection, one of the things the models added.
+		media: 'using-klinos/studio/backdrop-shadow/2',
+	},
+	{
+		label: 'Editable lighting',
+		text: 'Looks, plus an editor for the softbox lights. Calibrated is the default and matches V2.',
+		href: '/using-klinos/studio/lighting/',
+		media: 'using-klinos/studio/lighting/2',
+	},
+	{
+		label: 'Staging and positioning',
+		text: 'In Studio, the Staging card sets up a ready-made scene, such as Floating, Podium or Spotlight. Every value stays editable, and Revert puts back what the scene changed, until you edit one of those values. Turn on Position in the Frame card, then drag the device in the preview to move it.',
+		href: '/using-klinos/studio/staging/',
+		media: 'using-klinos/studio/staging/4',
+	},
+	{
+		label: 'A sharper preview',
+		text: "It renders at your screen's pixel density and stays sharp when you zoom. In Studio, drag the preview to turn the device and check your mockup.",
+		// The preview has no docs page of its own; the live demo is where to try it.
+		href: '/using-klinos/reference/try-it-live/',
+		media: 'whatsnew/preview',
+	},
+	{
+		label: 'Polished frame and Surface texture',
+		text: 'A mirror-polished frame for the phones, and a fine grain that makes the body read as metal. Both start off.',
+		href: '/using-klinos/studio/devices/#polished-frame-phones-only',
+		media: 'whatsnew/finish',
+	},
+	{
+		label: 'Photoreal mode',
+		text: 'Static renders of real devices, the iPhone 17 Pro and the MacBook Pro 14 inch, with your design in the screen.',
+		href: '/using-klinos/photoreal/photoreal/',
+		media: 'using-klinos/photoreal/photoreal/2',
+	},
+	{
+		label: 'Playground mode',
+		text: 'Any Figma layer as an angled card, or several layers as a layout.',
+		href: '/using-klinos/playground/layouts/',
+		media: 'using-klinos/playground/layouts/2',
+	},
+	{
+		label: 'Arrange the panel',
+		text: 'Drag a card by the grip at its top right to move it, or open the grip for Move up, Move down and Reset order. Each mode keeps its own order, and Klinos remembers it.',
+		href: '/using-klinos/panel/panel-cards/',
+		// The grip menu.
+		media: 'using-klinos/panel/panel-cards/2',
+	},
+	{
+		label: 'Dark theme',
+		text: 'The panel now has a dark version, and follows Figma by default. Change it with the switch at the top left.',
+		href: '/using-klinos/start-here/about-klinos/#what-v3-added',
+		// The panel's own dark theme: always the dark capture of the panel.
+		media: 'using-klinos/reference/try-it-live/1',
+		only: 'dark',
+	},
 ];
-
-const list = (readFileSync(ABOUT, 'utf8').split('### What V3 added')[1] ?? '').split(/\n#{2,3} |\nSmaller changes/)[0];
-const bullets = new Map(
-	[...list.matchAll(/^- \*\*(.+?)\.?\*\*\s*(.+)$/gm)].map((m) => [
-		m[1].replace(/\.$/, ''),
-		// Links in the bullet become plain text on the slide; "Read more" carries the link, so a closing
-		// "See [page](…)." sentence is dropped rather than shown as unlinked text.
-		m[2]
-			.replace(/\s*See \[[^\]]+\]\([^)]*\)\.?\s*$/, '')
-			.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-			.trim(),
-	])
-);
 
 function media(id, only) {
 	const [slug, n] = [id.slice(0, id.lastIndexOf('/')), id.slice(id.lastIndexOf('/') + 1)];
@@ -44,9 +81,9 @@ function media(id, only) {
 }
 
 const slides = SLIDES.map((s) => {
-	const text = bullets.get(s.label);
-	if (!text) throw new Error(`What's new: no "**${s.label}.**" bullet under "What V3 added" in about-klinos.md`);
-	return { ...s, text, img: media(s.media, s.only) };
+	const img = media(s.media, s.only);
+	if (!img) throw new Error(`What's new: no captured media "${s.media}" for "${s.label}"`);
+	return { ...s, img };
 });
 ---
 

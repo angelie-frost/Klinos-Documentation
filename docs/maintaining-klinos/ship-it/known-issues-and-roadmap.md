@@ -5,9 +5,10 @@ order: 12
 lastUpdated: "[VERIFY: date]"
 ---
 
-## Not yet run in Figma
+## Not yet confirmed in Figma
 
-- Large parts of Playground have only been tested in the standalone preview and against a mock of the Figma API: Insert as layers (Phase C), Stack's editable result, Exploded's reading of frames (temporary copies, masks, auto layout, instances), Reset layout and the guide. The Figma checklists in their change descriptions have not been run yet.
+Insert as layers, Stack, Exploded layers, Reset layout and the guide, and the What's new tour were tested in Figma for v3.16. Two points are still open:
+
 - What Figma's `exportAsync` returns for a hidden layer, or one inside a hidden parent. Each hidden layer is exported small once and its row shows the result; it is also logged as `[Klinos Playground] hidden layer export`. Until that is read in Figma, the active layer skips hidden ones.
 - Placement on the page for Playground sources inside auto layout, groups and rotated parents.
 

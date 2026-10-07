@@ -75,7 +75,7 @@ To read each card, Klinos makes a temporary copy of your frame named **Klinos te
 > Glass blur gets slower with more cards. For 6 cards, a draft takes about 36 ms (drafts skip the blur) and a settled frame about 880 ms. Lower Layers if the preview feels slow.
 
 > **Note**
-> Exploded layers has been tested in the standalone preview and against a mock of the Figma API. Its reading of frames, masks, auto layout and instances still needs a check in Figma.
+> Exploded layers was tested in Figma for v3.16.
 
 ## What you'll see
 

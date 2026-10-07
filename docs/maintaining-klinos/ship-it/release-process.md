@@ -8,7 +8,7 @@ lastUpdated: "[VERIFY: date]"
 ## Package a build
 
 1. Find the highest `dist/klinos-v3-<n>.zip`.
-2. Set `VERSION` to `3.<n+1>`. The next package is v3.16.
+2. Set `VERSION` to `3.<n+1>`. The next package is v3.17.
 3. Run:
 
 ```sh

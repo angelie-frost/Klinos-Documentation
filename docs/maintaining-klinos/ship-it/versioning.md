@@ -7,7 +7,7 @@ lastUpdated: "[VERIFY: date]"
 
 ## The build number
 
-- The build number lives in the `VERSION` file, for example `3.15`.
+- The build number lives in the `VERSION` file, for example `3.16`.
 - It is shown in the panel, as the small label at the right of the preview's status bar.
 - It has the form `3.<n>`, where `<n>` matches the package zip `dist/klinos-v3-<n>.zip`.
 
@@ -17,7 +17,7 @@ lastUpdated: "[VERIFY: date]"
 
 Work after a package keeps the last `VERSION` until the next package.
 
-Today `VERSION` is 3.15 and the newest package is `dist/klinos-v3-15.zip`. The labels "v3-16" and "v3-17" in the handoff notes were only working labels.
+Today `VERSION` is 3.16 and the newest package is `dist/klinos-v3-16.zip` (tag `v3.16`).
 
 ## The plugin ID
 

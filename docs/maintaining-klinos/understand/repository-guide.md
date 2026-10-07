@@ -19,7 +19,7 @@ lastUpdated: "[VERIFY: date]"
 | `src/ui.html` | The panel: markup, CSS and app JavaScript. |
 | `src/shaders/*.glsl` | Device, backdrop, card and other shaders, inlined at build time. |
 | `src/assets/` | Base64 and JSON assets: keyboard legends, Photoreal renders and their placement. |
-| `VERSION` | The build version shown in the panel, for example 3.15. |
+| `VERSION` | The build version shown in the panel, for example 3.16. |
 | `vendor/three.min.js` | Three.js r149 UMD, pinned, inlined into `ui.html`. Ask before adding to `vendor/`. |
 | `reference/v2/*.glsl` | V2's shipping shaders, verbatim. The calibration source of truth and the parity harness's baseline. |
 | `reference/photoreal/` | The Photoreal source renders, as supplied (green screens). |
@@ -48,3 +48,7 @@ lastUpdated: "[VERIFY: date]"
 
 > **Warning**
 > Don't move files between `src/` and `tools/` without asking first.
+
+## Keeping the docs site in step
+
+When `WN_SLIDES` changes in the plugin, update `src/components/WhatsNew.astro` to match.

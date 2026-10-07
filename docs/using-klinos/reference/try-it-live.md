@@ -17,6 +17,7 @@ It loads its 3D library (Three.js) from the internet, so it needs a connection.
 
 - **Theme.** Saved in the browser. The option reads "Match system" instead of "Match Figma".
 - **Panel card order.** Saved in the browser.
+- **The What's new tour.** It doesn't open by itself here, because the demo loads with `?nomodal=1`. Click the build label at the right of the status bar to open it.
 - **Match a photo.** It uses a normal file picker, so it should work. This was read from the code, not tested.
 - Switching modes, and the device, angle, lighting, staging, screen, frame, backdrop and shadow controls.
 

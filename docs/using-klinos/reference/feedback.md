@@ -11,7 +11,7 @@ Send bug reports and feedback directly to the plugin's maintainer. There is no i
 
 ## What to include
 
-1. **The build.** The small label at the right of the preview's status bar, for example v3.15.
+1. **The build.** The small label at the right of the preview's status bar, for example v3.16.
 2. **The mode.** Studio, Photoreal or Playground.
 3. **What you rendered.**
    - Studio: the device, finish, Look and angle preset.

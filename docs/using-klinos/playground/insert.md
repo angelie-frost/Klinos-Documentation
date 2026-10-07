@@ -53,7 +53,7 @@ Clicking **Insert image** on that selection makes a new image instead.
 > Insert as layers differs from the preview in a few ways. Figma's drop-shadow blur is its own. Scaling a copy also scales its strokes, effects and text. A layer inside auto layout is copied there for a moment, so the layout reflows and then returns.
 
 > **Note**
-> Insert as layers has only been tested against a mock of the Figma API so far. It isn't available in the standalone browser preview.
+> Insert as layers was tested in Figma for v3.16. It isn't available in the standalone browser preview.
 
 ## Copy
 

@@ -20,7 +20,8 @@ const opt = (name, fallback) => {
 };
 const ONLY = opt('--only', '') ? new Set(opt('--only').split(',')) : null;
 const THEMES = { light: ['light'], dark: ['dark'], both: ['light', 'dark'] }[opt('--theme', 'both')];
-const DEMO = pathToFileURL(join(ROOT, 'demo', 'preview.html')).href;
+// ?nomodal=1: the panel's first-run What's new tour must not open over the captures (it also leaves its key alone).
+const DEMO = pathToFileURL(join(ROOT, 'demo', 'preview.html')).href + '?nomodal=1';
 const VIEW = { width: 1056, height: 660 }; // 16:10, wide enough for the panel's side-by-side layout
 const CLIP_BUDGET = 950_000; // bytes per clip, under 1 MB
 

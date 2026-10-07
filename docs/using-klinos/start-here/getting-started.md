@@ -14,6 +14,15 @@ This page shows where to find Klinos and walks you through your first mockup.
 
 Klinos is published in the company's Figma organization. Open it directly from Figma's plugins. You don't need to import anything.
 
+The first time you open V3, a short tour, **What's new in V3**, opens over the panel. Its 9 slides show what V3 added, from the 3D device models to the dark theme. Step through with **Next** and **Back** or the arrow keys, and close it with **Done**, the **×** or Esc. It opens by itself only once, even if you close it early. To see it again, click the build label at the right of the preview's status bar.
+
+<!-- REMOVE-AT-3.17: tour note -->
+
+> **Note**
+> The installed v3.16 plugin shows 8 slides. The first slide, "Built on real 3D models", was added after the v3.16 package and ships in the next release.
+
+<!-- /REMOVE-AT-3.17 -->
+
 ## Your first mockup in 2 minutes
 
 1. **Select a frame.** In Figma, click the frame you want to show on a device.

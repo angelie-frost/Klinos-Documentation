@@ -1,9 +1,12 @@
 // Layout test across the tablet/desktop switch (980/981px). Usage: node scripts/test-layout.mjs [baseUrl]   (a built site, e.g. npm run preview)
 // At 800–980px there is no sidebar column: the content must sit centred with the same gutters as at 768px.
 // At every width: no horizontal overflow, and the header items share one centreline (spread <= 1px).
+import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
 const BASE = process.argv[2] || 'http://localhost:4322';
+// The version the header shows: its one source, src/config.ts.
+const VERSION = readFileSync(new URL('../src/config.ts', import.meta.url), 'utf8').match(/KLINOS_VERSION = '([^']+)'/)[1];
 const PAGES = [
 	['Home', 'using-klinos/start-here/home/'],
 	['Screen', 'using-klinos/studio/screen/'],
@@ -120,7 +123,7 @@ for (const theme of THEMES) {
 					text: v.textContent,
 					href: v.getAttribute('href'),
 					label: v.getAttribute('aria-label'),
-					copies: [...document.querySelectorAll('body *')].filter((e) => e.children.length === 0 && /^v3\.15$/.test(e.textContent.trim())).length,
+					copies: [...document.querySelectorAll('body *')].filter((e) => e.children.length === 0 && e.textContent.trim() === v.textContent.trim()).length,
 					titleText: titleEnd.textContent,
 					gap: vis(v) ? r(v).left + parseFloat(getComputedStyle(v).paddingLeft) - r(titleEnd).right : null,
 					baselineDiff: vis(v) ? Math.abs(baseline(v) - baseline(titleEnd)) : null,
@@ -137,7 +140,7 @@ for (const theme of THEMES) {
 			});
 			const tag = `${theme} ${touch ? 'touch' : 'mouse'} ${w}: version`;
 			headerRows.push({ theme, input: touch ? 'touch' : 'mouse', width: w, shown: m.shown, 'title before it': m.titleText, gap: m.gap?.toFixed(1), 'baseline diff': m.baselineDiff?.toFixed(2), height: m.height, spread: +m.spread.toFixed(2), overflow: m.overflow });
-			check(`${tag} text, link and label`, m.text === 'v3.15' && m.href === '/using-klinos/reference/changelog/' && m.label === 'Version 3.15, open the changelog');
+			check(`${tag} text, link and label`, m.text === `v${VERSION}` && m.href === '/using-klinos/reference/changelog/' && m.label === `Version ${VERSION}, open the changelog`);
 			check(`${tag} 12px Geist Mono, regular, no underline`, m.fontSize === '12px' && m.font.includes('Geist Mono') && m.weight === '400' && m.underline === 'none', `${m.fontSize} ${m.font} ${m.weight} ${m.underline}`);
 			check(`${tag} shown once`, m.copies === 1,`${m.copies} copies`);
 			check(`${tag} header fits: no overflow, items inside the header`, m.overflow <= 0 && m.inHeader, `${m.overflow}px`);
