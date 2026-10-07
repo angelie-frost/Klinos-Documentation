@@ -1079,19 +1079,66 @@ dialog.lightbox figcaption {
 	text-align: center;
 }
 .lightbox-close {
+	/* Inside the frame (the dialog), 12px in from its top and right edges: it belongs to the picture, stays put
+	   whatever the image size, and the frame (overflow visible, always within the viewport) never clips it. */
 	position: absolute;
-	top: 8px;
-	right: 8px;
+	top: 12px;
+	right: 12px;
 	z-index: 1;
-	width: 32px;
-	height: 32px;
+	box-sizing: border-box;
+	width: 36px;
+	height: 36px;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 0;
 	border: 1px solid var(--k-line2);
 	border-radius: 50%;
 	background: var(--k-surface);
 	color: var(--k-ink);
-	font-size: 20px;
-	line-height: 1;
+	box-shadow: var(--k-pop-shadow);
 	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+/* Touch: a 44px target. */
+@media (pointer: coarse) {
+	.lightbox-close {
+		width: 44px;
+		height: 44px;
+	}
+}
+.lightbox-close svg {
+	display: block;
+	flex: none;
+	width: 18px;
+	height: 18px;
+}
+@media (pointer: coarse) {
+	.lightbox-close svg {
+		width: 20px;
+		height: 20px;
+	}
+}
+/* The ring can sit over a dark image or the dim backdrop: a surface-coloured halo under it keeps it visible in both themes. */
+.lightbox-close:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+	box-shadow:
+		0 0 0 6px var(--k-surface),
+		var(--k-pop-shadow);
+}
+@media (hover: hover) and (pointer: fine) {
+	.lightbox-close:hover {
+		background: var(--k-hover-strong);
+	}
+}
+@media (hover: none), (pointer: coarse) {
+	.lightbox-close:active {
+		background: var(--k-hover-strong);
+		transition: none;
+	}
 }
 
 /* ---------- In-app guide visuals (ported from the panel's .helpfig, .shinestrip, .plsteps) ---------- */

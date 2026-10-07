@@ -1,4 +1,5 @@
 // Page behaviours: mermaid diagrams (themed, re-rendered on theme change) and the Try it live embed.
+import { lucide } from '../icons/lucide';
 
 /* ---------- Mermaid ---------- */
 const diagrams = Array.from(document.querySelectorAll<HTMLElement>('pre[data-mermaid]'));
@@ -80,14 +81,16 @@ if (live) {
 /* Sidebar: bringing the current page into view (the prototype's revealActive) is done before the first paint
    in overrides/Sidebar.astro, together with keeping the sidebar's scroll between pages. */
 
-/* ---------- Media: lightbox for images ---------- */
+/* ---------- Media: lightbox for images ----------
+   The close button is the first focusable item (showModal focuses it), 12px inside the frame's top-right corner.
+   Icon: Lucide x (ISC), see LICENSES/lucide.txt. */
 const zoomButtons = document.querySelectorAll<HTMLButtonElement>('[data-zoom]');
 if (zoomButtons.length) {
 	const box = document.createElement('dialog');
 	box.className = 'lightbox';
 	box.setAttribute('aria-label', 'Enlarged image');
 	box.innerHTML =
-		'<button class="lightbox-close" type="button" aria-label="Close">&times;</button><figure><img alt=""><figcaption></figcaption></figure>';
+		`<button class="lightbox-close" type="button" aria-label="Close">${lucide('x')}</button><figure><img alt=""><figcaption></figcaption></figure>`;
 	document.body.append(box);
 	const img = box.querySelector('img')!;
 	const cap = box.querySelector('figcaption')!;
