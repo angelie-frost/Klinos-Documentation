@@ -85,8 +85,8 @@ for (const theme of THEMES) {
 	await ctx.close();
 }
 
-// ---------- Header: logo and title left; What's new, Try it live and theme right; no version, no toggle ----------
-// Desktop (981px and up): the right group in that order, at least 12px between neighbours, the header search button
+// ---------- Header: logo and title left; section dropdown, What's new, Try it live and theme right; no version ----------
+// Desktop (981px and up): the right group in that order, at least 10px between neighbours, the header search button
 // hidden (search is in the sidebar). Tablet and phone: the Try it live icon and the search icon, 44px on touch.
 // Every width: one centreline (spread <= 1px), everything inside the header, no overflow.
 const headerRows = [];
@@ -116,22 +116,100 @@ for (const theme of THEMES) {
 					overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - lw,
 					version: !!document.querySelector('.k-header .k-version'),
 					toggle: !!document.querySelector('.k-header .k-tabs'),
-					order: right.map((e) => (e.matches('.k-whatsnew') ? 'whatsnew' : e.matches('.k-try') ? 'try' : e.querySelector('.themebtn') || e.matches('klinos-theme-toggle, starlight-theme-select') ? 'theme' : e.tagName.toLowerCase())),
+					order: right.map((e) => (e.matches('k-section-menu') ? 'sections' : e.matches('.k-whatsnew') ? 'whatsnew' : e.matches('.k-try') ? 'try' : e.querySelector('.themebtn') || e.matches('klinos-theme-toggle, starlight-theme-select') ? 'theme' : e.tagName.toLowerCase())),
 					minGap: gaps.length ? Math.min(...gaps) : null,
 					trySolo: vis(document.querySelector('.k-header .k-try')),
 					tryIcon: vis(document.querySelector('.k-header a.k-try-icon')) ? r(document.querySelector('.k-header a.k-try-icon')).height : 0,
 					search: vis(document.querySelector('.k-header button[data-open-modal]')) ? r(document.querySelector('.k-header button[data-open-modal]')).height : 0,
+					// No pill or circle anywhere in the header: every visible link or button's corner radius stays under half
+					// its height.
+					rounded: [...document.querySelectorAll('.k-header a, .k-header button')].filter(vis).filter((e) => parseFloat(getComputedStyle(e).borderTopLeftRadius) >= r(e).height / 2 - 0.5).map((e) => `${e.className || e.tagName} ${getComputedStyle(e).borderTopLeftRadius}/${r(e).height}`),
+					tryRadius: [document.querySelector('.k-header .k-try'), document.querySelector('.k-header a.k-try-icon')].filter(vis).map((e) => getComputedStyle(e).borderTopLeftRadius),
+					inputRadius: (() => {
+						const probe = document.createElement('span');
+						probe.style.borderTopLeftRadius = 'var(--k-r-nav)';
+						document.body.append(probe);
+						const v = getComputedStyle(probe).borderTopLeftRadius;
+						probe.remove();
+						return v;
+					})(),
 				};
 			});
 			const tag = `${theme} ${touch ? 'touch' : 'mouse'} ${w}: header`;
 			headerRows.push({ theme, input: touch ? 'touch' : 'mouse', width: w, right: m.order.join(' / ') || '-', 'min gap': m.minGap?.toFixed(1) ?? '-', 'try icon': m.tryIcon, search: m.search, spread: +m.spread.toFixed(2), overflow: m.overflow });
 			check(`${tag} has no version and no section toggle`, !m.version && !m.toggle);
 			check(`${tag} on one centreline, inside the header, no overflow`, m.spread <= 1 && m.inHeader && m.overflow <= 0, `spread ${m.spread.toFixed(2)}, overflow ${m.overflow}`);
+			check(`${tag}: no pill or circle shapes; Try it live ${w >= 981 ? 'button' : 'icon'} has the input radius`, m.rounded.length === 0 && m.tryRadius.length === 1 && m.tryRadius[0] === m.inputRadius, `${m.rounded.join('; ') || 'none'}; try ${m.tryRadius.join(',')}`);
 			if (w >= 981) {
-				check(`${tag}: What's new, Try it live, theme on the right, in that order`, m.order.join(',') === 'whatsnew,try,theme' && m.trySolo, m.order.join(','));
-				// 981–1100px keeps the narrow-band gap of 10px (restored from before Stage 14); wider, 16px.
-				const minGap = w <= 1100 ? 10 : 12;
-				check(`${tag}: at least ${minGap}px between neighbours on the right`, m.minGap >= minGap, `${m.minGap?.toFixed(1)}px`);
+				check(`${tag}: section dropdown, What's new, Try it live, theme on the right, in that order`, m.order.join(',') === 'sections,whatsnew,try,theme' && m.trySolo, m.order.join(','));
+				// The section dropdown: the trigger, then the open panel.
+				const d = await p.evaluate(() => {
+					const resolve = (prop, value) => {
+						const probe = document.createElement('span');
+						probe.style[prop] = value;
+						document.body.append(probe);
+						const c = getComputedStyle(probe)[prop];
+						probe.remove();
+						return c;
+					};
+					const t = document.querySelector('.k-header .k-secmenu-trigger');
+					const wn = document.querySelector('.k-header .k-whatsnew');
+					const look = (e) => {
+						const c = getComputedStyle(e);
+						return [c.fontSize, c.fontWeight, c.color, c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft, e.getBoundingClientRect().height].join(' ');
+					};
+					// The middle of a text line: the label, What's new and Try it live share one.
+					const textMid = (e) => {
+						const rg = document.createRange();
+						rg.selectNodeContents(e);
+						const b = rg.getClientRects()[0];
+						return b.top + b.height / 2;
+					};
+					const tryText = [...document.querySelector('.k-header .k-try').childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+					const tryRange = document.createRange();
+					tryRange.selectNodeContents(tryText);
+					const tb = tryRange.getClientRects()[0];
+					const tc = getComputedStyle(t);
+					return {
+						text: t.textContent.trim(),
+						expanded: t.getAttribute('aria-expanded'),
+						controls: t.getAttribute('aria-controls'),
+						noBox: parseFloat(tc.borderTopWidth) === 0 && tc.backgroundColor === 'rgba(0, 0, 0, 0)',
+						sameAsWhatsNew: look(t) === look(wn),
+						looks: [look(t), look(wn)],
+						mids: [textMid(t.querySelector('span')), textMid(wn), tb.top + tb.height / 2],
+						chevron: !!t.querySelector('.k-secmenu-chev'),
+						navActive: resolve('backgroundColor', 'var(--k-nav-active)'),
+					};
+				});
+				check(`${tag}: section trigger has no box and looks exactly like "What's new" (font, weight, colour, padding, height), chevron after "Guide", aria-expanded false`, d.noBox && d.sameAsWhatsNew && d.chevron && d.text === 'Guide' && d.expanded === 'false' && !!d.controls, JSON.stringify(d.looks));
+				check(`${tag}: "Guide", "What's new" and "Try it live" text on one line (±0.5px)`, Math.max(...d.mids) - Math.min(...d.mids) <= 0.5, d.mids.map((y) => y.toFixed(2)).join(' / '));
+				await p.click('.k-header .k-secmenu-trigger');
+				await p.waitForTimeout(120);
+				const o = await p.evaluate((navActive) => {
+					const t = document.querySelector('.k-header .k-secmenu-trigger');
+					const panel = document.getElementById(t.getAttribute('aria-controls'));
+					const pr = panel.getBoundingClientRect();
+					const items = [...panel.querySelectorAll('.k-secmenu-item')].map((a) => {
+						const desc = a.querySelector('.k-secmenu-desc');
+						const lines = Math.round(desc.getBoundingClientRect().height / parseFloat(getComputedStyle(desc).lineHeight));
+						return { title: a.querySelector('.k-secmenu-title').textContent.trim(), desc: desc.textContent.trim(), lines, href: a.getAttribute('href'), current: a.getAttribute('aria-current') === 'true', fill: getComputedStyle(a).backgroundColor === navActive };
+					});
+					return { expanded: t.getAttribute('aria-expanded'), shown: !panel.hidden, w: pr.width, rightDiff: pr.right - t.getBoundingClientRect().right, below: pr.top - t.getBoundingClientRect().bottom, items };
+				}, d.navActive);
+				check(`${tag}: panel opens (aria-expanded true), 280px, right edge on the trigger's, below it`, o.expanded === 'true' && o.shown && Math.abs(o.w - 280) <= 1 && Math.abs(o.rightDiff) <= 0.5 && o.below > 0, JSON.stringify({ w: o.w, rightDiff: o.rightDiff, below: o.below }));
+				check(
+					`${tag}: panel lists Guide and Develop with their descriptions (two lines at most) and first pages; Guide current (fill, aria-current)`,
+					o.items.length === 2 &&
+						o.items[0].title === 'Guide' && o.items[0].href === '/using-klinos/start-here/home/' && o.items[0].desc === 'How to use Klinos: the modes, the panel and everyday tasks.' &&
+						o.items[1].title === 'Develop' && o.items[1].href === '/maintaining-klinos/understand/architecture/' && o.items[1].desc === 'How Klinos is built, maintained and released.' &&
+						o.items.every((i) => i.lines <= 2) && o.items[0].current && o.items[0].fill && !o.items[1].current && !o.items[1].fill,
+					JSON.stringify(o.items),
+				);
+				await p.keyboard.press('Escape');
+				check(`${tag}: Esc closes it, focus back on the trigger`, await p.evaluate(() => { const t = document.querySelector('.k-header .k-secmenu-trigger'); return t.getAttribute('aria-expanded') === 'false' && document.activeElement === t; }));
+				// 981–1100px keeps the narrow-band gap of 10px; wider, 16px.
+				check(`${tag}: at least 10px between neighbours on the right`, m.minGap >= 10, `${m.minGap?.toFixed(1)}px`);
 				check(`${tag}: no search button (search is in the sidebar)`, m.search === 0);
 			} else {
 				check(`${tag}: Try it live icon and search icon${touch ? ', 44px' : ''}`, touch ? m.tryIcon >= 44 && m.search >= 44 : m.tryIcon > 0 && m.search > 0, `${m.tryIcon} / ${m.search}`);
@@ -139,6 +217,23 @@ for (const theme of THEMES) {
 		}
 		await ctx.close();
 	}
+}
+
+// ---------- Home: the current release links to its changelog entry and matches KLINOS_VERSION ----------
+{
+	const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+	await ctx.addInitScript(() => localStorage.setItem('klinos-whatsnew-v3', 'seen'));
+	const p = await ctx.newPage();
+	await p.goto(`${BASE}/using-klinos/start-here/home/`, { waitUntil: 'networkidle' });
+	const anchor = `#v${VERSION.replace(/\./g, '')}`;
+	const link = await p.evaluate(() => {
+		const a = [...document.querySelectorAll('main a[href*="/changelog/#v"]')].find((x) => /current release/i.test(x.closest('p')?.textContent ?? ''));
+		return a ? { text: a.textContent.trim(), href: a.getAttribute('href') } : null;
+	});
+	check(`Home: "The current release is v${VERSION}" links to the changelog's ${anchor}`, link?.text === `v${VERSION}` && link.href === `/using-klinos/reference/changelog/${anchor}`, JSON.stringify(link));
+	await p.goto(`${BASE}/using-klinos/reference/changelog/`, { waitUntil: 'networkidle' });
+	check(`Changelog: the ${anchor} entry exists`, await p.evaluate((id) => !!document.getElementById(id), anchor.slice(1)));
+	await ctx.close();
 }
 
 // ---------- Home: the current release links to its changelog entry and matches KLINOS_VERSION ----------
@@ -252,23 +347,24 @@ for (const theme of THEMES) {
 	await ctx.close();
 }
 
-// ---------- Sidebar: pinned search field and section toggle; one section at a time; group labels, links ----------
-// Desktop (981px and up): a pinned block at the top of the sidebar, the search field ("Search docs", a Ctrl+K chip)
-// and, 8px under it, the "User guide / Team handbook" toggle (the field's width, 36px, the input radius); 28px from
-// the toggle's bottom to the middle of the first group label. The menu (980px and below) has the toggle at its top,
-// 44px options. Only the current section's groups are shown. The rhythm, between the middles of text lines (1x,
-// tolerance 2px): link to link 36px, label to first link 30–32px, last link to next label 48px; on touch 44 / 38 / 59.
+// ---------- Sidebar: pinned search field; one section at a time; group labels, links; the menu's section control ----------
+// Desktop (981px and up): only the search field is pinned at the top of the sidebar ("Search docs", a Ctrl+K chip),
+// 56px; 28px from its bottom edge to the middle of the first group label. No section toggle in the sidebar (the
+// section dropdown is in the header). The menu (980px and below) has the section control at its top: a full-width
+// 44px trigger that expands inline to the two sections, items at least 52px. Only the current section's groups are
+// shown. The rhythm, between the middles of text lines (1x, tolerance 2px): link to link 36px, label to first link
+// 30–32px, last link to next label 48px; on touch 44 / 38 / 59.
 const USING_GROUPS = ['Start here', 'Studio', 'Photoreal', 'Playground', 'Working with the panel', 'Reference'];
 const MAINTAINING_GROUPS = ['Understand', 'Work on it', 'Ship it'];
-const SECTION_NAMES = { Using: 'User guide', Maintaining: 'Team handbook' };
+const SECTION_NAMES = { Using: 'Guide', Maintaining: 'Develop' };
 const sidebarRows = [];
 for (const [label, ctxOpts, theme, path, section] of [
-	['1440 light, User guide page', { viewport: { width: 1440, height: 1000 } }, 'light', 'using-klinos/studio/staging/', 'Using'],
-	['1440 dark, User guide page', { viewport: { width: 1440, height: 1000 } }, 'dark', 'using-klinos/studio/staging/', 'Using'],
-	['1440 light, Team handbook page', { viewport: { width: 1440, height: 1000 } }, 'light', 'maintaining-klinos/work-on-it/local-setup/', 'Maintaining'],
-	['981 light, User guide page', { viewport: { width: 981, height: 900 } }, 'light', 'using-klinos/studio/staging/', 'Using'],
+	['1440 light, Guide page', { viewport: { width: 1440, height: 1000 } }, 'light', 'using-klinos/studio/staging/', 'Using'],
+	['1440 dark, Guide page', { viewport: { width: 1440, height: 1000 } }, 'dark', 'using-klinos/studio/staging/', 'Using'],
+	['1440 light, Develop page', { viewport: { width: 1440, height: 1000 } }, 'light', 'maintaining-klinos/work-on-it/local-setup/', 'Maintaining'],
+	['981 light, Guide page', { viewport: { width: 981, height: 900 } }, 'light', 'using-klinos/studio/staging/', 'Using'],
 	['820 touch, menu open', { viewport: { width: 820, height: 1000 }, hasTouch: true }, 'light', 'using-klinos/studio/staging/', 'Using'],
-	['390 touch, menu open, Team handbook', { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }, 'dark', 'maintaining-klinos/work-on-it/local-setup/', 'Maintaining'],
+	['390 touch, menu open, Develop', { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }, 'dark', 'maintaining-klinos/work-on-it/local-setup/', 'Maintaining'],
 ]) {
 	const touch = !!ctxOpts.hasTouch;
 	const ctx = await browser.newContext(ctxOpts);
@@ -327,12 +423,6 @@ for (const [label, ctxOpts, theme, path, section] of [
 		const labels = [...pane.querySelectorAll('.top-level > li > details > summary .large')].map((l) => getComputedStyle(l));
 		const links = [...pane.querySelectorAll('.top-level a')];
 		const current = links.find((a) => a.getAttribute('aria-current') === 'page');
-		const control = pane.querySelector(touch ? '.k-tabs-menu' : '.k-sb-pinned .k-tabs-sidebar');
-		const tabs = [...control.querySelectorAll('.k-tab')].map((a) => {
-			const c = getComputedStyle(a);
-			const inner = r(a).width - 2 * parseFloat(c.borderLeftWidth) - parseFloat(c.paddingLeft) - parseFloat(c.paddingRight);
-			return { text: a.textContent.trim(), href: a.getAttribute('href'), current: a.getAttribute('aria-current') === 'true', color: c.color, weight: +c.fontWeight, bg: c.backgroundColor, border: parseFloat(c.borderTopWidth) > 0 && c.borderTopColor !== 'rgba(0, 0, 0, 0)', w: r(a).width, h: r(a).height, oneLine: line(a).width <= inner + 0.5 && document.createRange().getClientRects && a.getClientRects().length === 1, fontSize: c.fontSize };
-		});
 		const out = {
 			groups,
 			linkSteps,
@@ -348,11 +438,8 @@ for (const [label, ctxOpts, theme, path, section] of [
 				}),
 			activePill: !!current && getComputedStyle(current).backgroundColor === pill && +getComputedStyle(current).fontWeight >= 600,
 			rows: links.map((a) => a.getBoundingClientRect().height),
-			tabs,
-			muted,
-			ink,
+			toggle: !!pane.querySelector('.k-tabs, .k-sb-pinned k-section-menu'),
 			surface,
-			control: { w: r(control).width, h: r(control).height, radius: getComputedStyle(control).borderTopLeftRadius },
 			inputRadius,
 		};
 		if (!touch) {
@@ -365,6 +452,7 @@ for (const [label, ctxOpts, theme, path, section] of [
 			const c = r(chip);
 			const linkText = line(links.find((a) => a !== current).querySelector('span'));
 			const label0 = pane.querySelector('.top-level > li > details > summary .large');
+			const pinned = document.querySelector('.k-sb-pinned');
 			out.field = {
 				label: field.getAttribute('aria-label'),
 				text: span.textContent.trim(),
@@ -378,10 +466,10 @@ for (const [label, ctxOpts, theme, path, section] of [
 				mids: [icon.top + icon.height / 2, st.top + st.height / 2, c.top + c.height / 2].map((y) => y - (f.top + f.height / 2)),
 				clear: c.left - st.right,
 			};
-			out.toggleGap = r(control).top - f.bottom;
-			out.toggleToLabel = mid(label0) - r(control).bottom;
-			out.fieldW = f.width;
-			out.pinnedTop = [f.top, r(control).top];
+			out.pinnedH = r(pinned).height;
+			out.pinnedOnlyField = pinned.children.length === 1 && pinned.firstElementChild === field;
+			out.fieldToLabel = mid(label0) - f.bottom;
+			out.fieldTop = f.top;
 		}
 		return out;
 	}, touch);
@@ -395,11 +483,9 @@ for (const [label, ctxOpts, theme, path, section] of [
 	const names = m.groups.map((g) => g.label);
 	const expected = section === 'Using' ? USING_GROUPS : MAINTAINING_GROUPS;
 	const photo = m.groups.find((g) => g.label === 'Photoreal');
-	const tabCurrent = m.tabs.find((t) => t.current);
-	const tabOther = m.tabs.find((t) => !t.current);
 	const sectionName = SECTION_NAMES[section];
-	sidebarRows.push({ case: label, groups: names.length, 'link→link': fmt(ls), 'label→link': fmt(lab), 'link→next label': fmt(gs), toggle: `${m.control.w.toFixed(1)}×${m.control.h.toFixed(1)}`, 'field→toggle': m.toggleGap?.toFixed(1) ?? '-', 'toggle→label': m.toggleToLabel?.toFixed(1) ?? '-' });
-	check(`sidebar ${label}: no section title, only the ${sectionName} groups`, names.join('|') === expected.join('|'), names.join(', '));
+	sidebarRows.push({ case: label, groups: names.length, 'link→link': fmt(ls), 'label→link': fmt(lab), 'link→next label': fmt(gs), pinned: m.pinnedH ?? '-', 'field→label': m.fieldToLabel?.toFixed(1) ?? '-' });
+	check(`sidebar ${label}: no section title, no section toggle, only the ${sectionName} groups`, !m.toggle && names.join('|') === expected.join('|'), names.join(', '));
 	check(`sidebar ${label}: link to link ${L}px (±2), text middles`, ls[0] >= L - 2 && ls[1] <= L + 2, fmt(ls));
 	check(`sidebar ${label}: group label to first link ${touch ? `${G}px (±2)` : '30–32px'}, text middles`, touch ? lab[0] >= G - 2 && lab[1] <= G + 2 : lab[0] >= 30 && lab[1] <= 32, fmt(lab));
 	check(`sidebar ${label}: last link to next group label ${S}px (±2), text middles`, gs[0] >= S - 2 && gs[1] <= S + 2, fmt(gs));
@@ -407,41 +493,39 @@ for (const [label, ctxOpts, theme, path, section] of [
 	check(`sidebar ${label}: links 14px, ink, regular; the current one the pill at 600`, m.linkStyle && m.activePill);
 	if (section === 'Using') check(`sidebar ${label}: Photoreal is a group with one link, "Overview", between Studio and Playground`, names.indexOf('Studio') < names.indexOf('Photoreal') && names.indexOf('Photoreal') < names.indexOf('Playground') && photo?.links.length === 1 && photo.links[0] === 'Overview', JSON.stringify(photo));
 	check(`sidebar ${label}: rows ${touch ? 'at least 44px (touch)' : '36px, no link wraps'}`, rowsOk, fmt(range(m.rows)));
-	// The section toggle.
-	check(
-		`toggle ${label}: "User guide" / "Team handbook"; "${sectionName}" raised (surface, hairline, ink, 500, aria-current), the other muted with no fill; right links`,
-		m.tabs.length === 2 &&
-			tabCurrent?.text === sectionName &&
-			tabCurrent.color === m.ink &&
-			tabCurrent.weight >= 500 &&
-			tabCurrent.bg === m.surface &&
-			tabCurrent.border &&
-			tabOther.color === m.muted &&
-			tabOther.bg === 'rgba(0, 0, 0, 0)' &&
-			m.tabs.find((t) => t.text === 'User guide')?.href === '/using-klinos/start-here/home/' &&
-			m.tabs.find((t) => t.text === 'Team handbook')?.href === '/maintaining-klinos/understand/architecture/',
-		JSON.stringify(m.tabs.map((t) => [t.text, t.current, t.bg, t.color])),
-	);
-	check(`toggle ${label}: two equal halves, labels 13px on one line, track radius = input radius`, Math.abs(m.tabs[0].w - m.tabs[1].w) <= 0.5 && m.tabs.every((t) => t.oneLine && t.fontSize === '13px') && m.control.radius === m.inputRadius, `${m.tabs.map((t) => t.w.toFixed(1)).join(' / ')}, radius ${m.control.radius}`);
-	if (touch) check(`toggle ${label}: options 44px tall in the menu`, m.tabs.every((t) => Math.abs(t.h - 44) <= 0.5), m.tabs.map((t) => t.h).join(', '));
-	else {
+	if (touch) {
+		// The section control at the top of the menu: a full-width 44px trigger, expanding inline.
+		const before = await p.evaluate(() => {
+			const t = document.querySelector('#starlight__sidebar .k-secmenu-trigger');
+			const pane = document.querySelector('#starlight__sidebar .sidebar-content').getBoundingClientRect();
+			return { text: t.textContent.trim(), h: t.getBoundingClientRect().height, w: t.getBoundingClientRect().width, paneW: pane.width, expanded: t.getAttribute('aria-expanded') };
+		});
+		check(`menu ${label}: section control at the top, full width, 44px, showing "${sectionName}"`, Math.abs(before.h - 44) <= 0.5 && before.text === sectionName && before.expanded === 'false' && before.w >= before.paneW - 48, JSON.stringify(before));
+		await p.tap('#starlight__sidebar .k-secmenu-trigger');
+		await p.waitForTimeout(150);
+		const open = await p.evaluate(() => {
+			const t = document.querySelector('#starlight__sidebar .k-secmenu-trigger');
+			const panel = document.getElementById(t.getAttribute('aria-controls'));
+			return { expanded: t.getAttribute('aria-expanded'), position: getComputedStyle(panel).position, items: [...panel.querySelectorAll('.k-secmenu-item')].map((a) => ({ t: a.querySelector('.k-secmenu-title').textContent.trim(), h: a.getBoundingClientRect().height, current: a.getAttribute('aria-current') === 'true', desc: !!a.querySelector('.k-secmenu-desc')?.textContent.trim() })) };
+		});
+		check(`menu ${label}: expands inline to Guide and Develop, each at least 52px with a description, the current one marked`, open.expanded === 'true' && open.position === 'static' && open.items.length === 2 && open.items.every((i) => i.h >= 52 && i.desc) && open.items.find((i) => i.current)?.t === sectionName, JSON.stringify(open));
+	} else {
 		const f = m.field;
 		check(`field ${label}: "Search docs", aria-label "Search documentation", chip "Ctrl+K" (or ⌘K) at 11px or more`, f.text === 'Search docs' && f.label === 'Search documentation' && /^(Ctrl\+K|⌘K)$/.test(f.chip) && f.chipFont >= 11, `${f.text} / ${f.chip} ${f.chipFont}px`);
 		check(`field ${label}: chip is a rounded rectangle, not a pill (radius above 0, at most the input radius, under half its height)`, f.chipRadius > 0 && f.chipRadius <= parseFloat(m.inputRadius) && f.chipRadius < f.chipH / 2, `${f.chipRadius}px on ${f.chipH}px`);
 		check(`field ${label}: edges on the active pill's edges, icon on the links' text edge, chip inset = icon inset (±0.5)`, f.edges.every((d) => Math.abs(d) <= 0.5) && Math.abs(f.iconToText) <= 0.5 && Math.abs(f.insets[0] - f.insets[1]) <= 0.5, JSON.stringify({ edges: f.edges, iconToText: f.iconToText, insets: f.insets }));
 		check(`field ${label}: icon, text and chip vertically centred (±0.5), at least 12px between the text and the chip`, f.mids.every((d) => Math.abs(d) <= 0.5) && f.clear >= 12, `${f.mids.map((d) => d.toFixed(2)).join(', ')}; clear ${f.clear.toFixed(1)}`);
-		check(`toggle ${label}: under the field, same width, 36px tall, 8px gap`, Math.abs(m.control.w - m.fieldW) <= 0.5 && Math.abs(m.control.h - 36) <= 0.5 && Math.abs(m.toggleGap - 8) <= 0.5, `${m.control.w}×${m.control.h}, gap ${m.toggleGap}`);
-		check(`toggle ${label}: 28px (±2) from its bottom edge to the middle of the first group label`, Math.abs(m.toggleToLabel - 28) <= 2, m.toggleToLabel.toFixed(1));
-		// Pinned together: both stay put while the links scroll under them.
+		check(`sidebar ${label}: the pinned block is the search field only (56px); 28px (±2) from the field to the middle of the first label`, m.pinnedOnlyField && Math.abs(m.pinnedH - 56) <= 0.5 && Math.abs(m.fieldToLabel - 28) <= 2, `${m.pinnedH}px, ${m.fieldToLabel.toFixed(1)}px`);
+		// Pinned: the field stays put while the links scroll under it.
 		await p.$eval('#starlight__sidebar', (e) => (e.scrollTop = 300));
 		await p.waitForTimeout(100);
 		const after = await p.evaluate(() => {
 			const pane = document.getElementById('starlight__sidebar');
 			const block = document.querySelector('.k-sb-pinned').getBoundingClientRect();
-			return { scrolled: pane.scrollTop, tops: [document.querySelector('.k-sb-search').getBoundingClientRect().top, document.querySelector('.k-sb-pinned .k-tabs').getBoundingClientRect().top], bg: getComputedStyle(document.querySelector('.k-sb-pinned')).backgroundColor, under: [...pane.querySelectorAll('.top-level a')].some((a) => { const x = a.getBoundingClientRect(); return x.top < block.bottom && x.bottom > block.top; }) };
+			return { scrolled: pane.scrollTop, top: document.querySelector('.k-sb-search').getBoundingClientRect().top, bg: getComputedStyle(document.querySelector('.k-sb-pinned')).backgroundColor, under: [...pane.querySelectorAll('.top-level a')].some((a) => { const x = a.getBoundingClientRect(); return x.top < block.bottom && x.bottom > block.top; }) };
 		});
 		await p.$eval('#starlight__sidebar', (e) => (e.scrollTop = 0));
-		check(`sidebar ${label}: search and toggle pinned together on a solid surface while the links scroll`, after.tops.every((t, i) => Math.abs(t - m.pinnedTop[i]) <= 0.5) && after.bg === m.surface && (after.scrolled === 0 || after.under), JSON.stringify(after));
+		check(`sidebar ${label}: search field pinned on a solid surface while the links scroll`, Math.abs(after.top - m.fieldTop) <= 0.5 && after.bg === m.surface && (after.scrolled === 0 || after.under), JSON.stringify(after));
 	}
 	// Hover changes a link's background with a mouse only.
 	const link = p.locator('#starlight__sidebar .top-level a:not([aria-current])').first();

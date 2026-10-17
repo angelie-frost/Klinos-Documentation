@@ -1,13 +1,14 @@
 ---
-// Header. Desktop (981px and up): the logo and "Klinos Docs" on the left; What's new, Try it live (the only
-// button-shaped item) and the theme toggle on the right. Search is a field at the top of the sidebar there, with the
-// "User guide / Team handbook" toggle under it (overrides/Sidebar.astro); the search component stays here, out of
-// the layout, because it owns the one dialog and the Ctrl/Cmd+K shortcut.
+// Header. Desktop (981px and up): the logo and "Klinos Docs" on the left; the section dropdown ("Guide" or
+// "Develop", components/SectionMenu.astro), What's new, Try it live and the theme toggle on the right. Search is a
+// field at the top of the sidebar there (overrides/Sidebar.astro); the search component stays here, out of the
+// layout, because it owns the one dialog and the Ctrl/Cmd+K shortcut.
 // Tablet and phone: the title on the left; the Try it live icon, the search icon and the menu button on the right.
 // The version is not in the header: Home links it to the changelog (KLINOS_VERSION in src/config.ts).
 import Search from 'virtual:starlight/components/Search';
 import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
 import WhatsNew from '../WhatsNew.astro';
+import SectionMenu from '../SectionMenu.astro';
 // Lucide icon (ISC), copied from lucide-static 1.49.0; see LICENSES/lucide.txt.
 import rotate3d from '../../icons/lucide/rotate-3d.svg?raw';
 import { lucide } from '../../icons/lucide';
@@ -32,6 +33,7 @@ const tryIcon = lucide('square-play', 'k-icon');
 		<Search />
 	</div>
 	<div class="k-desktop-only print:hidden right-group">
+		<SectionMenu place="header" />
 		<button class="k-whatsnew" type="button" data-wn-open>What's new</button>
 		<a class="k-try" href={LIVE} aria-current={onLive ? 'page' : undefined}><Fragment set:html={tryIcon} />Try it live</a>
 		<ThemeSelect />

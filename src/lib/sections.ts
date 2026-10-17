@@ -1,8 +1,14 @@
-// The docs' two top-level sections (the `##` headings of sidebar.md: "User guide", "Team handbook").
-// The sidebar shows one section at a time; the section tabs switch between them.
+// The docs' two top-level sections (the `##` headings of sidebar.md: "Guide" and "Develop"). The sidebar shows one
+// section at a time; the section dropdown (components/SectionMenu.astro) switches between them.
 import type { StarlightRouteData } from '@astrojs/starlight/route-data';
 
 type Entry = StarlightRouteData['sidebar'][number];
+
+/** One line under each section's name in the dropdown. Keyed by the section's name in sidebar.md; edit here. */
+export const SECTION_DESCRIPTIONS: Record<string, string> = {
+	Guide: 'How to use Klinos: the modes, the panel and everyday tasks.',
+	Develop: 'How Klinos is built, maintained and released.',
+};
 
 const hasCurrent = (e: Entry): boolean => (e.type === 'link' ? e.isCurrent : e.entries.some(hasCurrent));
 const firstLink = (e: Entry): string | undefined => (e.type === 'link' ? e.href : e.entries.map(firstLink).find(Boolean));
@@ -12,13 +18,14 @@ export function currentSection(sidebar: Entry[]): Entry | undefined {
 	return sidebar.find(hasCurrent) ?? sidebar[0];
 }
 
-/** One option per section: its label from sidebar.md ("User guide"), its first page, and whether it is current. */
-export function sectionTabs(sidebar: Entry[]) {
+/** One item per section: its name from sidebar.md, its description, its first page, and whether it is current. */
+export function sectionItems(sidebar: Entry[]) {
 	const current = currentSection(sidebar);
 	return sidebar
 		.filter((s) => s.type === 'group')
 		.map((s) => ({
 			label: s.label,
+			description: SECTION_DESCRIPTIONS[s.label] ?? '',
 			href: firstLink(s) ?? '/',
 			current: s === current,
 		}));

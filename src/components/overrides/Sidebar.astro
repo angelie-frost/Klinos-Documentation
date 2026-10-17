@@ -1,13 +1,13 @@
 ---
 // Copy of Starlight 0.42.5 Sidebar.astro: the menu footer (theme toggle, What is new) shows up to 980px instead of 800px.
-// Changed: only the current section's groups are shown (no "User guide" / "Team handbook" title). On desktop a
-// pinned block sits at the top: the search field (it opens the one search dialog, in overrides/Search.astro) and,
-// under it, the section toggle. At 980px and below this is the menu: the toggle sits at its top, not pinned.
+// Changed: only the current section's groups are shown (no "Guide" / "Develop" title); the section dropdown in the
+// header switches sections. On desktop the search field is pinned at the top (it opens the one search dialog, in
+// overrides/Search.astro). At 980px and below this is the menu: the section dropdown sits at its top, inline.
 // Added after the tree: the sidebar's scroll is saved as the page is left, and the current page is kept in view.
 import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
 import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
 import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
-import SectionTabs from '../SectionTabs.astro';
+import SectionMenu from '../SectionMenu.astro';
 import { currentSection } from '../../lib/sections';
 import { lucide } from '../../icons/lucide';
 
@@ -24,7 +24,6 @@ const searchIcon = lucide('search', 'k-icon');
 		<span aria-hidden="true">Search docs</span>
 		<kbd aria-hidden="true" data-search-kbd>Ctrl+K</kbd>
 	</button>
-	<SectionTabs place="sidebar" />
 </div>
 {/* ⌘K instead of Ctrl+K on Apple devices, before the first paint. */}
 <script is:inline>
@@ -36,7 +35,7 @@ const searchIcon = lucide('search', 'k-icon');
 	})();
 </script>
 
-<SectionTabs place="menu" />
+<SectionMenu place="menu" />
 
 <SidebarPersister>
 	<SidebarSublist sublist={groups} />
@@ -85,7 +84,7 @@ const searchIcon = lucide('search', 'k-icon');
 			if (!current) return;
 			const box = scroller.getBoundingClientRect();
 			const link = current.getBoundingClientRect();
-			// The pinned block (search and toggle) covers the top of the pane: a link under it counts as out of view.
+			// The pinned search field covers the top of the pane: a link under it counts as out of view.
 			const pinned = scroller.querySelector('.k-sb-pinned');
 			const top = pinned && getComputedStyle(pinned).display !== 'none' ? pinned.getBoundingClientRect().bottom : box.top;
 			if (link.top < top || link.bottom > box.bottom) scroller.scrollTop += link.top - box.top - box.height / 2 + link.height / 2;

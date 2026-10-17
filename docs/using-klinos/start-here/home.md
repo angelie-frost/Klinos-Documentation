@@ -19,9 +19,9 @@ The current release is [**v3.16**](../reference/changelog.md#v316). To see which
 
 ## Start here
 
-- [Getting started](getting-started.md): open the plugin and make your first mockup.
-- [Device library](../reference/device-library.md): every device, its finishes and its sizes.
-- [Changelog](../reference/changelog.md): what changed in each build.
+- [Getting started](getting-started.md): Open the plugin and make your first mockup.
+- [Device library](../reference/device-library.md): Every device, its finishes and its sizes.
+- [Changelog](../reference/changelog.md): What changed in each build.
 
 ## Three modes
 

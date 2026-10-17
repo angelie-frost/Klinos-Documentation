@@ -1279,7 +1279,8 @@ dialog.lightbox figcaption {
 	font-weight: 500;
 }
 
-/* Header: "Try it live" (secondary: hairline border, never ink-filled) */
+/* Header: "Try it live" (secondary: hairline border, never ink-filled). A rounded rectangle with the inputs'
+   radius, not a pill. */
 .k-try {
 	display: inline-flex;
 	align-items: center;
@@ -1287,7 +1288,7 @@ dialog.lightbox figcaption {
 	height: 32px;
 	padding: 0 12px;
 	border: 1px solid var(--k-line2);
-	border-radius: var(--k-r-pill);
+	border-radius: var(--k-r-nav);
 	background: var(--k-surface);
 	color: var(--k-ink);
 	font-size: var(--k-fs-sm);

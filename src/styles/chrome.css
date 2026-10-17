@@ -804,10 +804,9 @@ main {
 	}
 }
 
-/* ---------- Pinned block at the top of the sidebar (desktop; components/overrides/Sidebar.astro) ----------
-   The search field and, under it, the "User guide / Team handbook" toggle, pinned together while the links scroll
-   under them on a solid surface. 12 + 36 (field) + 8 + 36 (toggle) + 8 = 100px pinned; then 10px to the first group
-   label, so the toggle's bottom edge sits 28px from the middle of that label's text. */
+/* ---------- Pinned search field at the top of the sidebar (desktop; components/overrides/Sidebar.astro) ----------
+   Pinned while the links scroll under it on a solid surface: 12 + 36 (the field) + 8 = 56px. Then 10px to the first
+   group label, so the field's bottom edge sits 28px from the middle of that label's text. */
 .k-sb-pinned {
 	position: sticky;
 	top: 0;
@@ -878,63 +877,153 @@ main {
 	}
 }
 
-/* ---------- Section toggle: "User guide / Team handbook" (components/SectionTabs.astro) ----------
-   A track with the input radius (--k-r-nav) and 3px padding; two equal halves; the current option raised (surface
-   fill, hairline, small shadow) with ink text at 500, marked aria-current, its radius the track's less the padding;
-   the other muted, no fill. 36px tall in the sidebar (desktop); in the menu (980px and below) the options are 44px.
-   `.k-tabs a.k-tab` outranks the sidebar's link rules (`.sidebar-content a`). */
-.k-tabs {
-	--k-tab-h: 30px;
-	--k-tab-pad: 3px;
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr)); /* two equal halves, whatever the label lengths */
-	gap: 2px;
-	padding: var(--k-tab-pad);
-	border-radius: var(--k-r-nav);
-	background: var(--k-sunk);
+/* ---------- Section dropdown: "Guide" / "Develop" (components/SectionMenu.astro) ----------
+   Like Mintlify's "Learn" menu. The trigger: 36px, hairline, the input radius, surface fill, ink text at 500, a
+   chevron that turns when open. Header (981px and up): the panel floats under the trigger, right-aligned, 280px.
+   Menu (980px and below): a full-width 44px trigger, the panel expanding inline, items at least 52px.
+   `.k-secmenu a.k-secmenu-item` outranks the sidebar's link rules (`.sidebar-content a`) inside the menu. */
+.k-secmenu {
+	position: relative;
+	display: block;
 }
-.k-tabs-menu {
-	--k-tab-h: 44px;
-	margin: 0 0 var(--k-s4);
+.k-secmenu-header {
+	display: inline-flex;
 }
-.k-tabs a.k-tab {
-	display: flex;
+.k-secmenu-trigger {
+	display: inline-flex;
 	align-items: center;
-	justify-content: center;
-	height: var(--k-tab-h);
-	min-height: 0;
-	padding: 0 2px; /* "Team handbook" at 500 is about 100px; each half has 101.5px inside its border */
-	border: 1px solid transparent;
-	border-radius: calc(var(--k-r-nav) - var(--k-tab-pad));
-	background: transparent;
-	color: var(--k-ink-muted);
-	font: 400 13px / 1 var(--k-font-body);
-	text-decoration: none;
-	white-space: nowrap;
-}
-.k-tabs a.k-tab[aria-current='true'] {
-	border-color: var(--k-line2);
+	gap: 6px;
+	height: 36px;
+	padding: 0 10px 0 12px;
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-nav);
 	background: var(--k-surface);
-	box-shadow: 0 1px 2px rgba(10, 10, 11, 0.08);
 	color: var(--k-ink);
-	font-weight: 500;
+	font: 500 var(--k-fs-sm) / 1 var(--k-font-body);
+	white-space: nowrap;
+	cursor: pointer;
 }
-.k-tabs a.k-tab:focus-visible {
+.k-secmenu-chev {
+	width: 14px;
+	height: 14px;
+	color: var(--k-ink-muted);
+	transition: transform 0.15s ease;
+}
+.k-secmenu-trigger[aria-expanded='true'] .k-secmenu-chev {
+	transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+	.k-secmenu-chev {
+		transition: none;
+	}
+}
+.k-secmenu-trigger:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+}
+.k-secmenu-panel {
+	display: grid;
+	gap: 2px;
+}
+.k-secmenu-panel[hidden] {
+	display: none;
+}
+.k-secmenu-header .k-secmenu-panel {
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	z-index: 20;
+	width: 280px;
+	padding: 8px;
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-media);
+	background: var(--k-surface);
+	box-shadow: var(--k-pop-shadow);
+}
+.k-secmenu a.k-secmenu-item {
+	display: grid;
+	align-content: center;
+	gap: 2px;
+	min-height: 0;
+	padding: 10px 12px;
+	border-radius: var(--k-r-nav);
+	background: transparent;
+	color: var(--k-ink);
+	text-decoration: none;
+	line-height: normal;
+}
+.k-secmenu-title {
+	font: 500 var(--k-fs-sm) / 20px var(--k-font-body);
+	color: var(--k-ink);
+}
+.k-secmenu-desc {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	font: 400 13px / 18px var(--k-font-body);
+	color: var(--k-ink-muted);
+}
+.k-secmenu a.k-secmenu-item[aria-current='true'] {
+	background: var(--k-nav-active);
+	font-weight: inherit;
+}
+.k-secmenu a.k-secmenu-item:focus-visible {
 	outline: 2px solid var(--k-focus);
 	outline-offset: 2px;
 }
 @media (hover: hover) and (pointer: fine) {
-	.k-tabs a.k-tab:hover {
-		background: transparent;
+	.k-secmenu-trigger:hover {
+		background: var(--k-hover);
+	}
+	.k-secmenu a.k-secmenu-item:not([aria-current]):hover {
+		background: var(--k-hover);
 		color: var(--k-ink);
 	}
-	.k-tabs a.k-tab[aria-current='true']:hover {
-		background: var(--k-surface);
+	.k-secmenu a.k-secmenu-item[aria-current='true']:hover {
+		background: var(--k-nav-active);
 	}
 }
 @media (hover: none), (pointer: coarse) {
-	.k-tabs a.k-tab:not([aria-current]):active {
+	.k-secmenu-trigger:active,
+	.k-secmenu a.k-secmenu-item:not([aria-current]):active {
 		background: var(--k-hover-strong);
 		transition: none;
 	}
+}
+/* In the header the trigger has no box: it is styled exactly like "What's new" (the same height, padding, font,
+   muted colour, corner for the hover and pressed states, and ink on hover with a mouse), with the chevron after the
+   label in the same colour. */
+.k-secmenu-header .k-secmenu-trigger {
+	gap: 4px;
+	height: var(--k-hit);
+	padding: 0 4px;
+	border: 0;
+	border-radius: var(--k-r-btn);
+	background: none;
+	color: var(--k-ink-muted);
+}
+.k-secmenu-header .k-secmenu-chev {
+	color: currentColor;
+}
+@media (hover: hover) and (pointer: fine) {
+	.k-secmenu-header .k-secmenu-trigger:hover {
+		background: none;
+		color: var(--k-ink);
+	}
+}
+/* In the menu (980px and below): a full-width 44px trigger, the panel inline under it. */
+.k-secmenu-menu {
+	margin: 0 0 var(--k-s4);
+}
+.k-secmenu-menu .k-secmenu-trigger {
+	justify-content: space-between;
+	width: 100%;
+	height: 44px;
+}
+.k-secmenu-menu .k-secmenu-panel {
+	margin-top: 8px;
+}
+.k-secmenu-menu a.k-secmenu-item {
+	min-height: 52px;
 }

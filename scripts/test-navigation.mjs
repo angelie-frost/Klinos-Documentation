@@ -78,7 +78,7 @@ for (const theme of ['light', 'dark']) {
 		['sidebar link', () => sidebarLink(P.devices)],
 		['sidebar link to the Changelog', () => sidebarLink(P.changelog)],
 		// Changelog is the last Using page: its Next crosses into Maintaining (the tab and the sidebar switch).
-		['pager Next, into the Team handbook', () => '.k-pager-link[rel="next"]', 'Team handbook'],
+		['pager Next, into Develop', () => '.k-pager-link[rel="next"]', 'Develop'],
 	];
 	for (const [i, [how, sel, switchTo]] of steps.entries()) {
 		const tag = `${theme} nav ${i + 1} (${how})`;
@@ -107,10 +107,10 @@ for (const theme of ['light', 'dark']) {
 		if (switchTo) {
 			// Another section: its own groups, the other tab current, and the sidebar starts at the top.
 			const sec = await p.evaluate(() => ({
-				tab: document.querySelector('.k-sb-pinned .k-tab[aria-current="true"]')?.textContent.trim(),
+				tab: document.querySelector('.k-header .k-secmenu-trigger')?.textContent.trim(),
 				groups: [...document.querySelectorAll('#starlight__sidebar .top-level > li > details > summary')].map((s) => s.textContent.trim()),
 			}));
-			check(`${tag}: the ${switchTo} tab is current and the sidebar shows its groups, from the top`, sec.tab === switchTo && sec.groups.join('|') === 'Understand|Work on it|Ship it' && scroll1 === 0, `${sec.tab}: ${sec.groups.join(', ')}; scroll ${scroll1}`);
+			check(`${tag}: the section dropdown reads ${switchTo} and the sidebar shows its groups, from the top`, sec.tab === switchTo && sec.groups.join('|') === 'Understand|Work on it|Ship it' && scroll1 === 0, `${sec.tab}: ${sec.groups.join(', ')}; scroll ${scroll1}`);
 		} else check(`${tag}: sidebar keeps its scroll (moves only to bring the new page into view)`, Math.abs(scroll1 - scroll0) <= 1 || current.wasHidden, `${scroll0} → ${scroll1}`);
 		check(`${tag}: new page highlighted and in view`, current.href === current.path && current.visible, current.href);
 		const shifts = await p.evaluate(() => window.__shifts.filter((s) => s !== 'other'));
@@ -236,7 +236,8 @@ const features = async (p, label) => {
 	const t0 = await p.evaluate(() => document.documentElement.dataset.theme);
 	await p.click('.k-header .themebtn');
 	const t1 = await p.evaluate(() => document.documentElement.dataset.theme);
-	await go(p, '.k-sb-pinned .k-tab[href="/maintaining-klinos/understand/architecture/"]'); // the sidebar toggle: Team handbook
+	await p.click('.k-header .k-secmenu-trigger'); // the section dropdown: Develop
+	await go(p, '.k-header .k-secmenu-item[href="/maintaining-klinos/understand/architecture/"]');
 	const r = await lastReveal(p);
 	check(`${label}: theme toggle switches and the next page keeps it`, t1 !== t0 && r?.theme === t1, `${t0} → ${t1}, next page ${r?.theme}`);
 	// Mermaid (on Architecture)
@@ -245,7 +246,8 @@ const features = async (p, label) => {
 	await p.click('.k-header .themebtn'); // back to the starting theme
 	// Version link
 	// The version is linked from Home ("The current release is v…"), to its changelog entry.
-	await go(p, '.k-sb-pinned .k-tab[href="/using-klinos/start-here/home/"]'); // the toggle's User guide option is Home
+	await p.click('.k-header .k-secmenu-trigger'); // the section dropdown: Guide (its first page is Home)
+	await go(p, '.k-header .k-secmenu-item[href="/using-klinos/start-here/home/"]');
 	await go(p, 'main a[href*="/changelog/#v"]');
 	check(`${label}: Home's version link opens the changelog`, new URL(p.url()).pathname === P.changelog);
 };
@@ -298,6 +300,49 @@ const features = async (p, label) => {
 	await p2.waitForTimeout(400);
 	check("What's new: opens on a direct first visit to Home, then never again", first && (await p2.evaluate(() => document.getElementById('whatsnew').hidden)));
 	await c2.close();
+}
+
+// ---------- Section dropdown: by click and by keyboard; closed on every new page; never in a view transition ----------
+{
+	const { ctx, p, errors } = await newPage();
+	// Whether the panel was open when the old page was captured for the transition (pageswap). The dropdown closes
+	// itself in a capture-phase pageswap listener, which runs before this one.
+	await ctx.addInitScript(() => addEventListener('pageswap', () => sessionStorage.setItem('k-panel-at-swap', String(!!document.querySelector('.k-secmenu-panel:not([hidden])')))));
+	const state = () =>
+		p.evaluate(() => {
+			const t = document.querySelector('.k-header .k-secmenu-trigger');
+			return { text: t.textContent.trim(), expanded: t.getAttribute('aria-expanded'), panelOpen: !document.getElementById(t.getAttribute('aria-controls')).hidden, focused: document.activeElement === t ? 'trigger' : document.activeElement?.querySelector?.('.k-secmenu-title')?.textContent.trim() ?? document.activeElement?.tagName, groups: [...document.querySelectorAll('#starlight__sidebar .top-level > li > details > summary')].map((x) => x.textContent.trim()), atSwap: sessionStorage.getItem('k-panel-at-swap') };
+		});
+	await p.goto(BASE + P.screen, { waitUntil: 'networkidle' });
+	// By click.
+	await p.click('.k-header .k-secmenu-trigger');
+	const opened = await state();
+	await go(p, '.k-header .k-secmenu-item[href="/maintaining-klinos/understand/architecture/"]');
+	const afterClick = await state();
+	check('dropdown, click: opens, then "Develop" navigates with a transition', opened.expanded === 'true' && opened.panelOpen && (await lastReveal(p))?.vt === true && new URL(p.url()).pathname === P.architecture, JSON.stringify(opened));
+	check('dropdown, click: the new page reads "Develop", shows the Develop groups, panel closed', afterClick.text === 'Develop' && afterClick.groups.join('|') === 'Understand|Work on it|Ship it' && !afterClick.panelOpen && afterClick.expanded === 'false', JSON.stringify(afterClick));
+	check('dropdown, click: the panel was closed when the old page was captured (not in the view transition)', afterClick.atSwap === 'false', afterClick.atSwap);
+	// By keyboard: Enter opens, arrows move, Esc closes and returns focus; then Enter on an item navigates.
+	await p.focus('.k-header .k-secmenu-trigger');
+	await p.keyboard.press('Enter');
+	const k1 = await state();
+	await p.keyboard.press('ArrowDown');
+	const k2 = await state();
+	await p.keyboard.press('ArrowDown');
+	const k3 = await state();
+	await p.keyboard.press('Escape');
+	const k4 = await state();
+	check('dropdown, keyboard: Enter opens; ArrowDown to Guide, then Develop; Esc closes with focus back on the trigger', k1.expanded === 'true' && k2.focused === 'Guide' && k3.focused === 'Develop' && k4.expanded === 'false' && !k4.panelOpen && k4.focused === 'trigger', JSON.stringify([k1.expanded, k2.focused, k3.focused, k4.expanded, k4.focused]));
+	await p.keyboard.press('ArrowDown'); // opens and moves to the first item, Guide
+	const before = p.url();
+	await p.keyboard.press('Enter');
+	await p.waitForURL((u) => u.href !== before);
+	await p.waitForLoadState('load');
+	await p.waitForTimeout(350);
+	const k5 = await state();
+	check('dropdown, keyboard: Enter on "Guide" goes to Home; the new page reads "Guide", panel closed, not in the transition', new URL(p.url()).pathname === P.home && k5.text === 'Guide' && !k5.panelOpen && k5.atSwap === 'false', JSON.stringify(k5));
+	check('dropdown: no console errors', errors.length === 0, errors.join(' | '));
+	await ctx.close();
 }
 
 // ---------- 5. Prefetch on hover ----------

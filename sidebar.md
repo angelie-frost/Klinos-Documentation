@@ -1,6 +1,6 @@
 # Klinos docs sidebar
 
-## User guide
+## Guide
 
 ### Start here
 - Home: using-klinos/start-here/home.md
@@ -38,7 +38,7 @@
 - Feedback and bug reports: using-klinos/reference/feedback.md
 - Changelog: using-klinos/reference/changelog.md
 
-## Team handbook
+## Develop
 
 ### Understand
 - Architecture overview: maintaining-klinos/understand/architecture.md
