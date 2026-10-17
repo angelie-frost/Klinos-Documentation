@@ -2,6 +2,8 @@
 // Site search. Starlight's trigger button, <dialog> and Ctrl/Cmd+K are kept; the panel inside is ours, built on
 // Pagefind's JavaScript API instead of its default UI. The default UI cannot show an empty state with
 // suggestions, a custom no-results line, an Esc hint in the field, or keyboard-selectable result rows.
+// Triggers: on desktop the field at the top of the sidebar (any element with data-open-search, see
+// overrides/Sidebar.astro); at 980px and below this header button, icon only; Ctrl/Cmd+K everywhere.
 // Icons: Lucide search (ISC), see LICENSES/lucide.txt.
 import { lucide } from '../../icons/lucide';
 
@@ -11,10 +13,8 @@ const searchIcon = lucide('search', 'k-icon');
 ---
 
 <site-search class={Astro.props.class} data-dev={import.meta.env.DEV ? '' : undefined}>
-	<button data-open-modal disabled aria-label="Search documentation" aria-keyshortcuts="Control+K">
+	<button class="k-touch-only" data-open-modal disabled aria-label="Search documentation" aria-keyshortcuts="Control+K">
 		<Fragment set:html={searchIcon} />
-		<span class="k-desktop-only" aria-hidden="true">Search documentation</span>
-		<kbd class="k-desktop-only" style="display: none;"><kbd>Ctrl</kbd><kbd>K</kbd></kbd>
 	</button>
 
 	<dialog class="k-search-dialog" aria-label="Search documentation">
@@ -62,19 +62,12 @@ const searchIcon = lucide('search', 'k-icon');
 </site-search>
 
 {
-	/* Show the right shortcut (Cmd on Apple devices) without a flash, as Starlight does. */
+	/* The shortcut is Cmd+K on Apple devices: say so to assistive tech. (The sidebar field shows its own chip.) */
 }
 <script is:inline>
 	(() => {
-		const openBtn = document.querySelector('button[data-open-modal]');
-		const shortcut = openBtn?.querySelector('kbd');
-		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
-		const platformKey = shortcut.querySelector('kbd');
-		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
-			platformKey.textContent = '⌘';
-			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
-		}
-		shortcut.style.display = '';
+		if (/(Mac|iPhone|iPod|iPad)/i.test(navigator.platform))
+			document.querySelector('button[data-open-modal]')?.setAttribute('aria-keyshortcuts', 'Meta+K');
 	})();
 </script>
 
@@ -118,6 +111,10 @@ const searchIcon = lucide('search', 'k-icon');
 			const closeModal = () => dialog.close();
 			openBtn.addEventListener('click', openModal);
 			openBtn.disabled = false;
+			// Any other trigger on the page (the sidebar field on desktop) opens the same dialog.
+			document.addEventListener('click', (e) => {
+				if ((e.target as Element | null)?.closest?.('[data-open-search]')) openModal(e);
+			});
 			this.querySelectorAll('[data-close-modal]').forEach((b) => b.addEventListener('click', closeModal));
 			// A click on the dim backdrop (outside the panel) closes it.
 			dialog.addEventListener('click', (e) => {

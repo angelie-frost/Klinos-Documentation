@@ -38,14 +38,15 @@ const ratio = (a, b) => {
 
 // [text token, background token, minimum, what it is]
 const PAIRS = [
-	['--k-ink', '--k-surface', 7, 'headings, bold, links'],
+	['--k-ink', '--k-surface', 7, 'headings, bold, links, sidebar links'],
 	['--k-ink-lede', '--k-surface', 7, 'lede'],
 	['--k-ink-body', '--k-surface', 7, 'body text'],
 	['--k-ink-body', '--k-sunk', 7, 'body text in Note callouts, cards'],
 	['--k-ink-body', '--k-stage', 7, 'body text on media/card stage'],
 	['--k-ink-body', '--k-ok-bg', 7, 'body text in Tip callouts'],
 	['--k-ink-body', '--k-warn-bg', 7, 'body text in Warning callouts'],
-	['--k-ink-muted', '--k-surface', 4.5, 'captions, sidebar, On this page, header version (header surface)'],
+	['--k-ink-muted', '--k-surface', 4.5, 'captions, On this page'],
+	['--k-ink-muted', '--k-surface', 4.5, 'sidebar group labels (13px, 400)'],
 	['--k-ink-muted', '--k-sunk', 4.5, 'muted text on sunk'],
 	['--k-ink-muted', '--k-stage', 4.5, 'media captions'],
 	['--k-ink', '--k-sunk', 4.5, 'Note callout title'],
@@ -54,7 +55,10 @@ const PAIRS = [
 	['--k-ink', '--k-hover-strong', 7, 'selected search row title, icon buttons on hover'],
 	['--k-ink-body', '--k-hover-strong', 7, 'selected search row excerpt'],
 	['--k-ink-muted', '--k-hover-strong', 4.5, 'selected search row section'],
-	['--k-focus', '--k-surface', 3, 'focus rings and the search field underline (non-text)'],
+	['--k-ink', '--k-surface', 3, 'search field focus: the icon and caret in full ink (non-text)'],
+	['--k-ink-muted', '--k-sunk', 4.5, 'section toggle: inactive option on the track'],
+	['--k-ink', '--k-surface', 7, 'section toggle: active option (raised pill)'],
+	['--k-focus', '--k-surface', 3, 'focus rings (non-text)'],
 ];
 
 const rows = [];

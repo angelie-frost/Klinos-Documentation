@@ -15,7 +15,7 @@ Klinos is a Figma plugin built around a library of device mockups that tilt into
 >
 > [Open Try it live](../reference/try-it-live.md)
 
-The current release is **v3.16**. To see which build you have, look at the small label at the right of the preview's status bar.
+The current release is [**v3.16**](../reference/changelog.md#v316). To see which build you have, look at the small label at the right of the preview's status bar.
 
 ## Start here
 

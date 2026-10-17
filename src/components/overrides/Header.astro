@@ -1,10 +1,13 @@
 ---
-// Header: logo + "Klinos Docs" + the version (a link to the changelog), search, then Try it live
-// (the only button-shaped item), What's new and the theme toggle.
+// Header. Desktop (981px and up): the logo and "Klinos Docs" on the left; What's new, Try it live (the only
+// button-shaped item) and the theme toggle on the right. Search is a field at the top of the sidebar there, with the
+// "User guide / Team handbook" toggle under it (overrides/Sidebar.astro); the search component stays here, out of
+// the layout, because it owns the one dialog and the Ctrl/Cmd+K shortcut.
+// Tablet and phone: the title on the left; the Try it live icon, the search icon and the menu button on the right.
+// The version is not in the header: Home links it to the changelog (KLINOS_VERSION in src/config.ts).
 import Search from 'virtual:starlight/components/Search';
 import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
 import WhatsNew from '../WhatsNew.astro';
-import { KLINOS_VERSION } from '../../config';
 // Lucide icon (ISC), copied from lucide-static 1.49.0; see LICENSES/lucide.txt.
 import rotate3d from '../../icons/lucide/rotate-3d.svg?raw';
 import { lucide } from '../../icons/lucide';
@@ -12,8 +15,6 @@ import { lucide } from '../../icons/lucide';
 const brandMark = rotate3d.replace(/<!--[\s\S]*?-->\s*/, '').replace('<svg', '<svg aria-hidden="true" focusable="false"').replace('class="lucide lucide-rotate-3d"', 'class="brand-mark lucide lucide-rotate-3d"');
 
 const LIVE = '/using-klinos/reference/try-it-live/';
-const CHANGELOG = '/using-klinos/reference/changelog/';
-const onChangelog = Astro.url.pathname === CHANGELOG;
 const onLive = Astro.url.pathname === LIVE;
 // One icon set in the header: Lucide at stroke 2, sized by CSS (--k-icon).
 const tryIcon = lucide('square-play', 'k-icon');
@@ -25,15 +26,14 @@ const tryIcon = lucide('square-play', 'k-icon');
 			<Fragment set:html={brandMark} />
 			<span translate="no">Klinos <small>Docs</small></span>
 		</a>
-		<a class="k-version" href={CHANGELOG} aria-label={`Version ${KLINOS_VERSION}, open the changelog`} aria-current={onChangelog ? 'page' : undefined} translate="no">v{KLINOS_VERSION}</a>
 	</div>
 	<div class="sl-flex print:hidden k-search">
 		<a class="k-try-icon" href={LIVE} aria-label="Try it live" aria-current={onLive ? 'page' : undefined} set:html={tryIcon} />
 		<Search />
 	</div>
 	<div class="k-desktop-only print:hidden right-group">
-		<a class="k-try" href={LIVE} aria-current={onLive ? 'page' : undefined}><Fragment set:html={tryIcon} />Try it live</a>
 		<button class="k-whatsnew" type="button" data-wn-open>What's new</button>
+		<a class="k-try" href={LIVE} aria-current={onLive ? 'page' : undefined}><Fragment set:html={tryIcon} />Try it live</a>
 		<ThemeSelect />
 	</div>
 </div>
@@ -61,11 +61,19 @@ const tryIcon = lucide('square-play', 'k-icon');
 		@media (min-width: 981px) {
 			.header {
 				display: grid;
-				grid-template-columns: calc(var(--sl-sidebar-width) - var(--sl-nav-pad-x)) 1fr auto;
-				align-content: center;
+				grid-template-columns: minmax(0, 1fr) auto;
+				align-items: center;
 			}
+			.title-wrapper {
+				justify-self: start;
+			}
+			/* The search component: no trigger here on desktop (the sidebar field opens it), and out of the grid. It
+			   stays rendered (not display: none), so its dialog can open. */
 			.k-search {
-				justify-content: center;
+				position: absolute;
+				width: 0;
+				height: 0;
+				overflow: visible;
 			}
 		}
 	}

@@ -1,15 +1,45 @@
 ---
 // Copy of Starlight 0.42.5 Sidebar.astro: the menu footer (theme toggle, What is new) shows up to 980px instead of 800px.
+// Changed: only the current section's groups are shown (no "User guide" / "Team handbook" title). On desktop a
+// pinned block sits at the top: the search field (it opens the one search dialog, in overrides/Search.astro) and,
+// under it, the section toggle. At 980px and below this is the menu: the toggle sits at its top, not pinned.
 // Added after the tree: the sidebar's scroll is saved as the page is left, and the current page is kept in view.
 import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
 import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
 import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import SectionTabs from '../SectionTabs.astro';
+import { currentSection } from '../../lib/sections';
+import { lucide } from '../../icons/lucide';
 
 const { sidebar } = Astro.locals.starlightRoute;
+const section = currentSection(sidebar);
+const groups = section?.type === 'group' ? section.entries : sidebar;
+const sectionLabel = section?.label ?? '';
+const searchIcon = lucide('search', 'k-icon');
 ---
 
+<div class="k-sb-pinned k-desktop-only">
+	<button class="k-sb-search" type="button" data-open-search aria-label="Search documentation" aria-keyshortcuts="Control+K">
+		<Fragment set:html={searchIcon} />
+		<span aria-hidden="true">Search docs</span>
+		<kbd aria-hidden="true" data-search-kbd>Ctrl+K</kbd>
+	</button>
+	<SectionTabs place="sidebar" />
+</div>
+{/* ⌘K instead of Ctrl+K on Apple devices, before the first paint. */}
+<script is:inline>
+	(() => {
+		if (!/(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) return;
+		const chip = document.querySelector('[data-search-kbd]');
+		if (chip) chip.textContent = '⌘K';
+		document.querySelector('[data-open-search]')?.setAttribute('aria-keyshortcuts', 'Meta+K');
+	})();
+</script>
+
+<SectionTabs place="menu" />
+
 <SidebarPersister>
-	<SidebarSublist sublist={sidebar} />
+	<SidebarSublist sublist={groups} />
 </SidebarPersister>
 
 {
@@ -17,9 +47,10 @@ const { sidebar } = Astro.locals.starlightRoute;
 	   1. Starlight saves the sidebar state on visibilitychange; this also saves it on pageswap/pagehide, which run
 	      before the next page is built, with the same key and format, so Starlight's restore reads it.
 	   2. Desktop only (the sidebar is a menu at 980px and below): restores the saved scroll (Starlight's own restore
-	      does not take, see below) and, if the current page's link is still out of view, centres it. */
+	      does not take, see below), but only within the same section: switching sections starts at the top. Then, if
+	      the current page's link is still out of view, it centres it. */
 }
-<script is:inline aria-hidden="true">
+<script is:inline aria-hidden="true" define:vars={{ sectionLabel }}>
 	(() => {
 		const scroller = document.getElementById('starlight__sidebar');
 		const persist = scroller?.querySelector('sl-sidebar-state-persist');
@@ -31,6 +62,9 @@ const { sidebar } = Astro.locals.starlightRoute;
 				const hash = persist.dataset.hash || '';
 				const open = Array.isArray(stored.open) && stored.hash === hash ? stored.open : [];
 				sessionStorage.setItem(key, JSON.stringify({ hash, open, scroll: scroller.scrollTop }));
+				// Starlight's own save (on visibilitychange) rewrites that key without extra fields, so the section
+				// the scroll belongs to is kept under its own key.
+				sessionStorage.setItem('k-sidebar-section', sectionLabel);
 			} catch {}
 		};
 		addEventListener('pageswap', save);
@@ -42,7 +76,8 @@ const { sidebar } = Astro.locals.starlightRoute;
 			// drop the attribute now (the same thing that script does) and restore the scroll here.
 			scroller.removeAttribute('popover');
 			const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
-			if (state && state.hash === persist.dataset.hash && state.scroll) scroller.scrollTop = state.scroll;
+			const sameSection = sessionStorage.getItem('k-sidebar-section') === sectionLabel;
+			scroller.scrollTop = state && state.hash === persist.dataset.hash && state.scroll && sameSection ? state.scroll : 0;
 			// The prototype's revealActive: if the current page's link is outside the visible part (a direct visit
 			// to a page low in the list), centre it. A link already in view is left alone, so the sidebar never jumps
 			// after a click. Set directly, not with scrollIntoView, which would also move where the next Tab starts.
@@ -50,7 +85,10 @@ const { sidebar } = Astro.locals.starlightRoute;
 			if (!current) return;
 			const box = scroller.getBoundingClientRect();
 			const link = current.getBoundingClientRect();
-			if (link.top < box.top || link.bottom > box.bottom) scroller.scrollTop += link.top - box.top - box.height / 2 + link.height / 2;
+			// The pinned block (search and toggle) covers the top of the pane: a link under it counts as out of view.
+			const pinned = scroller.querySelector('.k-sb-pinned');
+			const top = pinned && getComputedStyle(pinned).display !== 'none' ? pinned.getBoundingClientRect().bottom : box.top;
+			if (link.top < top || link.bottom > box.bottom) scroller.scrollTop += link.top - box.top - box.height / 2 + link.height / 2;
 		} catch {}
 	})();
 </script>

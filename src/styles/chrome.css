@@ -71,35 +71,6 @@
 	outline: 2px solid var(--k-focus);
 	outline-offset: 2px;
 }
-/* The version, next to the title: small muted mono text, a link to the changelog. No chip, no underline until hovered.
-   Its box is the header hit height (44px on touch), the text centred in it; 4px side padding gives the pressed
-   background room, and the negative margin keeps the visible gap after "Docs" at 8px. */
-.k-header .k-version {
-	display: inline-flex;
-	align-items: center;
-	height: var(--k-hit);
-	/* 2.5px on top moves the text 1.25px down in its box: the title, aligned to this baseline, then sits on
-	   the same centreline as the header icons. */
-	padding: 2.5px 4px 0;
-	margin-inline-start: -4px;
-	border-radius: var(--k-r-nav);
-	color: var(--k-ink-muted);
-	font: 400 var(--k-fs-label) / 1 var(--k-font-mono);
-	font-variant-numeric: tabular-nums;
-	text-decoration: none;
-	white-space: nowrap;
-}
-@media (hover: hover) and (pointer: fine) {
-.k-header .k-version:hover {
-	text-decoration: underline;
-	text-underline-offset: 3px;
-}
-}
-@media (max-width: 359px) {
-	.k-header .k-version {
-		display: none;
-	}
-}
 /* Theme toggle: a plain icon button; a soft background on hover and focus only. */
 klinos-theme-toggle {
 	display: inline-flex;
@@ -194,27 +165,6 @@ site-search {
 	align-items: center;
 	gap: 8px;
 	cursor: pointer;
-}
-@media (min-width: 981px) {
-	.k-search button[data-open-modal] > kbd {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25em;
-		margin-inline-start: auto;
-	}
-}
-.k-search button[data-open-modal] > kbd kbd {
-	font: inherit;
-	background: none;
-	border: 0;
-	padding: 0;
-}
-@media (min-width: 981px) {
-	.k-search button[data-open-modal] .k-icon {
-		width: 16px;
-		height: 16px;
-		color: var(--k-ink-muted);
-	}
 }
 
 /* ---------- Tablet and phone header: one row, one centreline, plain icon buttons ---------- */
@@ -435,17 +385,17 @@ site-search {
 	padding: 0 12px 0 16px;
 	height: 56px;
 	flex: none;
-	border-bottom: 1px solid var(--k-line);
-	box-shadow: inset 0 -2px 0 transparent;
-	transition: box-shadow 0.12s ease;
-}
-.k-search-field:focus-within {
-	box-shadow: inset 0 -2px 0 var(--k-focus);
+	/* A light 1px line. A line colour can't reach 3:1 on the surface (--k-line2 is about 1.3:1), so focus shows
+	   another way: the search icon and the caret turn full ink (19:1 light, 17:1 dark) while the input has focus. */
+	border-bottom: 1px solid var(--k-line2);
 }
 .k-search-field > .k-icon {
 	width: 18px;
 	height: 18px;
 	color: var(--k-ink-muted);
+}
+.k-search-field:focus-within > .k-icon {
+	color: var(--k-ink);
 }
 .k-search-field input {
 	flex: 1;
@@ -454,6 +404,7 @@ site-search {
 	border: 0;
 	background: transparent;
 	color: var(--k-ink);
+	caret-color: var(--k-ink);
 	font: 400 16px / 1.4 var(--k-font-body); /* 16px: iOS does not zoom */
 	outline: none;
 	-webkit-appearance: none;
@@ -654,16 +605,10 @@ site-search {
 	display: none;
 }
 
-/* Narrow desktop (981–1100px, sidebar showing): the desktop header, tightened so "Search documentation" fits. */
+/* Narrow desktop (981–1100px, sidebar showing): the header's right group, tightened. */
 @media (min-width: 981px) and (max-width: 1100px) {
 	:root {
 		--k-header-gap: 10px;
-	}
-	.k-search button[data-open-modal] > kbd {
-		display: none !important;
-	}
-	.k-search button[data-open-modal] > span {
-		white-space: nowrap;
 	}
 	.k-header .k-try {
 		padding: 0 10px;
@@ -734,7 +679,6 @@ site-search {
 	}
 	.k-header .k-try-icon:active,
 	.k-header .k-try:active,
-	.k-header .k-version:active,
 	.k-header .k-whatsnew:active,
 	.k-search button[data-open-modal]:active,
 	.k-menu-btn:active,
@@ -857,5 +801,140 @@ main {
 @keyframes k-vt-fade-in {
 	from {
 		opacity: 0;
+	}
+}
+
+/* ---------- Pinned block at the top of the sidebar (desktop; components/overrides/Sidebar.astro) ----------
+   The search field and, under it, the "User guide / Team handbook" toggle, pinned together while the links scroll
+   under them on a solid surface. 12 + 36 (field) + 8 + 36 (toggle) + 8 = 100px pinned; then 10px to the first group
+   label, so the toggle's bottom edge sits 28px from the middle of that label's text. */
+.k-sb-pinned {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	display: grid;
+	gap: 8px;
+	/* Covers the pane's top padding (24px), so the links scroll under a solid band. The bottom margin is 11px less
+	   the 1rem gap Starlight puts between the sidebar's children. */
+	margin: calc(-1 * var(--k-s5)) 0 calc(10px - 1rem);
+	padding: 12px 0 8px;
+	background: var(--k-surface);
+}
+
+/* The search field: its edges on the active pill's edges; the icon on the links' text edge (10px in); the chip
+   10px from the right edge; at least 12px between the text and the chip. Opens the one search dialog
+   (overrides/Search.astro listens for [data-open-search]). */
+.k-sb-search {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	height: 36px;
+	/* 1px border + 9px = 10px: the icon starts where the links' text does (their 10px padding), and the chip ends
+	   the same 10px from the right edge. */
+	padding: 0 9px;
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-nav);
+	background: var(--k-surface);
+	color: var(--k-ink-muted);
+	font: 400 13px / 1 var(--k-font-body);
+	text-align: start;
+	cursor: pointer;
+}
+.k-sb-search .k-icon {
+	width: 16px;
+	height: 16px;
+}
+.k-sb-search > span {
+	flex: 1;
+	min-width: 0;
+	margin-inline-end: 4px; /* with the 8px gap: at least 12px clear before the chip */
+	white-space: nowrap;
+}
+/* The shortcut chip: a small rounded rectangle, not a pill. The field's 10px radius on this 20px chip would make a
+   full pill, so the radius is the field's scaled to the chip's height (10 x 20/36, about 5px). */
+.k-sb-search > kbd {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	/* A fixed width ("Ctrl+K" in Geist Mono): the chip doesn't move when the mono font finishes loading. */
+	width: 52px;
+	height: 20px;
+	padding: 0 5px;
+	border: 1px solid var(--k-line2);
+	border-radius: 5px;
+	background: var(--k-surface);
+	color: var(--k-ink-muted);
+	font: 500 11px / 1 var(--k-font-mono);
+}
+.k-sb-search:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+	.k-sb-search:hover {
+		background: var(--k-hover);
+		color: var(--k-ink);
+	}
+}
+
+/* ---------- Section toggle: "User guide / Team handbook" (components/SectionTabs.astro) ----------
+   A track with the input radius (--k-r-nav) and 3px padding; two equal halves; the current option raised (surface
+   fill, hairline, small shadow) with ink text at 500, marked aria-current, its radius the track's less the padding;
+   the other muted, no fill. 36px tall in the sidebar (desktop); in the menu (980px and below) the options are 44px.
+   `.k-tabs a.k-tab` outranks the sidebar's link rules (`.sidebar-content a`). */
+.k-tabs {
+	--k-tab-h: 30px;
+	--k-tab-pad: 3px;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr)); /* two equal halves, whatever the label lengths */
+	gap: 2px;
+	padding: var(--k-tab-pad);
+	border-radius: var(--k-r-nav);
+	background: var(--k-sunk);
+}
+.k-tabs-menu {
+	--k-tab-h: 44px;
+	margin: 0 0 var(--k-s4);
+}
+.k-tabs a.k-tab {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: var(--k-tab-h);
+	min-height: 0;
+	padding: 0 2px; /* "Team handbook" at 500 is about 100px; each half has 101.5px inside its border */
+	border: 1px solid transparent;
+	border-radius: calc(var(--k-r-nav) - var(--k-tab-pad));
+	background: transparent;
+	color: var(--k-ink-muted);
+	font: 400 13px / 1 var(--k-font-body);
+	text-decoration: none;
+	white-space: nowrap;
+}
+.k-tabs a.k-tab[aria-current='true'] {
+	border-color: var(--k-line2);
+	background: var(--k-surface);
+	box-shadow: 0 1px 2px rgba(10, 10, 11, 0.08);
+	color: var(--k-ink);
+	font-weight: 500;
+}
+.k-tabs a.k-tab:focus-visible {
+	outline: 2px solid var(--k-focus);
+	outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+	.k-tabs a.k-tab:hover {
+		background: transparent;
+		color: var(--k-ink);
+	}
+	.k-tabs a.k-tab[aria-current='true']:hover {
+		background: var(--k-surface);
+	}
+}
+@media (hover: none), (pointer: coarse) {
+	.k-tabs a.k-tab:not([aria-current]):active {
+		background: var(--k-hover-strong);
+		transition: none;
 	}
 }

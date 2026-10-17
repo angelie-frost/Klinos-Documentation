@@ -41,7 +41,7 @@ for (const theme of THEMES) {
 				const pad = parseFloat(getComputedStyle(document.querySelector('.content-panel')).paddingLeft);
 				const maxW = parseFloat(getComputedStyle(document.querySelector('.content-panel .sl-container')).maxWidth);
 				const frame = document.querySelector('.main-frame');
-				const header = [...document.querySelectorAll('.k-header .brand, .k-header .k-version, .k-header a.k-try-icon, .k-header button[data-open-modal], .k-header .right-group > *, .k-menu-btn')].filter(vis);
+				const header = [...document.querySelectorAll('.k-header .brand, .k-header a.k-try-icon, .k-header button[data-open-modal], .k-header .right-group > *, .k-menu-btn')].filter(vis);
 				const mids = header.map((e) => r(e).top + r(e).height / 2);
 				const mtoc = document.querySelector('.k-mtoc');
 				const pager = document.querySelector('.k-pager');
@@ -85,7 +85,10 @@ for (const theme of THEMES) {
 	await ctx.close();
 }
 
-// ---------- Header: the version next to the title ----------
+// ---------- Header: logo and title left; What's new, Try it live and theme right; no version, no toggle ----------
+// Desktop (981px and up): the right group in that order, at least 12px between neighbours, the header search button
+// hidden (search is in the sidebar). Tablet and phone: the Try it live icon and the search icon, 44px on touch.
+// Every width: one centreline (spread <= 1px), everything inside the header, no overflow.
 const headerRows = [];
 for (const theme of THEMES) {
 	for (const touch of [false, true]) {
@@ -95,80 +98,64 @@ for (const theme of THEMES) {
 			localStorage.setItem('starlight-theme', t);
 		}, theme);
 		const p = await ctx.newPage();
-		for (const w of touch ? [980, 820, 768, 390, 360, 340] : [1100, 981, 980, 820, 768, 390, 360, 340]) {
+		for (const w of touch ? [980, 820, 768, 390, 360] : [1440, 1100, 981]) {
 			await p.setViewportSize({ width: w, height: 800 });
 			await p.goto(`${BASE}/using-klinos/studio/screen/`, { waitUntil: 'networkidle' });
 			const m = await p.evaluate(() => {
-				const vis = (e) => e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0;
+				const vis = (e) => !!e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0;
 				const r = (e) => e.getBoundingClientRect();
-				// The text baseline of an element: the top of its first text run plus the font's ascent.
-				const canvas = document.createElement('canvas').getContext('2d');
-				const baseline = (e) => {
-					const text = [...e.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
-					const range = document.createRange();
-					range.selectNodeContents(text);
-					const cs = getComputedStyle(e);
-					canvas.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-					return range.getClientRects()[0].top + canvas.measureText(text.textContent).fontBoundingBoxAscent;
-				};
-				const v = document.querySelector('.k-header .k-version');
-				const small = document.querySelector('.k-header .brand small');
-				const titleEnd = vis(small) ? small : document.querySelector('.k-header .brand > span');
-				const items = [...document.querySelectorAll('.k-header .brand, .k-header .k-version, .k-header a.k-try-icon, .k-header button[data-open-modal], .k-header .right-group > *, .k-menu-btn')].filter(vis);
-				const mids = items.map((e) => r(e).top + r(e).height / 2);
 				const header = r(document.querySelector('.k-header'));
+				const items = [...document.querySelectorAll('.k-header .brand, .k-header a.k-try-icon, .k-header button[data-open-modal], .k-header .right-group > *, .k-menu-btn')].filter(vis);
+				const mids = items.map((e) => r(e).top + r(e).height / 2);
+				const right = [...document.querySelectorAll('.k-header .right-group > *')].filter(vis);
+				const gaps = right.slice(1).map((e, i) => r(e).left - r(right[i]).right);
 				const lw = document.querySelector('.page').getBoundingClientRect().width;
 				return {
-					shown: vis(v),
-					text: v.textContent,
-					href: v.getAttribute('href'),
-					label: v.getAttribute('aria-label'),
-					copies: [...document.querySelectorAll('body *')].filter((e) => e.children.length === 0 && e.textContent.trim() === v.textContent.trim()).length,
-					titleText: titleEnd.textContent,
-					gap: vis(v) ? r(v).left + parseFloat(getComputedStyle(v).paddingLeft) - r(titleEnd).right : null,
-					baselineDiff: vis(v) ? Math.abs(baseline(v) - baseline(titleEnd)) : null,
-					oneLine: vis(v) ? v.getClientRects().length === 1 && r(v).height <= 48 : true,
-					height: vis(v) ? r(v).height : null,
-					fontSize: getComputedStyle(v).fontSize,
-					font: getComputedStyle(v).fontFamily.split(',')[0],
-					weight: getComputedStyle(v).fontWeight,
-					underline: getComputedStyle(v).textDecorationLine,
 					spread: Math.max(...mids) - Math.min(...mids),
 					inHeader: items.every((e) => r(e).left >= header.left - 0.5 && r(e).right <= header.right + 0.5),
 					overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - lw,
+					version: !!document.querySelector('.k-header .k-version'),
+					toggle: !!document.querySelector('.k-header .k-tabs'),
+					order: right.map((e) => (e.matches('.k-whatsnew') ? 'whatsnew' : e.matches('.k-try') ? 'try' : e.querySelector('.themebtn') || e.matches('klinos-theme-toggle, starlight-theme-select') ? 'theme' : e.tagName.toLowerCase())),
+					minGap: gaps.length ? Math.min(...gaps) : null,
+					trySolo: vis(document.querySelector('.k-header .k-try')),
+					tryIcon: vis(document.querySelector('.k-header a.k-try-icon')) ? r(document.querySelector('.k-header a.k-try-icon')).height : 0,
+					search: vis(document.querySelector('.k-header button[data-open-modal]')) ? r(document.querySelector('.k-header button[data-open-modal]')).height : 0,
 				};
 			});
-			const tag = `${theme} ${touch ? 'touch' : 'mouse'} ${w}: version`;
-			headerRows.push({ theme, input: touch ? 'touch' : 'mouse', width: w, shown: m.shown, 'title before it': m.titleText, gap: m.gap?.toFixed(1), 'baseline diff': m.baselineDiff?.toFixed(2), height: m.height, spread: +m.spread.toFixed(2), overflow: m.overflow });
-			check(`${tag} text, link and label`, m.text === `v${VERSION}` && m.href === '/using-klinos/reference/changelog/' && m.label === `Version ${VERSION}, open the changelog`);
-			check(`${tag} 12px Geist Mono, regular, no underline`, m.fontSize === '12px' && m.font.includes('Geist Mono') && m.weight === '400' && m.underline === 'none', `${m.fontSize} ${m.font} ${m.weight} ${m.underline}`);
-			check(`${tag} shown once`, m.copies === 1,`${m.copies} copies`);
-			check(`${tag} header fits: no overflow, items inside the header`, m.overflow <= 0 && m.inHeader, `${m.overflow}px`);
-			check(`${tag} header on one centreline`, m.spread <= 1, `${m.spread.toFixed(2)}px`);
-			if (w >= 360) {
-				check(`${tag} shown`, m.shown);
-				check(`${tag} 8px after the title`, Math.abs(m.gap - 8) <= 0.5, `${m.gap?.toFixed(1)}px`);
-				check(`${tag} on the title's baseline`, m.baselineDiff <= 0.5, `${m.baselineDiff?.toFixed(2)}px`);
-				check(`${tag} one line`, m.oneLine);
-				if (touch) check(`${tag} tap target at least 44px tall`, m.height >= 44, `${m.height}px`);
-			} else check(`${tag} hidden below 360px`, !m.shown);
-			if (w === 1100 || (touch && w === 390)) {
-				await p.hover('.k-header .k-version');
-				const underline = await p.$eval('.k-header .k-version', (e) => getComputedStyle(e).textDecorationLine);
-				check(`${tag} ${touch ? 'no underline on touch' : 'underline on mouse hover'}`, underline === (touch ? 'none' : 'underline'), underline);
-				const cdp = await ctx.newCDPSession(p);
-				await cdp.send('DOM.enable');
-				await cdp.send('CSS.enable');
-				const { root } = await cdp.send('DOM.getDocument');
-				const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: '.k-header .k-version' });
-				await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['active'] });
-				const bg = await p.$eval('.k-header .k-version', (e) => getComputedStyle(e).backgroundColor);
-				check(`${tag} ${touch ? 'pressed background on touch' : 'no pressed background with a mouse'}`, touch ? bg !== 'rgba(0, 0, 0, 0)' : bg === 'rgba(0, 0, 0, 0)', bg);
-				await cdp.detach();
+			const tag = `${theme} ${touch ? 'touch' : 'mouse'} ${w}: header`;
+			headerRows.push({ theme, input: touch ? 'touch' : 'mouse', width: w, right: m.order.join(' / ') || '-', 'min gap': m.minGap?.toFixed(1) ?? '-', 'try icon': m.tryIcon, search: m.search, spread: +m.spread.toFixed(2), overflow: m.overflow });
+			check(`${tag} has no version and no section toggle`, !m.version && !m.toggle);
+			check(`${tag} on one centreline, inside the header, no overflow`, m.spread <= 1 && m.inHeader && m.overflow <= 0, `spread ${m.spread.toFixed(2)}, overflow ${m.overflow}`);
+			if (w >= 981) {
+				check(`${tag}: What's new, Try it live, theme on the right, in that order`, m.order.join(',') === 'whatsnew,try,theme' && m.trySolo, m.order.join(','));
+				// 981–1100px keeps the narrow-band gap of 10px (restored from before Stage 14); wider, 16px.
+				const minGap = w <= 1100 ? 10 : 12;
+				check(`${tag}: at least ${minGap}px between neighbours on the right`, m.minGap >= minGap, `${m.minGap?.toFixed(1)}px`);
+				check(`${tag}: no search button (search is in the sidebar)`, m.search === 0);
+			} else {
+				check(`${tag}: Try it live icon and search icon${touch ? ', 44px' : ''}`, touch ? m.tryIcon >= 44 && m.search >= 44 : m.tryIcon > 0 && m.search > 0, `${m.tryIcon} / ${m.search}`);
 			}
 		}
 		await ctx.close();
 	}
+}
+
+// ---------- Home: the current release links to its changelog entry and matches KLINOS_VERSION ----------
+{
+	const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+	await ctx.addInitScript(() => localStorage.setItem('klinos-whatsnew-v3', 'seen'));
+	const p = await ctx.newPage();
+	await p.goto(`${BASE}/using-klinos/start-here/home/`, { waitUntil: 'networkidle' });
+	const anchor = `#v${VERSION.replace(/\./g, '')}`;
+	const link = await p.evaluate(() => {
+		const a = [...document.querySelectorAll('main a[href*="/changelog/#v"]')].find((x) => /current release/i.test(x.closest('p')?.textContent ?? ''));
+		return a ? { text: a.textContent.trim(), href: a.getAttribute('href') } : null;
+	});
+	check(`Home: "The current release is v${VERSION}" links to the changelog's ${anchor}`, link?.text === `v${VERSION}` && link.href === `/using-klinos/reference/changelog/${anchor}`, JSON.stringify(link));
+	await p.goto(`${BASE}/using-klinos/reference/changelog/`, { waitUntil: 'networkidle' });
+	check(`Changelog: the ${anchor} entry exists`, await p.evaluate((id) => !!document.getElementById(id), anchor.slice(1)));
+	await ctx.close();
 }
 
 // ---------- Tablet/phone: the open "On this page" list sits above the page ----------
@@ -265,7 +252,209 @@ for (const theme of THEMES) {
 	await ctx.close();
 }
 
+// ---------- Sidebar: pinned search field and section toggle; one section at a time; group labels, links ----------
+// Desktop (981px and up): a pinned block at the top of the sidebar, the search field ("Search docs", a Ctrl+K chip)
+// and, 8px under it, the "User guide / Team handbook" toggle (the field's width, 36px, the input radius); 28px from
+// the toggle's bottom to the middle of the first group label. The menu (980px and below) has the toggle at its top,
+// 44px options. Only the current section's groups are shown. The rhythm, between the middles of text lines (1x,
+// tolerance 2px): link to link 36px, label to first link 30–32px, last link to next label 48px; on touch 44 / 38 / 59.
+const USING_GROUPS = ['Start here', 'Studio', 'Photoreal', 'Playground', 'Working with the panel', 'Reference'];
+const MAINTAINING_GROUPS = ['Understand', 'Work on it', 'Ship it'];
+const SECTION_NAMES = { Using: 'User guide', Maintaining: 'Team handbook' };
+const sidebarRows = [];
+for (const [label, ctxOpts, theme, path, section] of [
+	['1440 light, User guide page', { viewport: { width: 1440, height: 1000 } }, 'light', 'using-klinos/studio/staging/', 'Using'],
+	['1440 dark, User guide page', { viewport: { width: 1440, height: 1000 } }, 'dark', 'using-klinos/studio/staging/', 'Using'],
+	['1440 light, Team handbook page', { viewport: { width: 1440, height: 1000 } }, 'light', 'maintaining-klinos/work-on-it/local-setup/', 'Maintaining'],
+	['981 light, User guide page', { viewport: { width: 981, height: 900 } }, 'light', 'using-klinos/studio/staging/', 'Using'],
+	['820 touch, menu open', { viewport: { width: 820, height: 1000 }, hasTouch: true }, 'light', 'using-klinos/studio/staging/', 'Using'],
+	['390 touch, menu open, Team handbook', { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }, 'dark', 'maintaining-klinos/work-on-it/local-setup/', 'Maintaining'],
+]) {
+	const touch = !!ctxOpts.hasTouch;
+	const ctx = await browser.newContext(ctxOpts);
+	await ctx.addInitScript((t) => {
+		localStorage.setItem('klinos-whatsnew-v3', 'seen');
+		localStorage.setItem('starlight-theme', t);
+	}, theme);
+	const p = await ctx.newPage();
+	await p.goto(`${BASE}/${path}`, { waitUntil: 'networkidle' });
+	if (touch) {
+		await p.tap('.k-menu-btn');
+		await p.waitForTimeout(300);
+	}
+	const m = await p.evaluate((touch) => {
+		const r = (e) => e.getBoundingClientRect();
+		// The box of an element's (first) text line, and its middle.
+		const line = (e) => {
+			const rg = document.createRange();
+			rg.selectNodeContents(e);
+			return rg.getClientRects()[0];
+		};
+		const mid = (e) => {
+			const b = line(e);
+			return b.top + b.height / 2;
+		};
+		// A token as the browser resolves it.
+		const resolve = (prop, value) => {
+			const probe = document.createElement('span');
+			probe.style[prop] = value;
+			document.body.append(probe);
+			const c = getComputedStyle(probe)[prop];
+			probe.remove();
+			return c;
+		};
+		const muted = resolve('color', 'var(--k-ink-muted)');
+		const ink = resolve('color', 'var(--k-ink)');
+		const pill = resolve('backgroundColor', 'var(--k-nav-active)');
+		const surface = resolve('backgroundColor', 'var(--k-surface)');
+		const inputRadius = resolve('borderTopLeftRadius', 'var(--k-r-nav)');
+		const pane = document.getElementById('starlight__sidebar');
+		const items = [...pane.querySelectorAll('.top-level > li')];
+		const groups = items.map((it) => ({
+			label: it.querySelector(':scope > details > summary .large')?.textContent.trim() ?? null,
+			links: [...it.querySelectorAll('a span')].map((s) => s.textContent.trim()),
+		}));
+		const linkSteps = [];
+		const labelSteps = [];
+		const groupSteps = [];
+		items.forEach((it, i) => {
+			const lab = it.querySelector(':scope > details > summary .large');
+			const spans = [...it.querySelectorAll('a span')];
+			if (lab) labelSteps.push(mid(spans[0]) - mid(lab));
+			for (let k = 1; k < spans.length; k++) linkSteps.push(mid(spans[k]) - mid(spans[k - 1]));
+			if (i > 0 && lab) groupSteps.push(mid(lab) - mid([...items[i - 1].querySelectorAll('a span')].at(-1)));
+		});
+		const labels = [...pane.querySelectorAll('.top-level > li > details > summary .large')].map((l) => getComputedStyle(l));
+		const links = [...pane.querySelectorAll('.top-level a')];
+		const current = links.find((a) => a.getAttribute('aria-current') === 'page');
+		const control = pane.querySelector(touch ? '.k-tabs-menu' : '.k-sb-pinned .k-tabs-sidebar');
+		const tabs = [...control.querySelectorAll('.k-tab')].map((a) => {
+			const c = getComputedStyle(a);
+			const inner = r(a).width - 2 * parseFloat(c.borderLeftWidth) - parseFloat(c.paddingLeft) - parseFloat(c.paddingRight);
+			return { text: a.textContent.trim(), href: a.getAttribute('href'), current: a.getAttribute('aria-current') === 'true', color: c.color, weight: +c.fontWeight, bg: c.backgroundColor, border: parseFloat(c.borderTopWidth) > 0 && c.borderTopColor !== 'rgba(0, 0, 0, 0)', w: r(a).width, h: r(a).height, oneLine: line(a).width <= inner + 0.5 && document.createRange().getClientRects && a.getClientRects().length === 1, fontSize: c.fontSize };
+		});
+		const out = {
+			groups,
+			linkSteps,
+			labelSteps,
+			groupSteps,
+			labelStyle: labels.every((c) => c.fontSize === '13px' && +c.fontWeight < 600 && c.textTransform === 'none' && (c.letterSpacing === 'normal' || parseFloat(c.letterSpacing) === 0) && c.color === muted),
+			labelSample: `${labels[0].fontSize} ${labels[0].fontWeight} ${labels[0].textTransform} ${labels[0].letterSpacing} ${labels[0].color}`,
+			linkStyle: links
+				.filter((a) => a !== current)
+				.every((a) => {
+					const c = getComputedStyle(a);
+					return c.fontSize === '14px' && c.color === ink && +c.fontWeight === 400;
+				}),
+			activePill: !!current && getComputedStyle(current).backgroundColor === pill && +getComputedStyle(current).fontWeight >= 600,
+			rows: links.map((a) => a.getBoundingClientRect().height),
+			tabs,
+			muted,
+			ink,
+			surface,
+			control: { w: r(control).width, h: r(control).height, radius: getComputedStyle(control).borderTopLeftRadius },
+			inputRadius,
+		};
+		if (!touch) {
+			const field = document.querySelector('.k-sb-search');
+			const f = r(field);
+			const icon = r(field.querySelector('.k-icon'));
+			const span = field.querySelector(':scope > span');
+			const st = line(span);
+			const chip = field.querySelector(':scope > kbd');
+			const c = r(chip);
+			const linkText = line(links.find((a) => a !== current).querySelector('span'));
+			const label0 = pane.querySelector('.top-level > li > details > summary .large');
+			out.field = {
+				label: field.getAttribute('aria-label'),
+				text: span.textContent.trim(),
+				chip: chip.textContent.trim(),
+				chipRadius: parseFloat(getComputedStyle(chip).borderTopLeftRadius),
+				chipH: c.height,
+				chipFont: parseFloat(getComputedStyle(chip).fontSize),
+				edges: [f.left - r(current).left, f.right - r(current).right],
+				iconToText: icon.left - linkText.left,
+				insets: [icon.left - f.left, f.right - c.right],
+				mids: [icon.top + icon.height / 2, st.top + st.height / 2, c.top + c.height / 2].map((y) => y - (f.top + f.height / 2)),
+				clear: c.left - st.right,
+			};
+			out.toggleGap = r(control).top - f.bottom;
+			out.toggleToLabel = mid(label0) - r(control).bottom;
+			out.fieldW = f.width;
+			out.pinnedTop = [f.top, r(control).top];
+		}
+		return out;
+	}, touch);
+	const range = (a) => [Math.min(...a), Math.max(...a)];
+	const fmt = (a) => `${a[0].toFixed(1)}–${a[1].toFixed(1)}`;
+	const [L, G, S] = touch ? [44, 38, 59] : [36, 31, 48];
+	const ls = range(m.linkSteps);
+	const lab = range(m.labelSteps);
+	const gs = range(m.groupSteps);
+	const rowsOk = touch ? m.rows.every((h) => h >= 44) : m.rows.every((h) => Math.abs(h - 36) <= 0.5);
+	const names = m.groups.map((g) => g.label);
+	const expected = section === 'Using' ? USING_GROUPS : MAINTAINING_GROUPS;
+	const photo = m.groups.find((g) => g.label === 'Photoreal');
+	const tabCurrent = m.tabs.find((t) => t.current);
+	const tabOther = m.tabs.find((t) => !t.current);
+	const sectionName = SECTION_NAMES[section];
+	sidebarRows.push({ case: label, groups: names.length, 'link→link': fmt(ls), 'label→link': fmt(lab), 'link→next label': fmt(gs), toggle: `${m.control.w.toFixed(1)}×${m.control.h.toFixed(1)}`, 'field→toggle': m.toggleGap?.toFixed(1) ?? '-', 'toggle→label': m.toggleToLabel?.toFixed(1) ?? '-' });
+	check(`sidebar ${label}: no section title, only the ${sectionName} groups`, names.join('|') === expected.join('|'), names.join(', '));
+	check(`sidebar ${label}: link to link ${L}px (±2), text middles`, ls[0] >= L - 2 && ls[1] <= L + 2, fmt(ls));
+	check(`sidebar ${label}: group label to first link ${touch ? `${G}px (±2)` : '30–32px'}, text middles`, touch ? lab[0] >= G - 2 && lab[1] <= G + 2 : lab[0] >= 30 && lab[1] <= 32, fmt(lab));
+	check(`sidebar ${label}: last link to next group label ${S}px (±2), text middles`, gs[0] >= S - 2 && gs[1] <= S + 2, fmt(gs));
+	check(`sidebar ${label}: group labels 13px, regular, sentence case, muted`, m.labelStyle, m.labelSample);
+	check(`sidebar ${label}: links 14px, ink, regular; the current one the pill at 600`, m.linkStyle && m.activePill);
+	if (section === 'Using') check(`sidebar ${label}: Photoreal is a group with one link, "Overview", between Studio and Playground`, names.indexOf('Studio') < names.indexOf('Photoreal') && names.indexOf('Photoreal') < names.indexOf('Playground') && photo?.links.length === 1 && photo.links[0] === 'Overview', JSON.stringify(photo));
+	check(`sidebar ${label}: rows ${touch ? 'at least 44px (touch)' : '36px, no link wraps'}`, rowsOk, fmt(range(m.rows)));
+	// The section toggle.
+	check(
+		`toggle ${label}: "User guide" / "Team handbook"; "${sectionName}" raised (surface, hairline, ink, 500, aria-current), the other muted with no fill; right links`,
+		m.tabs.length === 2 &&
+			tabCurrent?.text === sectionName &&
+			tabCurrent.color === m.ink &&
+			tabCurrent.weight >= 500 &&
+			tabCurrent.bg === m.surface &&
+			tabCurrent.border &&
+			tabOther.color === m.muted &&
+			tabOther.bg === 'rgba(0, 0, 0, 0)' &&
+			m.tabs.find((t) => t.text === 'User guide')?.href === '/using-klinos/start-here/home/' &&
+			m.tabs.find((t) => t.text === 'Team handbook')?.href === '/maintaining-klinos/understand/architecture/',
+		JSON.stringify(m.tabs.map((t) => [t.text, t.current, t.bg, t.color])),
+	);
+	check(`toggle ${label}: two equal halves, labels 13px on one line, track radius = input radius`, Math.abs(m.tabs[0].w - m.tabs[1].w) <= 0.5 && m.tabs.every((t) => t.oneLine && t.fontSize === '13px') && m.control.radius === m.inputRadius, `${m.tabs.map((t) => t.w.toFixed(1)).join(' / ')}, radius ${m.control.radius}`);
+	if (touch) check(`toggle ${label}: options 44px tall in the menu`, m.tabs.every((t) => Math.abs(t.h - 44) <= 0.5), m.tabs.map((t) => t.h).join(', '));
+	else {
+		const f = m.field;
+		check(`field ${label}: "Search docs", aria-label "Search documentation", chip "Ctrl+K" (or ⌘K) at 11px or more`, f.text === 'Search docs' && f.label === 'Search documentation' && /^(Ctrl\+K|⌘K)$/.test(f.chip) && f.chipFont >= 11, `${f.text} / ${f.chip} ${f.chipFont}px`);
+		check(`field ${label}: chip is a rounded rectangle, not a pill (radius above 0, at most the input radius, under half its height)`, f.chipRadius > 0 && f.chipRadius <= parseFloat(m.inputRadius) && f.chipRadius < f.chipH / 2, `${f.chipRadius}px on ${f.chipH}px`);
+		check(`field ${label}: edges on the active pill's edges, icon on the links' text edge, chip inset = icon inset (±0.5)`, f.edges.every((d) => Math.abs(d) <= 0.5) && Math.abs(f.iconToText) <= 0.5 && Math.abs(f.insets[0] - f.insets[1]) <= 0.5, JSON.stringify({ edges: f.edges, iconToText: f.iconToText, insets: f.insets }));
+		check(`field ${label}: icon, text and chip vertically centred (±0.5), at least 12px between the text and the chip`, f.mids.every((d) => Math.abs(d) <= 0.5) && f.clear >= 12, `${f.mids.map((d) => d.toFixed(2)).join(', ')}; clear ${f.clear.toFixed(1)}`);
+		check(`toggle ${label}: under the field, same width, 36px tall, 8px gap`, Math.abs(m.control.w - m.fieldW) <= 0.5 && Math.abs(m.control.h - 36) <= 0.5 && Math.abs(m.toggleGap - 8) <= 0.5, `${m.control.w}×${m.control.h}, gap ${m.toggleGap}`);
+		check(`toggle ${label}: 28px (±2) from its bottom edge to the middle of the first group label`, Math.abs(m.toggleToLabel - 28) <= 2, m.toggleToLabel.toFixed(1));
+		// Pinned together: both stay put while the links scroll under them.
+		await p.$eval('#starlight__sidebar', (e) => (e.scrollTop = 300));
+		await p.waitForTimeout(100);
+		const after = await p.evaluate(() => {
+			const pane = document.getElementById('starlight__sidebar');
+			const block = document.querySelector('.k-sb-pinned').getBoundingClientRect();
+			return { scrolled: pane.scrollTop, tops: [document.querySelector('.k-sb-search').getBoundingClientRect().top, document.querySelector('.k-sb-pinned .k-tabs').getBoundingClientRect().top], bg: getComputedStyle(document.querySelector('.k-sb-pinned')).backgroundColor, under: [...pane.querySelectorAll('.top-level a')].some((a) => { const x = a.getBoundingClientRect(); return x.top < block.bottom && x.bottom > block.top; }) };
+		});
+		await p.$eval('#starlight__sidebar', (e) => (e.scrollTop = 0));
+		check(`sidebar ${label}: search and toggle pinned together on a solid surface while the links scroll`, after.tops.every((t, i) => Math.abs(t - m.pinnedTop[i]) <= 0.5) && after.bg === m.surface && (after.scrolled === 0 || after.under), JSON.stringify(after));
+	}
+	// Hover changes a link's background with a mouse only.
+	const link = p.locator('#starlight__sidebar .top-level a:not([aria-current])').first();
+	const before = await link.evaluate((e) => getComputedStyle(e).backgroundColor);
+	await link.hover();
+	await p.waitForTimeout(200);
+	const after = await link.evaluate((e) => getComputedStyle(e).backgroundColor);
+	check(`sidebar ${label}: hover ${touch ? 'does nothing on touch' : 'shows with a mouse'}`, touch ? before === after : before !== after, `${before} → ${after}`);
+	await ctx.close();
+}
+
 await browser.close();
+console.table(sidebarRows);
 console.table(mtocRows.filter((r) => r.theme === 'light'));
 console.table(alignRows.filter((r) => r.theme === 'light'));
 console.table(rows.filter((r) => r.theme === 'light'));

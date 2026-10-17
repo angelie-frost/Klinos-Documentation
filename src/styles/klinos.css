@@ -94,68 +94,16 @@ header.header {
 	height: 22px;
 	flex: none;
 }
-/* The brand's text sets its baseline (the logo has none), so the version can sit on the same baseline. */
-.k-header .brand > span {
-	align-self: baseline;
-}
 .k-header .brand small {
 	font-weight: 400;
 	color: var(--k-ink2);
 	font-size: var(--k-fs-cap);
 }
 
-/* Search: the prototype's sunk field. The button opens Starlight's Pagefind dialog. */
+/* Title */
 .k-header .title-wrapper {
 	flex: none;
-	align-items: baseline; /* "Klinos Docs" and the version share a baseline */
-	gap: 8px;
 }
-@media (min-width: 981px) {
-	.k-search {
-		width: 100%;
-	}
-	.k-search site-search {
-		width: 100%;
-		display: flex;
-		justify-content: center;
-	}
-	.k-search button[data-open-modal] {
-		width: min(420px, 100%);
-		max-width: none;
-		height: 36px;
-		border: 0;
-		border-radius: var(--k-r-nav);
-		background: var(--k-sunk);
-		color: var(--k-ink2);
-		font-size: var(--k-fs-sm);
-		padding-inline: 11px 8px;
-	}
-	@media (hover: hover) and (pointer: fine) {
-	.k-search button[data-open-modal]:hover {
-		color: var(--k-ink);
-		background: var(--k-sunk);
-	}
-	}
-	.k-search button[data-open-modal] svg {
-		width: 16px;
-		height: 16px;
-	}
-	.k-search button[data-open-modal] > kbd {
-		height: 20px;
-		padding: 0 7px;
-		border: 1px solid var(--k-line2);
-		border-radius: var(--k-r-pill);
-		font: 500 11px/18px var(--k-font-mono);
-		color: var(--k-ink2);
-		background: var(--k-surface);
-		align-items: center;
-	}
-	.k-search button[data-open-modal] > kbd kbd {
-		font: inherit;
-		background: none;
-	}
-}
-
 /* Mobile menu footer keeps the toggle visible. */
 .mobile-preferences klinos-theme-toggle {
 	margin-inline-start: auto;
@@ -183,32 +131,60 @@ header.header {
 .sidebar-content summary .caret {
 	display: none;
 }
-/* Section title (Using Klinos / Maintaining Klinos) */
+/* As in Vercel's docs: the sidebar shows one section at a time (the section tabs switch them), so it has no
+   section title; muted group labels (13px, regular, sentence case) over links (14px, ink). The rhythm, measured
+   between the middles of text lines: link to link 36px (the row), a group label to its first link 31px, and the
+   last link of a group to the next label 48px. On touch the rows are 44px (chrome.css) and the gaps keep the same
+   ratios: 38px and 59px. */
+.sidebar-content {
+	--sb-row: 36px;
+	/* Gaps between boxes, tuned so the text middles (which sit about 0.5–1.5px off the line-box middles) land on
+	   31px and 48px. */
+	--sb-label-gap: 4.5px;
+	--sb-group-gap: 19.5px;
+}
+@media (pointer: coarse) {
+	.sidebar-content {
+		--sb-row: 44px;
+		--sb-label-gap: 7.5px; /* 38 */
+		--sb-group-gap: 26.5px; /* 59 */
+	}
+}
+.sidebar-content .top-level,
+.sidebar-content .top-level ul {
+	margin: 0;
+	padding: 0;
+}
 .sidebar-content .top-level > li + li {
-	margin-top: var(--k-s6);
+	margin-top: var(--sb-group-gap);
+}
+/* Group label */
+.sidebar-content .top-level > li > details > summary {
+	margin: 0;
+	padding: 0 10px;
+	line-height: 18px;
 }
 .sidebar-content .top-level > li > details > summary .large {
-	font: 500 var(--k-fs-sm) / 1.4 var(--k-font-body);
-	color: var(--k-ink);
+	font: 400 13px / 18px var(--k-font-body);
+	color: var(--k-ink-muted);
 }
-/* Group label (Start here, Studio, …) */
-.sidebar-content .top-level > li > details > ul > li > details > summary {
-	margin: var(--k-s5) 0 var(--k-s1);
+.sidebar-content .top-level > li > details > ul {
+	margin-top: var(--sb-label-gap);
 }
-.sidebar-content .top-level > li > details > ul > li > details > summary .large {
-	font: 400 var(--k-fs-label) / 1.4 var(--k-font-body);
-	color: var(--k-ink2);
+.sidebar-content ul ul li + li {
+	margin-top: 0;
 }
 .sidebar-content a {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	min-height: 32px;
-	padding: 5px 10px;
+	min-height: var(--sb-row);
+	padding: 7px 10px;
 	border-radius: var(--k-r-nav);
 	font-size: var(--k-fs-sm);
-	line-height: 1.35;
-	color: var(--k-ink2);
+	font-weight: 400;
+	line-height: 20px;
+	color: var(--k-ink);
 	text-decoration: none;
 }
 .sidebar-content a:focus-visible {

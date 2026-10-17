@@ -19,12 +19,14 @@ const newPage = async (opts) => {
 // ---------- Desktop, mouse ----------
 {
 	const { ctx, p } = await newPage({ viewport: { width: 1440, height: 900 } });
-	const trigger = p.locator('button[data-open-modal]');
-	check('trigger reads "Search documentation"', (await trigger.innerText()).includes('Search documentation'));
-	check('trigger aria-label "Search documentation"', (await trigger.getAttribute('aria-label')) === 'Search documentation');
-	check('desktop shows the Ctrl K hint', await visible(p, 'button[data-open-modal] > kbd'));
+	// On desktop the trigger is the field at the top of the sidebar; the header has no search button.
+	const trigger = p.locator('.k-sb-search');
+	check('desktop: no search button in the header', !(await visible(p, '.k-header button[data-open-modal]')));
+	check('sidebar field reads "Search docs" with the Ctrl+K chip', (await trigger.innerText()).includes('Search docs') && /^(Ctrl\+K|⌘K)$/.test((await p.textContent('.k-sb-search > kbd')).trim()));
+	check('sidebar field aria-label "Search documentation"', (await trigger.getAttribute('aria-label')) === 'Search documentation');
+	check('sidebar field shows the Ctrl K hint', await visible(p, '.k-sb-search > kbd'));
 	await trigger.click();
-	check('click opens the panel', await isOpen(p));
+	check('clicking the sidebar field opens the panel', await isOpen(p));
 	check('placeholder "Search documentation"', (await p.getAttribute('[data-search-input]', 'placeholder')) === 'Search documentation');
 	check('input text is 16px', (await p.$eval('[data-search-input]', (e) => getComputedStyle(e).fontSize)) === '16px');
 	check('Esc hint shown, Close hidden (mouse)', (await visible(p, '.k-search-esc')) && !(await visible(p, '.k-search-close')));
@@ -57,7 +59,7 @@ const newPage = async (opts) => {
 	check('Esc closes the panel', !(await isOpen(p)));
 	await trigger.click();
 	await p.keyboard.press('Escape');
-	check('focus returns to the trigger', await p.evaluate(() => document.activeElement?.matches('button[data-open-modal]')));
+	check('focus returns to the sidebar field', await p.evaluate(() => document.activeElement?.matches('.k-sb-search')));
 	await ctx.close();
 }
 
@@ -66,8 +68,13 @@ for (const vp of [{ n: '820', w: 820, h: 1180 }, { n: '390', w: 390, h: 844 }]) 
 	const { ctx, p } = await newPage({ viewport: { width: vp.w, height: vp.h }, isMobile: true, hasTouch: true });
 	const trigger = p.locator('button[data-open-modal]');
 	check(`${vp.n}: icon-only trigger, aria-label "Search documentation"`, !(await visible(p, 'button[data-open-modal] > span')) && (await trigger.getAttribute('aria-label')) === 'Search documentation');
+	check(`${vp.n}: no sidebar field (the sidebar is the menu here)`, !(await visible(p, '.k-sb-search')));
+	await p.keyboard.press('Control+k');
+	check(`${vp.n}: Ctrl K opens the panel here too`, await isOpen(p));
+	await p.keyboard.press('Escape');
+	await p.waitForTimeout(150);
 	await trigger.tap();
-	check(`${vp.n}: opens`, await isOpen(p));
+	check(`${vp.n}: the header icon opens it`, await isOpen(p));
 	const box = await p.locator('.k-search-panel').boundingBox();
 	const gaps = { left: box.x, right: vp.w - box.x - box.width, top: box.y, bottom: vp.h - box.y - box.height };
 	check(`${vp.n}: floating panel, gap ≥ 16px on all sides`, Object.values(gaps).every((g) => g >= 16), JSON.stringify(Object.fromEntries(Object.entries(gaps).map(([k, v]) => [k, Math.round(v)]))));
@@ -90,6 +97,55 @@ for (const vp of [{ n: '820', w: 820, h: 1180 }, { n: '390', w: 390, h: 844 }]) 
 	check(`${vp.n}: a tap outside closes it`, !(await isOpen(p)));
 	await ctx.close();
 }
+// ---------- The field's line and focus, both themes ----------
+// A light 1px line (--k-line2), no heavy inset line; focus shown by the search icon and caret in full ink (3:1 or
+// more on the surface, checked by check:contrast), muted again when focus leaves the field.
+for (const theme of ['light', 'dark']) {
+	for (const vp of [{ n: '1440', w: 1440, h: 900 }, { n: '390 touch', w: 390, h: 844, touch: true }]) {
+		const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h }, ...(vp.touch ? { isMobile: true, hasTouch: true } : {}) });
+		await ctx.addInitScript((t) => {
+			localStorage.setItem('klinos-whatsnew-v3', 'seen');
+			localStorage.setItem('starlight-theme', t);
+		}, theme);
+		const p = await ctx.newPage();
+		await p.goto(PAGE, { waitUntil: 'networkidle' });
+		await (vp.touch ? p.locator('button[data-open-modal]').tap() : p.locator('.k-sb-search').click());
+		await p.waitForTimeout(250);
+		const state = () =>
+			p.evaluate(() => {
+				const resolve = (v) => {
+					const probe = document.createElement('span');
+					probe.style.color = `var(${v})`;
+					document.body.append(probe);
+					const c = getComputedStyle(probe).color;
+					probe.remove();
+					return c;
+				};
+				const field = document.querySelector('.k-search-field');
+				const cs = getComputedStyle(field);
+				return {
+					focused: document.activeElement?.matches('[data-search-input]'),
+					width: cs.borderBottomWidth,
+					color: cs.borderBottomColor,
+					line2: resolve('--k-line2'),
+					inset: cs.boxShadow,
+					icon: getComputedStyle(field.querySelector('.k-icon')).color,
+					caret: getComputedStyle(field.querySelector('input')).caretColor,
+					ink: resolve('--k-ink'),
+					muted: resolve('--k-ink-muted'),
+				};
+			});
+		const on = await state();
+		const tag = `${theme} ${vp.n}`;
+		check(`${tag}: field line is 1px --k-line2, no heavy inset line`, on.width === '1px' && on.color === on.line2 && (on.inset === 'none' || !/inset/.test(on.inset)), `${on.width} ${on.color} ${on.inset}`);
+		check(`${tag}: focused field shows the icon and caret in full ink`, on.focused && on.icon === on.ink && on.caret === on.ink, `icon ${on.icon}, caret ${on.caret}`);
+		await p.focus('[data-suggest="Lighting"]');
+		const off = await state();
+		check(`${tag}: focus elsewhere: the icon goes back to muted`, !off.focused && off.icon === off.muted, off.icon);
+		await ctx.close();
+	}
+}
+
 await browser.close();
 console.table(results);
 const failed = results.filter((r) => r.result !== 'PASS').length;

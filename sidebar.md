@@ -1,6 +1,6 @@
 # Klinos docs sidebar
 
-## Using Klinos
+## User guide
 
 ### Start here
 - Home: using-klinos/start-here/home.md
@@ -18,14 +18,14 @@
 - Staging: using-klinos/studio/staging.md
 
 ### Photoreal
-- Photoreal: using-klinos/photoreal/photoreal.md
+- Overview: using-klinos/photoreal/photoreal.md
 
 ### Playground
 - Single card: using-klinos/playground/single-card.md
 - Layouts: using-klinos/playground/layouts.md
-- Insert image vs Insert as layers: using-klinos/playground/insert.md
+- Insert vs Insert as layers: using-klinos/playground/insert.md
 - Exploded layers: using-klinos/playground/exploded.md
-- Playground guide and Reset layout: using-klinos/playground/guide-reset.md
+- Guide and Reset layout: using-klinos/playground/guide-reset.md
 
 ### Working with the panel
 - Exporting and copy: using-klinos/panel/exporting.md
@@ -38,7 +38,7 @@
 - Feedback and bug reports: using-klinos/reference/feedback.md
 - Changelog: using-klinos/reference/changelog.md
 
-## Maintaining Klinos
+## Team handbook
 
 ### Understand
 - Architecture overview: maintaining-klinos/understand/architecture.md

@@ -62,7 +62,8 @@ const go = async (p, selector) => {
 	await p.waitForTimeout(350); // let the 200ms transition finish
 };
 const rect = (p, sel) => p.$eval(sel, (e) => { const r = e.getBoundingClientRect(); return [r.x, r.y, r.width, r.height].map((n) => Math.round(n * 10) / 10).join(','); });
-const sidebarLink = (path) => `#starlight__sidebar a[href="${path}"]`;
+// A link in the sidebar's list (not the section tabs at the top of the menu).
+const sidebarLink = (path) => `#starlight__sidebar .top-level a[href="${path}"]`;
 
 // ---------- 1. Six navigations in a row, light and dark (desktop) ----------
 for (const theme of ['light', 'dark']) {
@@ -75,9 +76,11 @@ for (const theme of ['light', 'dark']) {
 		['sidebar link', () => sidebarLink(P.about)],
 		['pager Previous', () => '.k-pager-link[rel="prev"]'],
 		['sidebar link', () => sidebarLink(P.devices)],
-		['version link', () => '.k-header .k-version'],
+		['sidebar link to the Changelog', () => sidebarLink(P.changelog)],
+		// Changelog is the last Using page: its Next crosses into Maintaining (the tab and the sidebar switch).
+		['pager Next, into the Team handbook', () => '.k-pager-link[rel="next"]', 'Team handbook'],
 	];
-	for (const [i, [how, sel]] of steps.entries()) {
+	for (const [i, [how, sel, switchTo]] of steps.entries()) {
 		const tag = `${theme} nav ${i + 1} (${how})`;
 		const header0 = await rect(p, 'header.header');
 		const side0 = await rect(p, '#starlight__sidebar');
@@ -101,7 +104,14 @@ for (const theme of ['light', 'dark']) {
 				wasHidden: !!r && (r.top + moved < s.top || r.bottom + moved > s.bottom),
 			};
 		}, scroll1 - scroll0);
-		check(`${tag}: sidebar keeps its scroll (moves only to bring the new page into view)`, Math.abs(scroll1 - scroll0) <= 1 || current.wasHidden, `${scroll0} → ${scroll1}`);
+		if (switchTo) {
+			// Another section: its own groups, the other tab current, and the sidebar starts at the top.
+			const sec = await p.evaluate(() => ({
+				tab: document.querySelector('.k-sb-pinned .k-tab[aria-current="true"]')?.textContent.trim(),
+				groups: [...document.querySelectorAll('#starlight__sidebar .top-level > li > details > summary')].map((s) => s.textContent.trim()),
+			}));
+			check(`${tag}: the ${switchTo} tab is current and the sidebar shows its groups, from the top`, sec.tab === switchTo && sec.groups.join('|') === 'Understand|Work on it|Ship it' && scroll1 === 0, `${sec.tab}: ${sec.groups.join(', ')}; scroll ${scroll1}`);
+		} else check(`${tag}: sidebar keeps its scroll (moves only to bring the new page into view)`, Math.abs(scroll1 - scroll0) <= 1 || current.wasHidden, `${scroll0} → ${scroll1}`);
 		check(`${tag}: new page highlighted and in view`, current.href === current.path && current.visible, current.href);
 		const shifts = await p.evaluate(() => window.__shifts.filter((s) => s !== 'other'));
 		check(`${tag}: no layout shift in header or sidebar`, shifts.length === 0, shifts.join(','));
@@ -110,7 +120,7 @@ for (const theme of ['light', 'dark']) {
 		check(`${tag}: first Tab is "Skip to content" (to the page heading)`, await p.evaluate(() => document.activeElement?.matches('.sl-skip-link') && document.activeElement.getAttribute('href') === '#_top'));
 		await p.evaluate(() => document.activeElement?.blur()); // the focused skip link covers the header's left side
 	}
-	check(`${theme}: no console errors over six navigations`, errors.length === 0, errors.join(' | '));
+	check(`${theme}: no console errors over seven navigations`, errors.length === 0, errors.join(' | '));
 	await ctx.close();
 }
 
@@ -121,7 +131,9 @@ for (const theme of ['light', 'dark']) {
 	await p.$eval('#starlight__sidebar', (e) => (e.scrollTop = 260));
 	const target = await p.evaluate(() => {
 		const s = document.getElementById('starlight__sidebar').getBoundingClientRect();
-		const a = [...document.querySelectorAll('#starlight__sidebar a[href^="/"]')].find((a) => { const r = a.getBoundingClientRect(); return r.top > s.top + 40 && r.bottom < s.bottom - 40 && !a.hasAttribute('aria-current'); });
+		// A link well inside the visible part: below the pinned search field, above the bottom edge.
+		const top = document.querySelector('.k-sb-pinned')?.getBoundingClientRect().bottom ?? s.top;
+		const a = [...document.querySelectorAll('#starlight__sidebar .top-level a[href^="/"]')].find((a) => { const r = a.getBoundingClientRect(); return r.top > top + 40 && r.bottom < s.bottom - 40 && !a.hasAttribute('aria-current'); });
 		return a.getAttribute('href');
 	});
 	await go(p, sidebarLink(target));
@@ -175,9 +187,9 @@ for (const w of [820, 390]) {
 	await p.tap('.k-mtoc-row');
 	await p.waitForTimeout(200);
 	const listOpen = await p.$eval('#k-mtoc-list', (l) => !l.hidden);
-	await go(p, '.k-header .k-version');
+	await go(p, '.k-header a.k-try-icon');
 	const r = await lastReveal(p);
-	check(`${w}: navigating with the "On this page" list open: list closed on the new page, no stray transition`, listOpen && new URL(p.url()).pathname === P.changelog && (await p.$eval('#k-mtoc-list', (l) => l.hidden)) && typeof r?.vt === 'boolean', `transition: ${r?.vt}`);
+	check(`${w}: navigating with the "On this page" list open: list closed on the new page, no stray transition`, listOpen && new URL(p.url()).pathname === P.live && (await p.$eval('#k-mtoc-list', (l) => l.hidden)) && typeof r?.vt === 'boolean', `transition: ${r?.vt}`);
 	check(`${w}: no console errors`, errors.length === 0, errors.join(' | '));
 	await ctx.close();
 }
@@ -207,7 +219,7 @@ for (const w of [820, 390]) {
 // ---------- 4. Features on the first load and after several navigations ----------
 const features = async (p, label) => {
 	// Search
-	await p.click('button[data-open-modal]');
+	await p.click('.k-sb-search'); // desktop: the search field at the top of the sidebar
 	await p.fill('[data-search-input]', 'lighting');
 	await p.waitForFunction(() => document.querySelectorAll('#k-search-results li').length > 0, null, { timeout: 8000 }).catch(() => {});
 	check(`${label}: search opens and finds results`, (await p.locator('#k-search-results li').count()) > 0);
@@ -224,7 +236,7 @@ const features = async (p, label) => {
 	const t0 = await p.evaluate(() => document.documentElement.dataset.theme);
 	await p.click('.k-header .themebtn');
 	const t1 = await p.evaluate(() => document.documentElement.dataset.theme);
-	await go(p, sidebarLink(P.architecture));
+	await go(p, '.k-sb-pinned .k-tab[href="/maintaining-klinos/understand/architecture/"]'); // the sidebar toggle: Team handbook
 	const r = await lastReveal(p);
 	check(`${label}: theme toggle switches and the next page keeps it`, t1 !== t0 && r?.theme === t1, `${t0} → ${t1}, next page ${r?.theme}`);
 	// Mermaid (on Architecture)
@@ -232,8 +244,10 @@ const features = async (p, label) => {
 	check(`${label}: mermaid diagram renders`, (await p.locator('pre[data-mermaid][data-rendered] svg').count()) > 0);
 	await p.click('.k-header .themebtn'); // back to the starting theme
 	// Version link
-	await go(p, '.k-header .k-version');
-	check(`${label}: version link opens the changelog`, new URL(p.url()).pathname === P.changelog);
+	// The version is linked from Home ("The current release is v…"), to its changelog entry.
+	await go(p, '.k-sb-pinned .k-tab[href="/using-klinos/start-here/home/"]'); // the toggle's User guide option is Home
+	await go(p, 'main a[href*="/changelog/#v"]');
+	check(`${label}: Home's version link opens the changelog`, new URL(p.url()).pathname === P.changelog);
 };
 {
 	const { ctx, p, errors } = await newPage();
