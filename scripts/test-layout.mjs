@@ -674,7 +674,160 @@ for (const theme of THEMES) {
 	}
 }
 
+// ---------- Home: the "Try Klinos in your browser" banner (layout A: bleeding preview) ----------
+// Side by side when the card is 680px or wider, stacked below that; the text and the window never overlap.
+// Stacked: the window shows first (CSS order; the DOM keeps the text first), cut by the card's top and sides,
+// 200–240px tall on phones and 260px otherwise, ending in a --k-line2 hairline above the text.
+const bannerRows = [];
+for (const theme of THEMES) {
+	for (const [w, h, touch] of [
+		[390, 844, true],
+		[728, 1000, true],
+		[768, 1000, true],
+		[820, 1180, true],
+		[900, 1000, true],
+		[980, 1000, true],
+		[981, 900, false],
+		[1000, 900, false],
+		[1024, 900, false],
+		[1100, 900, false],
+		[1200, 900, false],
+		[1300, 900, false],
+		[1440, 900, false],
+		[1600, 900, false],
+	]) {
+		const label = `${w}px ${theme}`;
+		const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: touch, isMobile: w === 390 });
+		await ctx.addInitScript((t) => {
+			localStorage.setItem('klinos-whatsnew-v3', 'seen');
+			localStorage.setItem('starlight-theme', t);
+		}, theme);
+		const p = await ctx.newPage();
+		await p.goto(`${BASE}/using-klinos/start-here/home/`, { waitUntil: 'networkidle' });
+		await p.evaluate(() => document.fonts.ready);
+		// Give the theme's panel image up to 5 s to load where it sits (no scrolling: the banner is in the first screen).
+		await p.evaluate(() => {
+			const img = [...document.querySelectorAll('main .try-window-shot img')].find((i) => getComputedStyle(i).display !== 'none');
+			if (!img || img.complete) return;
+			return Promise.race([new Promise((r) => img.addEventListener('load', r, { once: true })), new Promise((r) => setTimeout(r, 5000))]);
+		});
+		const b = await p.evaluate(() => {
+			const card = document.querySelector('main aside.try-card');
+			const q = (s) => card.querySelector(s);
+			const r = (e) => e.getBoundingClientRect();
+			const cs = (e) => getComputedStyle(e);
+			// Words on the last rendered line of an element.
+			const lastLineWords = (el) => {
+				const words = [];
+				const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+				for (let n; (n = walker.nextNode()); ) {
+					for (const m of n.data.matchAll(/\S+/g)) {
+						const range = document.createRange();
+						range.setStart(n, m.index);
+						range.setEnd(n, m.index + m[0].length);
+						const rect = range.getClientRects()[0];
+						if (rect) words.push(Math.round(rect.top));
+					}
+				}
+				const last = Math.max(...words);
+				return { lines: new Set(words).size, last: words.filter((t) => Math.abs(t - last) <= 2).length };
+			};
+			const clipped = ['.try-card-eyebrow', '.try-card-title', '.try-card-desc', 'a.try-btn'].filter((s) => {
+				const e = q(s);
+				return e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1 || r(e).right > r(card).right + 0.5 || r(e).left < r(card).left - 0.5;
+			});
+			const body = r(q('.try-card-body'));
+			const textRight = Math.max(...['.try-card-eyebrow', '.try-card-title', '.try-card-desc', '.try-card-actions'].map((s) => r(q(s)).right));
+			const textBottom = r(q('.try-card-actions')).bottom;
+			const win = r(q('.try-window'));
+			const c = r(card);
+			const img = [...card.querySelectorAll('.try-window-shot img')].find((i) => cs(i).display !== 'none');
+			const btn = q('a.try-btn');
+			// The part of a box that shows inside the card (the card clips the window and the image).
+			const shown = (b) => ({ w: Math.max(0, Math.min(b.right, c.right) - Math.max(b.left, c.left)), h: Math.max(0, Math.min(b.bottom, c.bottom) - Math.max(b.top, c.top)) });
+			const wcs = cs(q('.try-window'));
+			const side = cs(q('.try-card-inner')).display === 'grid';
+			const eyebrowTop = r(q('.try-card-eyebrow')).top;
+			const line2 = (() => {
+				const s = document.createElement('div');
+				s.style.color = 'var(--k-line2)';
+				card.append(s);
+				const v = cs(s).color;
+				s.remove();
+				return v;
+			})();
+			const focusable = card.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+			const h1 = r(document.querySelector('h1#_top'));
+			return {
+				side,
+				winAbove: win.bottom <= eyebrowTop + 0.5,
+				domTextFirst: !!(q('.try-card-body').compareDocumentPosition(q('.try-window')) & Node.DOCUMENT_POSITION_FOLLOWING),
+				winH: win.height,
+				gap: eyebrowTop - win.bottom,
+				hairline: `${wcs.borderBottomWidth} ${wcs.borderBottomStyle} ${wcs.borderBottomColor === line2}`,
+				focusable: focusable.length,
+				dotsHidden: q('.try-window-bar').getAttribute('aria-hidden') === 'true',
+				imgW: img ? r(img).width : 0,
+				// Phones: the bottom of the button if the banner started where the page content starts (the h1).
+				foldBtn: h1.top + scrollY + (r(btn).bottom - c.top),
+				cardW: c.width,
+				cardH: c.height,
+				column: r(document.querySelector('main .sl-markdown-content')).width,
+				radius: cs(card).borderTopLeftRadius,
+				overflow: cs(card).overflow,
+				noOverlap: side ? win.left >= textRight && win.left >= body.right - 0.5 : win.bottom <= eyebrowTop + 0.5,
+				bleed: side ? win.right > c.right && win.bottom > c.bottom : win.left < c.left && win.right > c.right && win.top < c.top + card.clientTop,
+				btnH: r(btn).height,
+				btnRadius: cs(btn).borderTopLeftRadius,
+				btnW: r(btn).width,
+				bodyW: body.width,
+				actionsW: r(q('.try-card-actions')).width,
+				links: [...card.querySelectorAll('a')].map((a) => a.getAttribute('href')),
+				winStyle: `${wcs.display}/${wcs.visibility}/${wcs.opacity}`,
+				winShown: shown(win),
+				imgShown: img ? shown(r(img)) : { w: 0, h: 0 },
+				imgLoaded: !!img && img.complete && img.naturalWidth > 0,
+				textMid: (r(q('.try-card-eyebrow')).top + r(q('.try-card-actions')).bottom) / 2 - c.top,
+				title: lastLineWords(q('.try-card-title')),
+				desc: lastLineWords(q('.try-card-desc')),
+				descW: r(q('.try-card-desc')).width,
+				clipped,
+				img: img && { src: img.getAttribute('src'), alt: img.alt },
+				eyebrow: q('.try-card-eyebrow').innerText,
+				hscroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			};
+		});
+		bannerRows.push({ width: w, theme, layout: b.side ? 'side by side' : 'stacked', card: `${b.cardW.toFixed(0)}×${b.cardH.toFixed(0)}`, text: b.bodyW.toFixed(0), desc: b.descW.toFixed(0), window: `${b.winShown.w.toFixed(0)}×${b.winShown.h.toFixed(0)}`, gap: b.side ? '' : b.gap.toFixed(0), title: `${b.title.lines} lines, last ${b.title.last}`, description: `${b.desc.lines} lines, last ${b.desc.last}` });
+		check(`banner ${label}: the card fills the column, 16px radius, overflow hidden`, Math.abs(b.cardW - b.column) <= 1 && b.radius === '16px' && b.overflow === 'hidden', `${b.cardW} / ${b.column}, ${b.radius}, ${b.overflow}`);
+		check(`banner ${label}: side by side only when the card is at least 680px wide, otherwise stacked`, b.side === b.cardW >= 680, `${b.side ? 'side' : 'stacked'} at ${b.cardW.toFixed(0)}px`);
+		if (b.side) check(`banner ${label}: side by side at least 360px tall, the text block centred (±2px)`, b.cardH >= 360 && Math.abs(b.textMid - b.cardH / 2) <= 2, `${b.cardH}, text middle ${b.textMid.toFixed(1)}`);
+		check(`banner ${label}: the window shows, with a real size (at least 240×200 inside the card)`, b.winStyle === 'block/visible/1' && b.winShown.w >= 240 && b.winShown.h >= 200, `${b.winStyle} ${JSON.stringify(b.winShown)}`);
+		check(`banner ${label}: the panel image loaded and shows (at least 200×150 inside the card)`, b.imgLoaded && b.imgShown.w >= 200 && b.imgShown.h >= 150, `${b.imgLoaded} ${JSON.stringify(b.imgShown)}`);
+		check(`banner ${label}: the text and the window don't overlap`, b.noOverlap);
+		check(`banner ${label}: the window is cut by the card (${b.side ? 'right and bottom' : 'top and both sides'})`, b.bleed);
+		if (!b.side) {
+			const [lo, hi] = w < 600 ? [200, 240] : [259.5, 260.5];
+			check(`banner ${label}: stacked: the window shows above the eyebrow; the DOM keeps the text first`, b.winAbove && b.domTextFirst);
+			check(`banner ${label}: stacked: window ${w < 600 ? '200–240' : '260'}px tall, ending in a 1px --k-line2 hairline`, b.winH >= lo && b.winH <= hi && b.hairline === '1px solid true', `${b.winH}px, ${b.hairline}`);
+			check(`banner ${label}: stacked: at least ${w < 600 ? 28 : 32}px from the hairline to the eyebrow`, b.gap >= (w < 600 ? 28 : 32) - 0.5, `${b.gap}px`);
+			check(`banner ${label}: stacked: the panel image is cut, not shrunk (at least 600px wide)`, b.imgW >= 600, `${b.imgW}px`);
+		}
+		if (w === 390) check(`banner ${label}: phones: title, description and button fit in 844px if the banner starts at the top of the content`, b.foldBtn <= 844, `button bottom at ${b.foldBtn.toFixed(0)}px`);
+		check(`banner ${label}: the button is the only focusable element; the window's dots are aria-hidden`, b.focusable === 1 && b.dotsHidden, `${b.focusable}`);
+		check(`banner ${label}: no horizontal scroll`, b.hscroll <= 0, `${b.hscroll}px`);
+		check(`banner ${label}: the primary button is ${touch ? 44 : 42}px tall with a 10px radius`, Math.abs(b.btnH - (touch ? 44 : 42)) <= 0.5 && b.btnRadius === '10px', `${b.btnH}px, ${b.btnRadius}`);
+		if (w === 390) check(`banner ${label}: on phones the button is full width`, Math.abs(b.btnW - b.actionsW) <= 1, `${b.btnW} / ${b.actionsW}`);
+		check(`banner ${label}: one link only, the button to Try it live (no text link)`, b.links.join() === '/using-klinos/reference/try-it-live/', b.links.join(' '));
+		check(`banner ${label}: no orphan: the last line of the title and of the description has 2 or more words`, b.title.last >= 2 && b.desc.last >= 2, `title ${JSON.stringify(b.title)}, description ${JSON.stringify(b.desc)}`);
+		check(`banner ${label}: no text clipped or outside the card`, b.clipped.length === 0, b.clipped.join(', '));
+		check(`banner ${label}: the ${theme} panel image is the one shown, with its alt text`, b.img?.src === `/media/banner/try-live${theme === 'dark' ? '-dark' : ''}.webp` && /Klinos panel in the browser, showing an iPhone 17 Pro/.test(b.img.alt), JSON.stringify(b.img));
+		check(`banner ${label}: eyebrow reads LIVE DEMO`, b.eyebrow === 'LIVE DEMO', b.eyebrow);
+		await ctx.close();
+	}
+}
+
 await browser.close();
+console.table(bannerRows);
 console.table(sidebarRows);
 console.table(mtocRows.filter((r) => r.theme === 'light'));
 console.table(alignRows.filter((r) => r.theme === 'light'));

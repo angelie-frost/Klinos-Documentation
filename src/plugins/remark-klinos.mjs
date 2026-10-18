@@ -180,16 +180,31 @@ function toCallout(node) {
 		node.children.shift();
 
 	if (kind === 'try') {
-		// The card's link reads as the primary button; the demo poster sits beside the text.
-		visit(node, 'link', (l) => addClass(l, 'try-btn'));
-		const poster = capturedMedia(LIVE_SLUG, 1);
-		const art = poster
-			? `<a class="try-card-art" href="${LIVE_URL}" tabindex="-1" aria-hidden="true">${themed(poster, '')}</a>`
+		// Layout "A: bleeding preview": eyebrow, title, description and the button on the left; a window holding the
+		// real panel (public/media/banner/, from capture-media.mjs) that runs off the card's edges. The link is the
+		// primary button.
+		const paras = node.children.filter((c) => c.type === 'paragraph');
+		const actions = paras.find((p) => p.children.some((c) => c.type === 'link'));
+		for (const p of paras) addClass(p, p === actions ? 'try-card-actions' : 'try-card-desc');
+		if (actions) {
+			actions.children = actions.children.filter((c) => c.type === 'link');
+			for (const l of actions.children) {
+				addClass(l, 'try-btn');
+				l.children.unshift(html(lucide('square-play')));
+			}
+		}
+		const shot = capturedMedia('banner', 'try-live');
+		const art = shot
+			? `<div class="try-window"><div class="try-window-bar" aria-hidden="true"><i></i><i></i><i></i></div>` +
+				`<div class="try-window-shot">${themed(shot, 'The Klinos panel in the browser, showing an iPhone 17 Pro mockup')}</div></div>`
 			: '';
 		return [
-			html(`<aside class="try-card" aria-label="${esc(label)}"><div class="try-card-body"><p class="try-card-title">${esc(label)}</p>`),
+			html(
+				`<aside class="try-card${shot ? '' : ' no-art'}" aria-label="${esc(label)}"><div class="try-card-inner"><div class="try-card-body">` +
+					`<p class="try-card-eyebrow">Live demo</p><p class="try-card-title">${esc(label)}</p>`
+			),
 			...node.children,
-			html(`</div>${art}</aside>`),
+			html(`</div>${art}</div></aside>`),
 		];
 	}
 	return [

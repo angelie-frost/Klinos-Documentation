@@ -680,10 +680,20 @@ const R = {
 		},
 		target: '#stage',
 	},
+
+	/* ---------- Extra for the Home "Try Klinos in your browser" banner ---------- */
+	// The whole panel at its default (iPhone 17 Pro), 1100×700 so the banner's bleeding crop reads well. Cropped just
+	// above the status bar, which leaves the build label out.
+	'banner#try-live': {
+		kind: 'shot',
+		viewport: { width: 1100, height: 700 },
+		cropAbove: '.statusbar',
+	},
 };
 
 // Extra captures used outside the docs pages (written to public/media/<slug>/<n>.*, like the others).
 const EXTRAS = [
+	{ slug: 'banner', n: 'try-live', kind: 'Screenshot', desc: 'The Klinos panel in the browser, showing an iPhone 17 Pro mockup.' },
 	{ slug: 'whatsnew', n: 'preview', kind: 'Screenshot', desc: 'The preview zoomed in on the frame of an iPhone 17 Pro.' },
 	{ slug: 'whatsnew', n: 'finish', kind: 'Screenshot', desc: 'An iPhone 17 Pro with Polished frame at full Shine and Surface texture on.' },
 ].map((it) => ({ notes: [], seconds: null, ratio: null, isClip: false, title: "What's new", key: `${it.slug}#${it.n}`, ...it }));
@@ -964,6 +974,12 @@ async function grab(page, target, pad = 0) {
 	});
 }
 
+/** The full width of the page, from the top down to the top of `sel`. */
+async function grabAbove(page, sel) {
+	const top = await page.locator(sel).first().evaluate((e) => e.getBoundingClientRect().top);
+	return page.screenshot({ clip: { x: 0, y: 0, width: page.viewportSize().width, height: Math.floor(top) } });
+}
+
 /* ======================= Run ======================= */
 const manifest = allMediaItems().flatMap((p) => p.items.map((it) => ({ ...it, slug: p.slug, title: p.title, key: `${p.slug}#${it.n}` }))).concat(EXTRAS);
 const report = { captured: [], figma: [], missing: [], failed: [] };
@@ -1064,7 +1080,7 @@ for (const theme of THEMES) {
 						pngs.push(await grab(page, h.resolve(r.target), r.pad));
 					}
 				} else {
-					pngs.push(await grab(page, r.target && h.resolve(r.target), r.pad));
+					pngs.push(r.cropAbove ? await grabAbove(page, r.cropAbove) : await grab(page, r.target && h.resolve(r.target), r.pad));
 				}
 				if (pngs.length > 1) {
 					const d = await framesDiffer(tool, pngs);

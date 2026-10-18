@@ -71,6 +71,12 @@ const PAIRS = [
 	['--k-ink', '--k-sunk', 7, 'comparison table: V3 heading and phone labels'],
 	['--k-ink', '--k-surface', 7, 'steps: title'],
 	['--k-ink', '--k-sunk', 4.5, 'steps: badge number'],
+	// The Try it live banner's gradient runs from --k-surface to --k-sunk: text is checked against both ends.
+	['--k-ink-muted', '--k-surface', 4.5, 'banner: eyebrow and description (gradient start)'],
+	['--k-ink-muted', '--k-sunk', 4.5, 'banner: eyebrow and description (gradient end)'],
+	['--k-ink', '--k-surface', 7, 'banner: title (gradient start)'],
+	['--k-ink', '--k-sunk', 7, 'banner: title (gradient end)'],
+	['--k-onink', '--k-ink', 7, 'banner: primary button text and icon'],
 	['--k-focus', '--k-surface', 3, 'focus rings (non-text)'],
 ];
 

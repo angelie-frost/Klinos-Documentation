@@ -11,7 +11,7 @@ lastUpdated: "[VERIFY: date]"
 Klinos is a Figma plugin built around a library of device mockups that tilt into a 3D perspective angle. It puts a Figma frame onto a device, or turns any Figma layer into a card at an angle, and places the result back on the canvas.
 
 > **Try Klinos in your browser**
-> It's the real Klinos panel, running right here in the docs, with nothing to install.
+> This is the real Klinos panel, running right here in the docs. Pick a device, change its finish and lighting, then drag the preview to turn it, with nothing to install.
 >
 > [Open Try it live](../reference/try-it-live.md)
 

@@ -146,7 +146,55 @@ for (const theme of ['light', 'dark']) {
 	}
 }
 
+// ---------- The active result: a fill only, no left bar, no shift ----------
+const contrastRows = [];
+for (const theme of ['light', 'dark']) {
+	for (const vp of [{ n: 'desktop', w: 1440, h: 900 }, { n: '390', w: 390, h: 844, touch: true }]) {
+		const { ctx, p } = await newPage({ viewport: { width: vp.w, height: vp.h }, isMobile: !!vp.touch, hasTouch: !!vp.touch, colorScheme: theme });
+		await p.evaluate((t) => localStorage.setItem('starlight-theme', t), theme);
+		await p.reload({ waitUntil: 'networkidle' });
+		await p.keyboard.press('Control+k');
+		await p.fill('[data-search-input]', 'lighting');
+		await p.waitForFunction(() => document.querySelectorAll('#k-search-results li').length > 2);
+		await p.waitForTimeout(300);
+		const row = (i) =>
+			p.evaluate((i) => {
+				const li = document.querySelectorAll('#k-search-results li')[i];
+				const a = li.querySelector('a');
+				const cs = getComputedStyle(a);
+				const t = li.querySelector('.k-sr-title').getBoundingClientRect();
+				return { selected: li.getAttribute('aria-selected'), borderLeft: cs.borderLeftWidth, shadow: cs.boxShadow, bg: cs.backgroundColor, title: [t.left, t.top - li.getBoundingClientRect().top], panel: getComputedStyle(document.querySelector('.k-search-panel')).backgroundColor };
+			}, i);
+		const tag = `active result ${theme} ${vp.n}`;
+		const a0 = await row(0);
+		const b1 = await row(1);
+		await p.keyboard.press('ArrowDown');
+		const a1 = await row(1);
+		const b0 = await row(0);
+		await p.keyboard.press('ArrowUp');
+		const back = await row(0);
+		// Contrast of the active fill against the panel surface (WCAG relative luminance).
+		const lum = (c) => {
+			const [r, g, b] = c.match(/\d+(\.\d+)?/g).slice(0, 3).map((v) => {
+				const s = Number(v) / 255;
+				return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+			});
+			return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+		};
+		const [hi, lo] = [lum(a0.bg), lum(a0.panel)].sort((x, y) => y - x);
+		const ratio = (hi + 0.05) / (lo + 0.05);
+		contrastRows.push({ theme, viewport: vp.n, active: a0.bg, panel: a0.panel, ratio: ratio.toFixed(2) });
+		check(`${tag}: no left border or inset bar`, a0.selected === 'true' && a0.borderLeft === '0px' && a0.shadow === 'none', `${a0.borderLeft}, ${a0.shadow}`);
+		check(`${tag}: the active row has a fill that differs from inactive rows`, a0.bg !== b1.bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(a0.bg), `${a0.bg} vs ${b1.bg}`);
+		check(`${tag}: the fill reads against the panel (at least 1.10:1, so no outline is needed)`, ratio >= 1.1, `${ratio.toFixed(2)}:1`);
+		check(`${tag}: the text doesn't move between active and inactive`, JSON.stringify(a0.title) === JSON.stringify(b0.title) && JSON.stringify(b1.title) === JSON.stringify(a1.title), `${a0.title} / ${b0.title}; ${b1.title} / ${a1.title}`);
+		check(`${tag}: ArrowDown and ArrowUp still move the active row`, a1.selected === 'true' && b0.selected === 'false' && back.selected === 'true', `${a1.selected} ${b0.selected} ${back.selected}`);
+		await ctx.close();
+	}
+}
+
 await browser.close();
+console.table(contrastRows);
 console.table(results);
 const failed = results.filter((r) => r.result !== 'PASS').length;
 console.log(failed ? `${failed} check(s) failed` : `all ${results.length} checks pass`);

@@ -534,7 +534,6 @@ site-search {
 }
 .k-search-results [aria-selected='true'] a {
 	background: var(--k-hover-strong);
-	box-shadow: inset 2px 0 0 var(--k-ink);
 }
 .k-sr-title {
 	font-weight: 600;
