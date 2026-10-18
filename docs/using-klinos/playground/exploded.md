@@ -11,12 +11,14 @@ Exploded layers is the "anatomy of a screen" shot. Klinos takes one frame and st
 
 ## Explode a frame
 
+:::steps
 1. **Select one frame** in Figma. A component or instance works too. It needs at least two visible layers.
 2. In Klinos, on the Playground tab, turn on **Arrange as a layout**. **Exploded** is the only layout offered.
 3. Set how many cards you want with **Layers**.
 4. Adjust **Gap**, **Twist**, plates, labels and lines.
 5. Use the **layer list** to choose exactly which layers float, stay in the base, or merge.
 6. Click **Insert image**. Exploded goes in as an image only.
+:::
 
 ## How the cards are made
 

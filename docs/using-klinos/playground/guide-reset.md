@@ -11,9 +11,11 @@ Playground has a short guide built into the panel, and a Reset layout control on
 
 ## Open the in-app guide
 
+:::steps
 1. On the Playground tab, find **Arrange as a layout** in the Layouts card.
 2. Click the **(?)** button beside it. It is always shown in Playground.
 3. Read the steps, then click **Got it**, press Esc, or click outside the guide to close it.
+:::
 
 The guide only opens from the (?). It never opens by itself.
 
@@ -31,9 +33,11 @@ Playground shows any Figma layer as a flat card at an angle. There is no device.
 
 ## Reset a whole layout
 
+:::steps
 1. Find **Reset layout** in the row above the current layout's sliders.
 2. Click it. That layout's settings go back to their defaults.
 3. To take it back, click **Undo** in the status bar. "Layout reset · Undo" stays for 10 seconds.
+:::
 
 Reset layout is greyed out when the layout is already at its defaults.
 

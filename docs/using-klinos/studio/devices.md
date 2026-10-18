@@ -13,8 +13,10 @@ The Device card sets which device your design sits on and what it is made of. Yo
 
 ## Pick a device
 
+:::steps
 1. In the Device card, click the device name to open the picker.
 2. Choose a device. The picker groups them like this:
+:::
 
 | Group | Devices | Line under the name |
 |---|---|---|
@@ -61,9 +63,11 @@ A mirror only shows a light where the surface faces halfway between the light an
 
 #### Using it
 
+:::steps
 1. **Turn on Polished frame.** Existing mockups stay as they were until you do.
 2. **Pick a colour.** **Match finish** polishes the frame in the phone's own finish. **Graphite**, **Pacific Blue**, **Deep Purple**, **Rose Gold** or a **custom colour** recolour the **whole body** in that metal. Picking a Finish again takes you back to Match finish.
 3. **Set the Shine.**
+:::
 
 ![Shine at 0% - satin, 100% - polished (default) and 150% - brighter mirror](/guides/polish-shine.html)
 
@@ -79,8 +83,10 @@ This is **art direction**, not a colour-matched finish: the standard finishes ar
 
 Surface texture works on every device and is off by default.
 
+:::steps
 1. Turn on **Surface texture**.
 2. Adjust **Strength** (0 to 150%). Each device starts at its own default. Click **Default** to put it back.
+:::
 
 The (?) next to its switch opens the in-app guide below.
 

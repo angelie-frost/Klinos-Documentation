@@ -13,12 +13,14 @@ Select two or more layers and Klinos can arrange them as one picture: along an a
 
 ## Arrange your layers
 
+:::steps
 1. **Select two or more layers** in Figma.
 2. In the Layouts card, turn on **Arrange as a layout**.
 3. **Pick a layout.** Klinos sets the Angle card to suit it. You can still change the angle.
 4. **Shape it** with the layout's sliders.
 5. **Set the order** in the Selection card if you need to.
 6. Click **Insert image**, or **Insert as layers** for Arc, Fan and Stack when the view is flat. See [Insert image vs Insert as layers](insert.md).
+:::
 
 Size and Position in the Angle card move the whole arrangement. The image stays the size of all the selected layers together.
 

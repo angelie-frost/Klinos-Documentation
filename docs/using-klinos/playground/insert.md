@@ -11,8 +11,10 @@ Playground can place its result two ways. **Insert image** places a picture and 
 
 ## Insert image
 
+:::steps
 1. Pick a scale at the bottom of the panel: 1x, 2x or 4x.
 2. Click **Insert image**.
+:::
 
 The image is the size of your selection (or of all the selected layers together), times the scale. Klinos places it on the page 80 px to the right of the selection, lined up with its top.
 
@@ -43,9 +45,11 @@ Klinos checks everything first: that the layers still exist, that none is a comp
 
 ### Rebuild layers
 
+:::steps
 1. Select a frame you inserted as layers.
 2. Your settings come back, and the button reads **Rebuild layers**.
 3. Click it to replace the frame's contents in place. Its position and name are kept, and it is resized to fit.
+:::
 
 Clicking **Insert image** on that selection makes a new image instead.
 

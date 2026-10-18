@@ -22,6 +22,7 @@ These are separate renders, not the Studio 3D devices. The MacBook here is the 1
 
 ## Make a Photoreal mockup
 
+:::steps
 1. Select a frame in Figma.
 2. In Klinos, click the **Photoreal** tab.
 3. In the Device card, choose the iPhone 17 Pro or the MacBook Pro 14″. For the iPhone, pick a finish.
@@ -29,6 +30,7 @@ These are separate renders, not the Studio 3D devices. The MacBook here is the 1
 5. In the Frame card, pick an aspect ratio and set **Size**. Turn on **Position** to move the device in the frame.
 6. In the Backdrop and shadow card, set the **Canvas** colour and the **Ground shadow**.
 7. Click **Insert mockup**.
+:::
 
 ## What still applies, and what doesn't
 

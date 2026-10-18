@@ -20,10 +20,12 @@ Klinos fills the display with your design. **Fill** crops the design to the disp
 
 ## Scale and move the design
 
+:::steps
 1. Set **Image scale** (100 to 400%) to zoom the design inside the display.
 2. Once the design is larger than the screen, drag it on the glass in the preview to move it.
 3. To scale with the mouse, hold Alt and scroll over the design.
 4. Click **Reset** to put the scale and position back.
+:::
 
 ## Screen glare (Studio only)
 

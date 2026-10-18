@@ -9,11 +9,16 @@
 //                                 item 1 after the opening paragraph, the rest at the end
 //  - ```mermaid                 → <pre class="mermaid">, rendered in the browser
 //  - Try it live page           → the live demo embed after the opening paragraph
+//  - :::cards around a list     → link cards; "- **Group**: text" links to that sidebar.md group's first page,
+//                                 "- [Title](page.md): text" links where written
+//  - :::compare[Caption] around a table → the comparison table (caption, row headers, labels for phones)
+//  - :::steps around a numbered list    → numbered steps; a bold first sentence becomes the step title
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { visit, SKIP } from 'unist-util-visit';
 import { capturedMedia, parseMediaComment } from '../../scripts/media-items.mjs';
+import { readSidebar } from '../../scripts/sidebar.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const CONTENT = path.join(ROOT, 'src', 'content', 'docs');
@@ -270,6 +275,152 @@ function inlineGuides(tree, file) {
 	});
 }
 
+/* ---------- Cards, comparison table, steps (container directives) ---------- */
+// Nodes built here carry data.hName, so they render as that element with their Markdown children intact.
+const el = (tagName, props, children = []) => ({
+	type: 'kElement',
+	data: { hName: tagName, hProperties: props },
+	children,
+});
+const textNode = (value) => ({ type: 'text', value });
+
+// Card icons: Lucide (ISC), copied unchanged into src/icons/lucide/. A title with no entry has no icon.
+const CARD_ICON = {
+	Studio: 'box',
+	Photoreal: 'camera',
+	Playground: 'layers',
+	'Editable lighting': 'lightbulb',
+	'Staging and positioning': 'move',
+	'Sharper preview': 'scan-eye',
+	'Polished frame and Surface texture': 'sparkles',
+	'Galaxy S26': 'smartphone',
+	'Photoreal mode': 'camera',
+	'Playground mode': 'layers',
+	'Arrange the panel': 'grip-vertical',
+	'Dark theme': 'moon',
+};
+
+/** URL of the first page of the sidebar.md group with this label. */
+function groupHref(label) {
+	for (const section of readSidebar().sections) {
+		const group = section.groups.find((g) => g.label === label);
+		if (group?.items[0]) return `/${group.items[0].slug}/`;
+	}
+	return null;
+}
+
+function toCards(node, slug, file) {
+	const list = node.children.find((c) => c.type === 'list');
+	if (!list || node.children.length !== 1) file.fail(`:::cards in docs/${slug}.md must hold one list and nothing else`, node);
+	const items = list.children.map((li) => {
+		const para = li.children[0];
+		const [lead, ...rest] = para?.type === 'paragraph' ? para.children : [];
+		let title;
+		let href;
+		if (lead?.type === 'link') {
+			title = plainText(lead);
+			href = lead.url;
+		} else if (lead?.type === 'strong') {
+			title = plainText(lead);
+			href = groupHref(title);
+			if (!href) file.fail(`Card "${title}" in docs/${slug}.md: no sidebar.md group with that name`, li);
+		}
+		const first = rest[0];
+		if (!title || first?.type !== 'text' || !/^:\s*/.test(first.value) || li.children.length !== 1)
+			file.fail(`Card items in docs/${slug}.md read "- **Group**: text" or "- [Title](page.md): text"`, li);
+		first.value = first.value.replace(/^:\s*/, '');
+		if (rest.some((n) => n.type === 'link')) file.fail(`Card "${title}" in docs/${slug}.md: a card is one link, so its text can't hold another`, li);
+		const icon = CARD_ICON[title];
+		return el('li', {}, [
+			el('a', { className: ['k-card'], href }, [
+				...(icon ? [html(`<span class="k-card-icon">${lucide(icon)}</span>`)] : []),
+				el('span', { className: ['k-card-title'] }, [textNode(title)]),
+				el('span', { className: ['k-card-desc'] }, rest),
+			]),
+		]);
+	});
+	return el('ul', { className: ['k-cards'], role: 'list' }, items);
+}
+
+function toCompare(node, slug, file) {
+	const label = node.children.find((c) => c.data?.directiveLabel);
+	const table = node.children.find((c) => c.type === 'table');
+	if (!label || !table) file.fail(`:::compare[Caption] in docs/${slug}.md must hold a caption and one table`, node);
+	const [head, ...body] = table.children;
+	const cols = head.children.map((c) => plainText(c).trim());
+	// Phones stack each row (CSS display: block), which can drop a table's built-in semantics, so the roles are explicit.
+	return el('div', { className: ['k-compare'] }, [
+		el('table', { role: 'table' }, [
+			el('caption', {}, label.children),
+			el('thead', { role: 'rowgroup' }, [
+				el(
+					'tr',
+					{ role: 'row' },
+					head.children.map((c, i) =>
+						i === 0 ? el('td', { role: 'cell' }, c.children) : el('th', { scope: 'col', role: 'columnheader' }, c.children)
+					)
+				),
+			]),
+			el(
+				'tbody',
+				{ role: 'rowgroup' },
+				body.map((row) =>
+					el(
+						'tr',
+						{ role: 'row' },
+						row.children.map((c, i) =>
+							i === 0
+								? el('th', { scope: 'row', role: 'rowheader' }, c.children)
+								: el('td', { role: 'cell', dataLabel: cols[i] }, c.children)
+						)
+					)
+				)
+			),
+		]),
+	]);
+}
+
+/**
+ * The step's title: the first sentence of a bold lead, without its full stop. Anything after that sentence in
+ * the same bold span stays bold in the body. A bold lead that doesn't end a sentence gives no title.
+ */
+function stepTitle(para) {
+	const strong = para?.type === 'paragraph' && para.children[0];
+	if (strong?.type !== 'strong' || strong.children.length !== 1 || strong.children[0].type !== 'text') return null;
+	const m = strong.children[0].value.match(/^(.+?)([.?!])(?:\s+(.+))?$/s);
+	if (!m) return null;
+	const [, sentence, stop, more] = m;
+	if (more) strong.children[0].value = more;
+	else para.children.shift();
+	const next = para.children[0];
+	if (next?.type === 'text') {
+		next.value = next.value.replace(/^\s+/, '');
+		if (!next.value) para.children.shift();
+	}
+	// Only a full stop is dropped; a question or exclamation mark is part of the title.
+	return stop === '.' ? sentence : sentence + stop;
+}
+
+function toSteps(node, slug, file) {
+	const list = node.children.find((c) => c.type === 'list');
+	if (!list?.ordered || node.children.length !== 1) file.fail(`:::steps in docs/${slug}.md must hold one numbered list`, node);
+	const start = list.start ?? 1;
+	const items = list.children.map((li, i) => {
+		const title = stepTitle(li.children[0]);
+		if (title && li.children[0].children.length === 0) li.children.shift();
+		return el('li', {}, [
+			el('span', { className: ['k-step-num'] }, [textNode(String(start + i))]),
+			el('div', { className: ['k-step-body'] }, [
+				...(title ? [el('span', { className: ['k-step-title'] }, [textNode(title)])] : []),
+				...li.children,
+			]),
+		]);
+	});
+	return el('ol', { className: ['k-steps'], ...(start !== 1 ? { start } : {}) }, items);
+}
+
+const DIRECTIVES = { cards: toCards, compare: toCompare, steps: toSteps };
+
 /* ---------- Live demo ---------- */
 const liveDemo = () =>
 	html(`<div class="live" data-live-demo data-pagefind-ignore>
@@ -285,6 +436,13 @@ export default function remarkKlinos() {
 		if (!slug) return;
 
 		visit(tree, ['link', 'definition'], (node) => rewriteLink(node, slug, file));
+
+		visit(tree, 'containerDirective', (node, index, parent) => {
+			const make = DIRECTIVES[node.name];
+			if (!make || !parent) return;
+			parent.children[index] = make(node, slug, file);
+			return [SKIP, index + 1];
+		});
 
 		// Callouts may sit at the top level or inside lists.
 		visit(tree, 'blockquote', (node, index, parent) => {

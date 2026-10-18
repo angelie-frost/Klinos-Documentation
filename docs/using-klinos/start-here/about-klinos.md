@@ -23,27 +23,34 @@ The design team first. Beyond that, anyone who likes this style, as described ab
 
 ## From V2 to V3
 
-### V2
+V2 was the first Klinos.
 
-V2 was the first Klinos. Its Studio mode drew the devices directly in shaders, as raymarched shapes. It covered the iPhone 13, iPhone 17 Pro, MacBook Pro 16″ and iPad Pro 11″.
+:::compare[V2 and V3 compared]
+| | V2 | V3 |
+| --- | --- | --- |
+| Built with | Shaders: devices drawn as raymarched shapes | Three.js: devices as 3D meshes |
+| Devices | iPhone 13, iPhone 17 Pro, MacBook Pro 16″, iPad Pro 11″ | The same four, plus the Galaxy S26 |
+| Finishes | Fitted to Apple's own product renders (the calibration) | V2's calibrated material, unchanged |
+| Modes | Studio | Studio, Photoreal and Playground |
+| Lighting | Colour-matched lighting | Looks, plus an editor for the softbox lights; Calibrated, the default, matches V2 |
+| Panel theme | Light only | Light and dark (dark on Figma's dark grey) |
+:::
 
-V2's device finishes were fitted to Apple's own product renders. That colour matching is called the calibration.
-
-### V3
-
-V3 rebuilds the plugin on Three.js. The devices are now 3D meshes, but they still use V2's calibrated material. The finishes look the same as in V2. V2's finishes were fitted to the makers' own product renders, so keeping them keeps the devices true to the real products.
-
-The team compared the two before switching. The mesh version came within 0.33 to 0.64 points out of 255, on average, of V2's renders across finishes and poses. That close a match is why the calibration could be kept as it was.
+V2's finishes were fitted to the makers' own product renders, so keeping them keeps the devices true to the real products. The team compared the two before switching. The mesh version came within 0.33 to 0.64 points out of 255, on average, of V2's renders across finishes and poses. That close a match is why the calibration could be kept as it was.
 
 ### What V3 added
 
-- **Editable lighting.** Looks, plus an editor for the softbox lights. Calibrated is the default and matches V2.
-- **Sharper preview.** The preview renders at your screen's own pixel density and stays sharp when you zoom in. Drag it to turn the device and check the result, or try it in the [live demo](../reference/try-it-live.md).
-- **Polished frame and Surface texture.** A mirror-polished frame for the phones, and a fine grain that makes the body read as metal on every device. Both are switches that start off. When you turn on Surface texture, it starts at its own default strength on each device. See [Devices and finishes](../studio/devices.md).
-- **Galaxy S26.** A new device with no V2 version.
-- **Photoreal mode.** Static renders of real devices with your design keyed into the screen.
-- **Playground mode.** Any Figma layer as an angled card, or several layers as a layout. This is new in V3, not a V2 feature.
-- **Dark theme.** V2's panel was light only. V3 keeps V2's panel design and adds a dark version on Figma's dark grey.
+:::cards
+- [Editable lighting](../studio/lighting.md): Looks, plus an editor for the softbox lights.
+- [Staging and positioning](../studio/staging.md): Ready-made scenes, and Position to drag the device in the frame.
+- [Sharper preview](../reference/try-it-live.md): Renders at your screen's own pixel density and stays sharp when you zoom in.
+- [Polished frame and Surface texture](../studio/devices.md#polished-frame-phones-only): Both start off. Surface texture has its own default strength on each device.
+- [Galaxy S26](../studio/devices.md): A new device with no V2 version.
+- [Photoreal mode](../photoreal/photoreal.md): Static renders of real devices with your design keyed into the screen.
+- [Playground mode](../playground/single-card.md): Any Figma layer as an angled card, or several layers as a layout.
+- [Arrange the panel](../panel/panel-cards.md): Move the panel's cards into any order. Each mode keeps its own order.
+- [Dark theme](../reference/try-it-live.md#works-fully): V2's panel was light only. V3 adds a dark version on Figma's dark grey.
+:::
 
 Smaller changes are listed in the [Changelog](../reference/changelog.md).
 

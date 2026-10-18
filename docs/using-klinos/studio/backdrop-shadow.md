@@ -13,8 +13,10 @@ To move the device inside the frame, use Position in the Frame card. See [Framin
 
 ## Choose a background
 
+:::steps
 1. Set the **Canvas** colour.
 2. Pick **Flat fill** or **Studio sweep**. Flat fill is a solid colour. Studio sweep curves a lit floor up into a backdrop and reflects the device in it.
+:::
 
 ## Floor reflection and highlight (Studio sweep only)
 

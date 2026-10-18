@@ -15,12 +15,14 @@ It works with an image, shape, vector, text, frame, component or instance.
 
 ## Make a card
 
+:::steps
 1. **Select a layer** in Figma.
 2. **Open Klinos and click the Playground tab.** The Selection card lists your layer with a thumbnail, its type and its size. The status bar shows its name and size.
 3. **Pick an angle.** In the Angle card, choose a preset: Front, Hero, Tilt back, Turn left, Turn right or Lay flat. The default is Hero.
 4. **Fine-tune.** Drag the card in the preview to turn it (hold Shift to lock one axis), or use the dials and sliders below.
 5. **Set the background and shadow** in the Background and shadow card.
 6. **Pick a scale** (1x, 2x or 4x) and click **Insert image**.
+:::
 
 ## The Angle card
 
@@ -50,9 +52,11 @@ The image is always the size of your selection. Klinos fits the turned card insi
 
 ## Refresh in place
 
+:::steps
 1. Select an image you inserted.
 2. Your settings come back, and the button reads **Refresh image**.
 3. Change anything, then click **Refresh image**. The image updates in place.
+:::
 
 ## What you'll see
 

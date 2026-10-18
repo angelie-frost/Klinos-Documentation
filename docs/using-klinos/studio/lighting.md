@@ -19,11 +19,13 @@ A Look is a ready-made set of these lights. Calibrated is the default. It is V2'
 
 ## Light a mockup
 
+:::steps
 1. **Pick a Look.** In the Lighting card, click a Look. Hover a Look to read what it is for. Picking a Look also sets the backdrop: its colour, sweep and reflection.
 2. **Check it against a neutral background.** Under **Preview background**, choose Grey or Dark to judge the highlights. Choose Output to see exactly what Insert, Export and Copy produce. This setting is preview only and never exported.
 3. **See where the lights are.** Turn on **Reference spheres**. A chrome ball mirrors every light's position and shape, and a grey ball shows the overall direction. They are never exported.
 4. **Set the brightness.** **Brightness** scales the whole rig without moving any light. 100% on Calibrated is V2's colour-matched lighting. The top of the slider is 110% on the iPhone 13, MacBook Pro 16″ and iPad Pro 11″, and 105% on the iPhone 17 Pro and Galaxy S26.
 5. **Fine-tune, if you need to.** Open **Edit lights** to move, add or change individual lights. See [Edit the lights](#edit-the-lights).
+:::
 
 > **Tip**
 > For colour-accurate finishes, use Calibrated at 100% brightness. The finishes were fitted under that light, so every other Look is art direction.

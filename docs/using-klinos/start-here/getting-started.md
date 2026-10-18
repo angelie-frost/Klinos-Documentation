@@ -25,12 +25,14 @@ The first time you open V3, a short tour, **What's new in V3**, opens over the p
 
 ## Your first mockup in 2 minutes
 
+:::steps
 1. **Select a frame.** In Figma, click the frame you want to show on a device.
 2. **Open Klinos** from your organization's plugins in Figma. The panel opens on the Studio tab. The status bar shows your frame's name and size.
 3. **Pick a device.** In the Device card, choose a device and a finish. The default is the iPhone 17 Pro in Cosmic Orange.
 4. **Pick an angle.** In the Angle card, choose a preset. Upright has Flat, Turn left and Turn right. Laid back has Laid left, Laid right and Steep. The default is Turn left.
 5. **Choose a scale.** At the bottom of the panel, pick 1x, 2x or 4x. The default is 2x.
 6. **Click Insert mockup.** Klinos places the mockup on the canvas and selects it.
+:::
 
 ## What you'll see
 

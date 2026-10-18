@@ -15,10 +15,12 @@ It works on every Studio device except the MacBook Pro 16″. On the MacBook the
 
 ## Trace a photo
 
+:::steps
 1. In the Match a photo card, load a photo of a device.
 2. Four colour-coded handles appear on the photo. Drag them onto the screen's corners, starting top-left.
 3. Scroll to zoom in for precision.
 4. Release a handle to see the fit: tilt, turn, roll and how well it fits, as a percentage.
+:::
 
 ## Use the result
 

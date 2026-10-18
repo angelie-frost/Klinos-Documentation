@@ -13,8 +13,10 @@ Framing is two cards. The Angle card turns the device. The Frame card sets the s
 
 ## Choose an angle
 
+:::steps
 1. In the Angle card, open the preset picker.
 2. Choose a preset.
+:::
 
 **Phones and iPad Pro 11″:**
 
@@ -52,15 +54,19 @@ Past 90°, Tilt back and Turn show the back of the device. Your design then face
 
 The Frame card sets the image's shape and the device's size in it.
 
+:::steps
 1. Under the aspect ratio, pick **4:5**, **1:1**, **4:3** or **16:9**. The default is 4:5.
 2. Set **Size** (40 to 100) to make the device larger or smaller in the frame. The default is 82.
+:::
 
 ## Move the device in the frame
 
+:::steps
 1. In the Frame card, turn on **Position**.
 2. Drag the device in the preview to move it. Hold Shift to lock to one axis.
 3. To set it exactly, use the **X** and **Y** sliders (-50 to 50).
 4. Click **Center** to put it back in the middle.
+:::
 
 Offsets are a share of the frame, so they hold at every aspect ratio and size.
 

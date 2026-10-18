@@ -11,8 +11,10 @@ The bottom of the panel has three things: the scale, **Copy** and **Insert mocku
 
 ## Insert a mockup
 
+:::steps
 1. Pick a scale: **1x**, **2x** or **4x**. The default is 2x.
 2. Click **Insert mockup**. The button reads "Rendering" while it works.
+:::
 
 Klinos places the mockup 80 px to the right of your frame, lined up with its top, and selects it. It is named after your frame, for example "Home — mockup".
 
@@ -22,9 +24,11 @@ For the size in pixels at each scale, see [Output size](../studio/framing.md#out
 
 The mockup keeps its settings. To update it after you change the frame:
 
+:::steps
 1. Select the mockup.
 2. Klinos restores its settings, and the button reads **Refresh mockup**.
 3. Change anything you like, then click **Refresh mockup**.
+:::
 
 Figma shows "Mockup refreshed." when it is done.
 
@@ -32,9 +36,11 @@ Figma shows "Mockup refreshed." when it is done.
 
 This is the reliable way to get a mockup out of Figma.
 
+:::steps
 1. Click **Insert mockup**.
 2. Select the mockup in Figma.
 3. Export it as a PNG.
+:::
 
 ## Copy to the clipboard
 

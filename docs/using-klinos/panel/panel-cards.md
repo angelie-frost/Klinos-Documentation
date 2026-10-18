@@ -11,9 +11,11 @@ You can move the cards in the right panel into any order. Each mode keeps its ow
 
 ## Move a card by dragging
 
+:::steps
 1. Find the **grip** in the card's top-right corner, beside its title.
 2. Drag it up or down. With a mouse, the drag starts after a small movement. On touch or pen, press and hold first.
 3. Release to drop the card. Press Esc during the drag to cancel.
+:::
 
 The card moves live as you pass its neighbours, and the panel scrolls when you reach its edge.
 

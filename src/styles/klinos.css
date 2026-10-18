@@ -404,6 +404,267 @@ h1#_top.is-home {
 	background: none;
 }
 
+/* ---------- Link cards (:::cards) ---------- */
+/* One link per card; equal heights per row; 3 columns from 981px, 2 from 600px, 1 on phones. */
+.sl-markdown-content .k-cards {
+	list-style: none;
+	padding: 0;
+	margin: var(--k-s5) 0 0;
+	max-width: none;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--k-s3);
+}
+.sl-markdown-content .k-cards > li {
+	display: flex;
+	margin: 0;
+	padding: 0;
+}
+.sl-markdown-content a.k-card {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 20px;
+	border: 1px solid var(--k-line2);
+	border-radius: var(--k-r-media);
+	background: var(--k-surface);
+	color: var(--k-ink);
+	text-decoration: none;
+	-webkit-tap-highlight-color: transparent;
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+	.sl-markdown-content a.k-card:hover {
+		background: var(--k-hover);
+		border-color: color-mix(in srgb, var(--k-line2), var(--k-ink) 14%);
+	}
+}
+/* Touch: a pressed state instead of a hover. */
+@media (hover: none) {
+	.sl-markdown-content a.k-card:active {
+		background: var(--k-hover-strong);
+	}
+}
+.k-card-icon {
+	display: block;
+	margin-bottom: var(--k-s3);
+	color: var(--k-ink);
+}
+.k-card-icon svg {
+	display: block;
+	width: 20px;
+	height: 20px;
+	stroke-width: 1.5;
+}
+.k-card-title {
+	display: block;
+	font: 600 15px / 1.4 var(--k-font-body);
+	color: var(--k-ink);
+}
+.k-card-desc {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	overflow: hidden;
+	margin-top: 4px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--k-ink-muted);
+}
+@media (max-width: 980px) {
+	.sl-markdown-content .k-cards {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+@media (max-width: 599px) {
+	.sl-markdown-content .k-cards {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.sl-markdown-content a.k-card {
+		transition: none;
+	}
+}
+
+/* ---------- Comparison table (:::compare) ---------- */
+/* The V3 column sits on --k-sunk. At 640px and below each row stacks: its label, then labelled V2 and V3 lines. */
+.sl-markdown-content .k-compare {
+	margin-top: var(--k-s4);
+}
+.sl-markdown-content .k-compare table {
+	display: table;
+	overflow: visible;
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: separate;
+	border-spacing: 0;
+}
+.sl-markdown-content .k-compare caption {
+	caption-side: top;
+	text-align: left;
+	padding: 0 0 var(--k-s2);
+	font-size: var(--k-fs-sm);
+	color: var(--k-ink-muted);
+}
+.sl-markdown-content .k-compare :is(th, td) {
+	padding: 12px 14px;
+	border-bottom: 1px solid var(--k-line);
+	vertical-align: top;
+	text-align: left;
+	color: var(--k-ink-body);
+}
+.sl-markdown-content .k-compare :is(th, td):first-child {
+	width: 24%;
+	padding-left: 0;
+}
+.sl-markdown-content .k-compare thead :is(th, td) {
+	font: 600 var(--k-fs-sm) / 1.4 var(--k-font-body);
+	color: var(--k-ink);
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.sl-markdown-content .k-compare tbody th {
+	font-size: var(--k-fs-sm);
+	font-weight: 600;
+	color: var(--k-ink);
+}
+.sl-markdown-content .k-compare :is(th, td):last-child {
+	background: var(--k-sunk);
+}
+.sl-markdown-content .k-compare thead :is(th, td):last-child {
+	border-radius: var(--k-r-btn) var(--k-r-btn) 0 0;
+}
+.sl-markdown-content .k-compare tbody tr:last-child > * {
+	border-bottom: 0;
+}
+.sl-markdown-content .k-compare tbody tr:last-child > :last-child {
+	border-radius: 0 0 var(--k-r-btn) var(--k-r-btn);
+}
+@media (max-width: 640px) {
+	.sl-markdown-content .k-compare :is(table, caption, tbody, tr, th, td) {
+		display: block;
+		width: auto;
+	}
+	.sl-markdown-content .k-compare thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+	.sl-markdown-content .k-compare tbody tr {
+		padding: var(--k-s3) 0;
+		border-bottom: 1px solid var(--k-line);
+	}
+	.sl-markdown-content .k-compare tbody tr:first-child {
+		padding-top: 0;
+	}
+	.sl-markdown-content .k-compare tbody tr:last-child {
+		border-bottom: 0;
+	}
+	.sl-markdown-content .k-compare tbody :is(th, td),
+	.sl-markdown-content .k-compare tbody tr:last-child > * {
+		border: 0;
+		border-radius: 0;
+	}
+	.sl-markdown-content .k-compare tbody :is(th, td):first-child {
+		width: auto;
+		padding: 0 0 6px;
+		font-size: 15px;
+	}
+	.sl-markdown-content .k-compare tbody td {
+		display: grid;
+		grid-template-columns: 2.25rem minmax(0, 1fr);
+		gap: var(--k-s2);
+		padding: 6px 10px;
+	}
+	.sl-markdown-content .k-compare tbody td:last-child {
+		border-radius: var(--k-r-btn);
+	}
+	.sl-markdown-content .k-compare td::before {
+		content: attr(data-label);
+		font-weight: 600;
+		color: var(--k-ink);
+	}
+}
+
+/* ---------- Numbered steps (:::steps) ---------- */
+/* Rounded-square badges joined by a thin line; the title on its own line, the body below. Ordinary numbered
+   lists keep the muted-numeral rail (chrome.css). */
+.sl-markdown-content ol.k-steps {
+	max-width: 68ch;
+	padding: 0;
+	list-style: none;
+}
+.sl-markdown-content ol.k-steps > li {
+	position: relative;
+	display: grid;
+	grid-template-columns: 28px minmax(0, 1fr);
+	column-gap: var(--k-s4);
+	align-items: start;
+	margin: 0;
+	padding: 0;
+}
+.sl-markdown-content ol.k-steps > li + li {
+	margin-top: 28px;
+}
+.sl-markdown-content ol.k-steps > li::before {
+	display: none;
+}
+/* The line runs from under one badge to just above the next; none after the last step. */
+.sl-markdown-content ol.k-steps > li::after {
+	content: '';
+	position: absolute;
+	left: 13.5px;
+	top: 32px;
+	bottom: -24px;
+	width: 1px;
+	background: var(--k-line2);
+}
+.sl-markdown-content ol.k-steps > li:last-child::after {
+	display: none;
+}
+.k-step-num {
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 28px;
+	height: 28px;
+	border: 1px solid var(--k-line2);
+	border-radius: 8px;
+	background: var(--k-sunk);
+	color: var(--k-ink);
+	font: 500 13px / 1 var(--k-font-mono);
+	font-variant-numeric: tabular-nums;
+	-webkit-print-color-adjust: exact;
+	print-color-adjust: exact;
+}
+.sl-markdown-content .k-step-body {
+	min-width: 0;
+	margin: 0;
+}
+.sl-markdown-content .k-step-body > * {
+	margin: 0;
+}
+.sl-markdown-content .k-step-body > * + * {
+	margin-top: var(--k-s2);
+}
+/* The title's first line sits level with the badge. */
+.k-step-title {
+	display: block;
+	padding-top: 3.5px;
+	font: 600 15px / 1.4 var(--k-font-body);
+	color: var(--k-ink);
+}
+.sl-markdown-content .k-step-body > .k-step-title + * {
+	margin-top: 4px;
+}
+
 /* ---------- Mode pills ---------- */
 .modes {
 	margin: var(--k-s4) 0 var(--k-s5);

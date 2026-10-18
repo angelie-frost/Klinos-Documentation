@@ -11,10 +11,12 @@ The Staging card has ready-made scenes. A scene sets the Look, backdrop, shadow,
 
 ## Apply a scene
 
+:::steps
 1. In Studio, open the Staging card.
 2. Open the scene picker. Each scene has a small preview of the whole scene.
 3. Pick a scene.
 4. Adjust anything you like in the other cards.
+:::
 
 ## The scenes
 

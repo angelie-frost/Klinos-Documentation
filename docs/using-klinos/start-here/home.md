@@ -27,17 +27,11 @@ The current release is [**v3.16**](../reference/changelog.md#v316). To see which
 
 Klinos has three modes. You switch between them with the tabs at the top of the panel.
 
-### Studio
-
-3D device mockups with editable lighting. The devices are the iPhone 13, iPhone 17 Pro, Galaxy S26, MacBook Pro 16″ (lid 0–135°) and iPad Pro 11″ (portrait or landscape).
-
-### Photoreal
-
-Static front-on renders of real devices: the iPhone 17 Pro in two finishes and the MacBook Pro 14″. Your design is keyed into the screen. There is no angle, and no screen glass or reflection.
-
-### Playground
-
-Any Figma element as a flat card at an angle: an image, shape, vector, text, frame, component or instance. Select two or more layers to arrange them as a layout. There is no device, no material and no light.
+:::cards
+- **Studio**: 3D device mockups with editable lighting.
+- **Photoreal**: Static renders of real devices with your design keyed into the screen.
+- **Playground**: Any Figma layer as an angled card, or several layers as a layout.
+:::
 
 ## Where your settings live
 

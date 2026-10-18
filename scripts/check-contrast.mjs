@@ -61,6 +61,16 @@ const PAIRS = [
 	['--k-ink-muted', '--k-surface', 4.5, 'section dropdown: item description'],
 	['--k-ink', '--k-nav-active', 7, 'section dropdown: current item title (on its fill)'],
 	['--k-ink-muted', '--k-nav-active', 4.5, 'section dropdown: current item description (on its fill)'],
+	['--k-ink', '--k-surface', 7, 'link card: title and icon'],
+	['--k-ink-muted', '--k-surface', 4.5, 'link card: description'],
+	['--k-ink', '--k-hover', 7, 'link card on hover: title and icon'],
+	['--k-ink-muted', '--k-hover', 4.5, 'link card on hover: description'],
+	['--k-ink', '--k-hover-strong', 7, 'link card pressed (touch): title'],
+	['--k-ink-muted', '--k-hover-strong', 4.5, 'link card pressed (touch): description'],
+	['--k-ink-body', '--k-sunk', 7, 'comparison table: V3 column text'],
+	['--k-ink', '--k-sunk', 7, 'comparison table: V3 heading and phone labels'],
+	['--k-ink', '--k-surface', 7, 'steps: title'],
+	['--k-ink', '--k-sunk', 4.5, 'steps: badge number'],
 	['--k-focus', '--k-surface', 3, 'focus rings (non-text)'],
 ];
 

@@ -537,6 +537,143 @@ for (const [label, ctxOpts, theme, path, section] of [
 	await ctx.close();
 }
 
+// ---------- Cards (Home, About), the V2/V3 comparison table (About) and numbered steps (Lighting, Staging) ----------
+const HOME_CARDS = [
+	['Studio', '/using-klinos/studio/devices/'],
+	['Photoreal', '/using-klinos/photoreal/photoreal/'],
+	['Playground', '/using-klinos/playground/single-card/'],
+];
+const ABOUT_CARDS = ['Editable lighting', 'Staging and positioning', 'Sharper preview', 'Polished frame and Surface texture', 'Galaxy S26', 'Photoreal mode', 'Playground mode', 'Arrange the panel', 'Dark theme'];
+const LIGHT_TITLES = ['Pick a Look', 'Check it against a neutral background', 'See where the lights are', 'Set the brightness', 'Fine-tune, if you need to'];
+const cardsOn = (p) =>
+	p.evaluate(() =>
+		[...document.querySelectorAll('main ul.k-cards')].map((ul) => {
+			const cards = [...ul.querySelectorAll(':scope > li > a.k-card')].map((a) => {
+				const r = a.getBoundingClientRect();
+				const d = a.querySelector('.k-card-desc');
+				const lh = parseFloat(getComputedStyle(d).lineHeight);
+				return { title: a.querySelector('.k-card-title').textContent, href: a.getAttribute('href'), top: Math.round(r.top), h: r.height, lines: Math.round(d.scrollHeight / lh), clipped: d.scrollHeight > d.clientHeight + 1, one: a.parentElement.children.length === 1 };
+			});
+			return { cols: getComputedStyle(ul).gridTemplateColumns.split(' ').length, cards };
+		})
+	);
+for (const theme of THEMES) {
+	for (const [w, h, touch] of [
+		[1440, 900, false],
+		[820, 1180, true],
+		[390, 844, true],
+	]) {
+		const label = `${w}px ${theme}`;
+		const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: touch, isMobile: w === 390 });
+		await ctx.addInitScript((t) => {
+			localStorage.setItem('klinos-whatsnew-v3', 'seen');
+			localStorage.setItem('starlight-theme', t);
+		}, theme);
+		const p = await ctx.newPage();
+		const cols = w >= 981 ? 3 : w >= 600 ? 2 : 1;
+		const overflow = () => p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+
+		for (const [page, path, expectTitles] of [
+			['Home', 'using-klinos/start-here/home/', HOME_CARDS.map((c) => c[0])],
+			['About', 'using-klinos/start-here/about-klinos/', ABOUT_CARDS],
+		]) {
+			await p.goto(`${BASE}/${path}`, { waitUntil: 'networkidle' });
+			await p.evaluate(() => document.fonts.ready);
+			const [grid] = await cardsOn(p);
+			const rowsOf = Object.values(Object.groupBy(grid.cards, (c) => c.top));
+			check(`cards ${page} ${label}: ${expectTitles.length} cards in order, each one real <a href> filling its list item`, JSON.stringify(grid.cards.map((c) => c.title)) === JSON.stringify(expectTitles) && grid.cards.every((c) => c.href && c.one), grid.cards.map((c) => c.title).join(' | '));
+			check(`cards ${page} ${label}: ${cols} column(s)`, grid.cols === cols && rowsOf[0].length === Math.min(cols, grid.cards.length), `${grid.cols} columns, first row ${rowsOf[0].length}`);
+			check(`cards ${page} ${label}: equal heights in every row (±0.5px)`, rowsOf.every((r) => Math.max(...r.map((c) => c.h)) - Math.min(...r.map((c) => c.h)) <= 0.5), rowsOf.map((r) => r.map((c) => c.h.toFixed(1)).join('/')).join(', '));
+			if (w === 1440) check(`cards ${page} ${label}: every description at most 3 lines and none cut off`, grid.cards.every((c) => c.lines <= 3 && !c.clipped), grid.cards.map((c) => c.lines).join(','));
+			if (page === 'Home') check(`cards Home ${label}: each mode links to the first page of its sidebar group`, HOME_CARDS.every(([t, href]) => grid.cards.find((c) => c.title === t)?.href === href), grid.cards.map((c) => c.href).join(' '));
+			if (page === 'Home' && w === 1440) {
+				// Links go to real pages.
+				const statuses = await Promise.all(grid.cards.map((c) => p.request.get(`${BASE}${c.href}`).then((r) => r.status())));
+				check(`cards Home ${label}: every card link loads`, statuses.every((s) => s === 200), statuses.join(','));
+			}
+			if (page === 'About') {
+				const t = await p.evaluate(() => {
+					const table = document.querySelector('main .k-compare table');
+					const r = (e) => e.getBoundingClientRect();
+					const rows = [...table.querySelectorAll('tbody tr')];
+					const firstRow = rows[0];
+					return {
+						caption: table.querySelector('caption')?.textContent,
+						cols: [...table.querySelectorAll('thead th[scope="col"]')].map((e) => e.textContent),
+						rowHeads: rows.every((tr) => tr.firstElementChild.matches('th[scope="row"]')),
+						v3: getComputedStyle(firstRow.lastElementChild).backgroundColor,
+						v2: getComputedStyle(firstRow.children[1]).backgroundColor,
+						rowDisplay: getComputedStyle(firstRow).display,
+						labels: [...firstRow.querySelectorAll('td')].map((td) => getComputedStyle(td, '::before').content),
+						stacked: r(firstRow.children[1]).top > r(firstRow.firstElementChild).bottom - 1 && r(firstRow.lastElementChild).top > r(firstRow.children[1]).bottom - 1,
+						inside: r(table).right <= r(document.querySelector('main .sl-markdown-content')).right + 1,
+					};
+				});
+				const sunk = await p.evaluate(() => {
+					const s = document.createElement('div');
+					s.style.background = 'var(--k-sunk)';
+					document.body.append(s);
+					const c = getComputedStyle(s).backgroundColor;
+					s.remove();
+					return c;
+				});
+				check(`table About ${label}: caption, column headers V2 and V3, a row header on every row`, t.caption === 'V2 and V3 compared' && t.cols.join() === 'V2,V3' && t.rowHeads, JSON.stringify({ caption: t.caption, cols: t.cols }));
+				check(`table About ${label}: the V3 column on --k-sunk, V2 not`, t.v3 === sunk && t.v2 !== sunk, `${t.v3} / ${t.v2}`);
+				if (w === 390) check(`table About ${label}: rows stacked (label, then V2 and V3 lines with their labels), inside the column`, t.rowDisplay === 'block' && t.stacked && t.labels.join() === '"V2","V3"' && t.inside, JSON.stringify(t));
+				else check(`table About ${label}: a real table row, side by side`, t.rowDisplay === 'table-row' && !t.stacked && t.inside, t.rowDisplay);
+			}
+			check(`cards ${page} ${label}: no horizontal scroll`, (await overflow()) <= 0, `${await overflow()}px`);
+		}
+
+		await p.goto(`${BASE}/using-klinos/studio/lighting/`, { waitUntil: 'networkidle' });
+		await p.evaluate(() => document.fonts.ready);
+		const s = await p.evaluate(() => {
+			const ol = document.querySelector('main ol.k-steps');
+			const items = [...ol.children];
+			const r = (e) => e.getBoundingClientRect();
+			return {
+				tag: ol.tagName,
+				cls: ol.className,
+				lis: items.every((li) => li.tagName === 'LI'),
+				badges: items.map((li) => {
+					const b = li.querySelector('.k-step-num');
+					const cs = getComputedStyle(b);
+					return { n: b.textContent, w: r(b).width, h: r(b).height, radius: parseFloat(cs.borderTopLeftRadius) };
+				}),
+				lines: items.map((li) => {
+					const a = getComputedStyle(li, '::after');
+					return a.display !== 'none' && a.content !== 'none' && parseFloat(a.width) === 1;
+				}),
+				titles: items.map((li) => li.querySelector('.k-step-title')?.textContent),
+				ownLine: items.every((li) => {
+					const t = li.querySelector('.k-step-title');
+					const next = t.nextElementSibling;
+					return getComputedStyle(t).display === 'block' && r(next).top >= r(t).bottom - 0.5;
+				}),
+				level: items.every((li) => Math.abs(r(li.querySelector('.k-step-title')).top + 3.5 + 10.5 - (r(li.querySelector('.k-step-num')).top + 14)) <= 1.5),
+				gaps: items.slice(1).map((li, i) => r(li).top - r(items[i]).bottom),
+				textGap: r(items[0].querySelector('.k-step-body')).left - r(items[0].querySelector('.k-step-num')).right,
+				bold4: items[3].querySelector('.k-step-body p > strong:first-child')?.textContent,
+			};
+		});
+		check(`steps Lighting ${label}: a real <ol class="k-steps"> of 5 <li>, numbered 1–5`, s.tag === 'OL' && /k-steps/.test(s.cls) && s.lis && s.badges.map((b) => b.n).join('') === '12345', s.cls);
+		check(`steps Lighting ${label}: badges equal 28px rounded squares (radius 8, not circles)`, s.badges.every((b) => b.w === 28 && b.h === 28 && b.radius === 8), JSON.stringify(s.badges[0]));
+		check(`steps Lighting ${label}: a connecting line on every step but the last`, s.lines.slice(0, -1).every(Boolean) && !s.lines.at(-1), s.lines.join(','));
+		check(`steps Lighting ${label}: titles without their full stop; "Brightness" stays bold in step 4`, JSON.stringify(s.titles) === JSON.stringify(LIGHT_TITLES) && s.bold4 === 'Brightness', s.titles.join(' | '));
+		check(`steps Lighting ${label}: each title on its own line above its body, level with its badge`, s.ownLine && s.level);
+		check(`steps Lighting ${label}: 28px between steps, 16px from badge to text`, s.gaps.every((g) => Math.abs(g - 28) <= 0.5) && Math.abs(s.textGap - 16) <= 0.5, `${s.gaps.map((g) => g.toFixed(1)).join(',')}; ${s.textGap}`);
+		check(`steps Lighting ${label}: no horizontal scroll`, (await overflow()) <= 0, `${await overflow()}px`);
+
+		await p.goto(`${BASE}/using-klinos/studio/staging/`, { waitUntil: 'networkidle' });
+		const st = await p.evaluate(() => {
+			const ol = document.querySelector('main ol.k-steps');
+			return { n: ol.children.length, badges: ol.querySelectorAll('.k-step-num').length, titles: ol.querySelectorAll('.k-step-title').length };
+		});
+		check(`steps Staging ${label}: an untitled list gets badges and no titles`, st.n === 4 && st.badges === 4 && st.titles === 0, JSON.stringify(st));
+		await ctx.close();
+	}
+}
+
 await browser.close();
 console.table(sidebarRows);
 console.table(mtocRows.filter((r) => r.theme === 'light'));

@@ -29,8 +29,10 @@ Run `python3 tools/build.py --check` after every edit to `src/ui.html`. Don't ca
 
 ## Load the plugin in Figma desktop
 
+:::steps
 1. In Figma desktop, go to **Plugins → Development → Import plugin from manifest**.
 2. Pick `manifest.json` in the repo root.
+:::
 
 V3 installs beside V2. The plugin IDs are different, but both are named "Klinos". If you load both, rename one in its local manifest.
 
