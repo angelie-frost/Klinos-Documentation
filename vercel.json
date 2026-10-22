@@ -1,0 +1,4 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"redirects": [{ "source": "/", "destination": "/using-klinos/start-here/home/", "permanent": true }]
+}

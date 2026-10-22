@@ -10,13 +10,22 @@ export default defineConfig({
 	// Fetch a page when its link is hovered or focused, so the page transition does not wait on the network.
 	// Not "viewport": the sidebar shows ~40 links, which would download most of the site on every page view.
 	prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
-	// The home page lives at its folder address; the bare root forwards to it.
-	redirects: { '/': '/using-klinos/start-here/home/' },
 	markdown: {
 		// Keep the text exactly as written (no curly-quote or dash substitution).
 		processor: unified({ remarkPlugins: [remarkKlinos], smartypants: false }),
 	},
 	integrations: [
+		// The home page lives at its folder address; the bare root forwards to it. On Vercel that is a real 308 from
+		// vercel.json, sent before any page loads. A static build can only write a "Redirecting to…" page (a 200 with a
+		// meta refresh, which flashes), so the Astro redirect is added for the dev server only.
+		{
+			name: 'klinos-dev-root-redirect',
+			hooks: {
+				'astro:config:setup': ({ command, updateConfig }) => {
+					if (command === 'dev') updateConfig({ redirects: { '/': '/using-klinos/start-here/home/' } });
+				},
+			},
+		},
 		starlight({
 			title: 'Klinos Docs',
 			// Tab titles read "About Klinos - Klinos Docs"; Home sets its own ("Klinos Docs") in its frontmatter.
